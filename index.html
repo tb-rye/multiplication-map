@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naya's Multiplication Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #100a1f;
+    --bg-2: #18102e;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-2: rgba(255, 255, 255, 0.09);
+    --line: rgba(255, 255, 255, 0.10);
+    --text: #f5effd;
+    --muted: #b7a9d6;
+    --dim: #7d6fa0;
+    --teal: #2ef2cf;
+    --teal-deep: #0fb8a0;
+    --pink: #ff5fb0;
+    --purple: #9b6bff;
+    --violet-deep: #5e35d8;
+    --learn-a: rgba(46, 242, 207, 0.38);
+    --learn-b: rgba(155, 107, 255, 0.28);
+    --focus: #fff;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    padding-inline: clamp(16px, 3vw, 40px);
+    padding-block: 20px 56px;
+    min-height: 100vh;
+    font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text);
+    background:
+      radial-gradient(900px 520px at -5% -10%, rgba(46, 242, 207, 0.20), transparent 60%),
+      radial-gradient(800px 560px at 105% 0%, rgba(255, 95, 176, 0.20), transparent 60%),
+      radial-gradient(900px 700px at 50% 110%, rgba(155, 107, 255, 0.26), transparent 60%),
+      linear-gradient(180deg, var(--bg-2), var(--bg));
+    background-attachment: fixed;
+  }
+  h1, h2, h3 { font-family: "Fredoka", "Nunito", sans-serif; margin: 0; text-wrap: balance; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* ---------- top bar ---------- */
+  .top {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 14px 24px; max-width: 1240px; margin: 0 auto 22px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .orb {
+    width: 46px; height: 46px; border-radius: 50%; flex: none;
+    background: conic-gradient(from 200deg, var(--teal), var(--purple), var(--pink), var(--teal));
+    box-shadow: 0 0 24px rgba(155, 107, 255, 0.55), 0 0 60px rgba(46, 242, 207, 0.25);
+    display: grid; place-items: center;
+    font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 22px; color: #120a22;
+  }
+  .brand h1 { font-size: clamp(22px, 3vw, 30px); font-weight: 600; letter-spacing: 0.01em; }
+  .brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  nav.views { display: flex; gap: 6px; padding: 5px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+  nav.views button {
+    border: 0; background: transparent; border-radius: 999px; padding: 8px 18px;
+    font-family: "Fredoka", sans-serif; font-weight: 500; font-size: 15px; color: var(--muted);
+    transition: background .2s, color .2s;
+  }
+  nav.views button[aria-selected="true"] {
+    color: #120a22;
+    background: linear-gradient(120deg, var(--teal), var(--purple) 60%, var(--pink));
+    box-shadow: 0 0 18px rgba(155, 107, 255, 0.5);
+  }
+  .save-state { font-size: 12px; color: var(--dim); min-width: 90px; text-align: right; }
+  .save-state b { color: var(--teal); font-weight: 700; }
+
+  /* ---------- summary strip ---------- */
+  .summary {
+    max-width: 1240px; margin: 0 auto 20px; display: grid;
+    grid-template-columns: 1fr auto; gap: 16px 28px; align-items: center;
+    padding: 16px 20px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line);
+    backdrop-filter: blur(6px);
+  }
+  .meter { height: 14px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; display: flex; }
+  .meter .m { background: linear-gradient(90deg, var(--pink), var(--purple)); box-shadow: 0 0 14px var(--pink); transition: width .4s; }
+  .meter .l { background: linear-gradient(90deg, var(--teal-deep), var(--teal)); transition: width .4s; }
+  .summary .headline { font-family: "Fredoka", sans-serif; font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+  .summary .headline b { color: var(--teal); font-weight: 700; }
+  .counts { display: flex; gap: 22px; font-variant-numeric: tabular-nums; }
+  .counts div { text-align: center; }
+  .counts .n { font-family: "Fredoka", sans-serif; font-size: 30px; font-weight: 600; line-height: 1; }
+  .counts .k { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .counts .n.mast { color: var(--pink); text-shadow: 0 0 16px rgba(255,95,176,.6); }
+  .counts .n.learn { color: var(--teal); text-shadow: 0 0 16px rgba(46,242,207,.5); }
+  .counts .n.todo { color: var(--muted); }
+
+  /* ---------- main layout ---------- */
+  .layout {
+    max-width: 1240px; margin: 0 auto; display: grid;
+    grid-template-columns: 230px minmax(0, 1fr); gap: 22px; align-items: start;
+  }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    border-radius: 22px; background: var(--surface); border: 1px solid var(--line);
+    padding: 18px; backdrop-filter: blur(6px);
+  }
+  .panel h2 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .panel .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
+
+  /* table checklist */
+  .tables { display: grid; gap: 7px; }
+  .trow {
+    display: grid; grid-template-columns: 38px 1fr; align-items: center; gap: 8px;
+    padding: 5px 6px 5px 8px; border-radius: 12px; transition: background .2s;
+  }
+  .trow.is-learning { background: linear-gradient(90deg, rgba(46,242,207,.16), transparent); }
+  .trow.is-mastered { background: linear-gradient(90deg, rgba(255,95,176,.22), rgba(155,107,255,.14)); }
+  .trow .lbl { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; }
+  .seg { display: flex; gap: 4px; }
+  .seg button {
+    flex: 1; border: 1px solid var(--line); background: rgba(255,255,255,0.04); border-radius: 9px;
+    padding: 5px 0; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: var(--dim);
+    transition: all .18s;
+  }
+  .seg button:hover { color: var(--text); border-color: rgba(255,255,255,.3); }
+  .seg button.on-learning { background: linear-gradient(120deg, var(--teal-deep), var(--teal)); color: #06201b; border-color: transparent; box-shadow: 0 0 12px rgba(46,242,207,.45); }
+  .seg button.on-mastered { background: linear-gradient(120deg, var(--pink), var(--purple)); color: #fff; border-color: transparent; box-shadow: 0 0 12px rgba(255,95,176,.5); }
+  .legend { margin-top: 16px; display: grid; gap: 7px; font-size: 12.5px; color: var(--muted); }
+  .legend div { display: flex; align-items: center; gap: 9px; }
+  .sw { width: 22px; height: 16px; border-radius: 5px; flex: none; border: 1px solid var(--line); }
+  .sw.mast { background: linear-gradient(135deg, var(--pink), var(--purple)); }
+  .sw.learn { background: linear-gradient(135deg, var(--learn-a), var(--learn-b)); }
+  .sw.todo { background: rgba(255,255,255,.05); }
+  .sw.mirror { background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 3px, transparent 3px 7px); }
+  .sw.over { position: relative; background: rgba(255,255,255,.05); }
+  .sw.over::after { content: ""; position: absolute; right: 2px; top: 2px; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff; }
+  .reset { margin-top: 16px; width: 100%; border: 1px dashed var(--line); background: transparent; border-radius: 10px; padding: 8px; font-size: 12px; color: var(--dim); }
+  .reset:hover { color: var(--pink); border-color: var(--pink); }
+
+  /* chart */
+  .chart-wrap { overflow-x: auto; padding-bottom: 6px; }
+  .grid {
+    --cell: 48px;
+    display: grid; grid-template-columns: repeat(13, var(--cell)); gap: 4px;
+    width: max-content; margin: 0 auto;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 1100px) { .grid { --cell: 42px; } }
+  .cell, .hd {
+    height: var(--cell); border-radius: 10px; display: grid; place-items: center;
+    font-family: "Fredoka", sans-serif; font-size: 16px; font-weight: 500;
+  }
+  .hd { color: var(--muted); font-weight: 600; background: rgba(255,255,255,0.04); }
+  .hd.corner { background: transparent; font-size: 20px; color: var(--purple); }
+  .hd.lit-learning { color: var(--teal); background: rgba(46,242,207,.10); }
+  .hd.lit-mastered { color: #fff; background: linear-gradient(120deg, rgba(255,95,176,.45), rgba(155,107,255,.4)); text-shadow: 0 0 10px rgba(255,95,176,.8); }
+  .cell {
+    border: 1px solid var(--line); background: rgba(255,255,255,0.045); color: var(--text);
+    padding: 0; position: relative; transition: transform .12s, box-shadow .2s, background .25s;
+  }
+  .cell:hover { transform: scale(1.08); z-index: 2; border-color: rgba(255,255,255,.4); }
+  .cell.learning { background: linear-gradient(135deg, var(--learn-a), var(--learn-b)); border-color: rgba(46,242,207,.35); }
+  .cell.mastered {
+    background: linear-gradient(135deg, var(--pink), var(--purple)); border-color: transparent; color: #fff;
+    box-shadow: 0 0 14px rgba(255,95,176,.45), inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  .cell.mirror { color: var(--dim); background: repeating-linear-gradient(135deg, rgba(255,255,255,.045) 0 3px, transparent 3px 7px); border-color: rgba(255,255,255,.06); font-weight: 400; }
+  .cell.mirror.learning { background: repeating-linear-gradient(135deg, rgba(46,242,207,.18) 0 3px, rgba(46,242,207,.05) 3px 7px); }
+  .cell.mirror.mastered { background: repeating-linear-gradient(135deg, rgba(255,95,176,.35) 0 3px, rgba(155,107,255,.18) 3px 7px); box-shadow: none; color: rgba(255,255,255,.75); }
+  .cell.square { font-weight: 700; }
+  .cell.override::after { content: ""; position: absolute; right: 4px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; }
+  .chart-foot { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; color: var(--muted); font-size: 12.5px; margin-top: 12px; }
+
+  /* work lists */
+  .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+  @media (max-width: 700px) { .lists { grid-template-columns: 1fr; } }
+  .list h2 { display: flex; align-items: baseline; gap: 10px; }
+  .list h2 .cnt { font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: rgba(255,255,255,.08); color: var(--muted); font-family: "Nunito", sans-serif; }
+  .list.learn h2 { color: var(--teal); }
+  .list.start h2 { color: var(--pink); }
+  .group { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
+  .group .g { flex: none; width: 34px; font-family: "Fredoka", sans-serif; font-weight: 600; color: var(--dim); padding-top: 5px; font-variant-numeric: tabular-nums; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--line); background: rgba(255,255,255,.05); border-radius: 999px;
+    padding: 4px 11px; font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+    transition: all .15s;
+  }
+  .chip:hover { border-color: var(--teal); color: var(--teal); }
+  .list.start .chip:hover { border-color: var(--pink); color: var(--pink); }
+  .empty { color: var(--dim); font-size: 13.5px; padding: 10px 0; }
+  .empty b { color: var(--teal); }
+
+  /* view 2 placeholder */
+  .soon { max-width: 640px; margin: 40px auto; text-align: center; }
+  .soon h2 { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
+  .soon p { color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="orb">×</div>
+    <div>
+      <h1>Naya's Multiplication Map</h1>
+      <p>Every fact from 1 × 1 to 12 × 12, and which ones are already yours.</p>
+    </div>
+  </div>
+  <nav class="views" role="tablist" aria-label="Views">
+    <button role="tab" id="tab-chart" aria-selected="true" aria-controls="view-chart">My chart</button>
+    <button role="tab" id="tab-next" aria-selected="false" aria-controls="view-next">Next view</button>
+  </nav>
+  <div class="save-state" id="saveState">Loading…</div>
+</header>
+
+<section id="view-chart" role="tabpanel" aria-labelledby="tab-chart">
+  <div class="summary">
+    <div>
+      <div class="headline" id="headline"></div>
+      <div class="meter" aria-hidden="true"><div class="m" id="meterM"></div><div class="l" id="meterL"></div></div>
+    </div>
+    <div class="counts">
+      <div><div class="n mast" id="nMast">0</div><div class="k">Mastered</div></div>
+      <div><div class="n learn" id="nLearn">0</div><div class="k">Learning</div></div>
+      <div><div class="n todo" id="nTodo">78</div><div class="k">Not yet</div></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="panel">
+      <h2>Times tables</h2>
+      <p class="hint">Mark a whole table at once. Tap a square on the chart to change just that one fact.</p>
+      <div class="tables" id="tables"></div>
+      <div class="legend">
+        <div><span class="sw mast"></span>Mastered — I just know it</div>
+        <div><span class="sw learn"></span>Learning — working on it</div>
+        <div><span class="sw todo"></span>Not started yet</div>
+        <div><span class="sw mirror"></span>Mirror — same fact, flipped</div>
+        <div><span class="sw over"></span>Changed by hand</div>
+      </div>
+      <button class="reset" id="resetBtn" type="button">Clear everything and start over</button>
+    </aside>
+
+    <main class="panel">
+      <div class="chart-wrap"><div class="grid" id="grid" role="grid" aria-label="Multiplication chart"></div></div>
+      <div class="chart-foot">
+        <span>The striped half repeats the top half — 6 × 4 is the same as 4 × 6, so it only counts once.</span>
+        <span>78 facts to know in all.</span>
+      </div>
+    </main>
+  </div>
+
+  <div class="lists">
+    <div class="panel list learn">
+      <h2>Keep learning these <span class="cnt" id="cntLearn">0</span></h2>
+      <p class="hint">Tap one when it finally sticks.</p>
+      <div id="listLearn"></div>
+    </div>
+    <div class="panel list start">
+      <h2>Start these next <span class="cnt" id="cntStart">0</span></h2>
+      <p class="hint">Tap one to move it into Learning.</p>
+      <div id="listStart"></div>
+    </div>
+  </div>
+</section>
+
+<section id="view-next" role="tabpanel" aria-labelledby="tab-next" hidden>
+  <div class="panel soon">
+    <h2>Something new is coming here</h2>
+    <p>This spot is saved for the next way to explore multiplication.</p>
+  </div>
+</section>
+
+<script>
+(() => {
+  const N = 12;
+  const ORDER = { none: 0, learning: 1, mastered: 2 };
+  const KEY = 'naya-mult-map-v1';
+  let state = { tables: {}, overrides: {} };
+  let db = null, docRef = null, saveTimer = null;
+  let localStamp = 0;      // when this device last changed something
+  let dirty = false;       // a local change is waiting to be saved or confirmed
+
+  const $ = id => document.getElementById(id);
+  const fk = (a, b) => `${Math.min(a, b)}x${Math.max(a, b)}`;
+
+  function tableStatus(t) { return state.tables[t] || 'none'; }
+  function factStatus(a, b) {
+    const o = state.overrides[fk(a, b)];
+    if (o) return o;
+    const s1 = tableStatus(a), s2 = tableStatus(b);
+    return ORDER[s1] >= ORDER[s2] ? s1 : s2;
+  }
+  function isOverridden(a, b) {
+    const o = state.overrides[fk(a, b)];
+    if (!o) return false;
+    const s1 = tableStatus(a), s2 = tableStatus(b);
+    const derived = ORDER[s1] >= ORDER[s2] ? s1 : s2;
+    return o !== derived;
+  }
+
+  /* ---------- build ---------- */
+  function buildTables() {
+    const host = $('tables');
+    for (let t = 1; t <= N; t++) {
+      const row = document.createElement('div');
+      row.className = 'trow'; row.id = `trow-${t}`;
+      row.innerHTML = `<div class="lbl">${t}s</div>
+        <div class="seg" role="group" aria-label="${t}s table">
+          <button type="button" data-t="${t}" data-s="learning" id="t${t}-learning">Learning</button>
+          <button type="button" data-t="${t}" data-s="mastered" id="t${t}-mastered">Mastered</button>
+        </div>`;
+      host.appendChild(row);
+    }
+    host.addEventListener('click', e => {
+      const b = e.target.closest('button[data-t]'); if (!b) return;
+      const t = +b.dataset.t, s = b.dataset.s;
+      state.tables[t] = tableStatus(t) === s ? 'none' : s;
+      // a table decision overrules earlier hand edits inside that table
+      for (let k = 1; k <= N; k++) delete state.overrides[fk(t, k)];
+      changed();
+    });
+  }
+
+  function buildGrid() {
+    const g = $('grid');
+    g.appendChild(el('div', 'hd corner', '×'));
+    for (let c = 1; c <= N; c++) { const h = el('div', 'hd', c); h.id = `hc-${c}`; g.appendChild(h); }
+    for (let r = 1; r <= N; r++) {
+      const h = el('div', 'hd', r); h.id = `hr-${r}`; g.appendChild(h);
+      for (let c = 1; c <= N; c++) {
+        const cell = document.createElement('button');
+        cell.type = 'button'; cell.className = 'cell'; cell.id = `c-${r}-${c}`;
+        cell.dataset.r = r; cell.dataset.c = c; cell.textContent = r * c;
+        cell.setAttribute('aria-label', `${r} times ${c} is ${r * c}`);
+        if (c < r) cell.classList.add('mirror');
+        if (c === r) cell.classList.add('square');
+        g.appendChild(cell);
+      }
+    }
+    g.addEventListener('click', e => {
+      const cell = e.target.closest('.cell'); if (!cell) return;
+      cycleFact(+cell.dataset.r, +cell.dataset.c);
+    });
+  }
+  function el(tag, cls, text) { const d = document.createElement(tag); d.className = cls; d.textContent = text; return d; }
+
+  function cycleFact(a, b) {
+    const cur = factStatus(a, b);
+    const next = cur === 'none' ? 'learning' : cur === 'learning' ? 'mastered' : 'none';
+    state.overrides[fk(a, b)] = next;
+    changed();
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    let nM = 0, nL = 0, nT = 0;
+    const learn = {}, start = {};
+    for (let r = 1; r <= N; r++) for (let c = 1; c <= N; c++) {
+      const s = factStatus(r, c);
+      const cell = $(`c-${r}-${c}`);
+      cell.classList.toggle('learning', s === 'learning');
+      cell.classList.toggle('mastered', s === 'mastered');
+      cell.classList.toggle('override', c >= r && isOverridden(r, c));
+      if (c >= r) {
+        if (s === 'mastered') nM++;
+        else if (s === 'learning') { nL++; (learn[r] ||= []).push(c); }
+        else { nT++; (start[r] ||= []).push(c); }
+      }
+    }
+    for (let t = 1; t <= N; t++) {
+      const s = tableStatus(t);
+      const row = $(`trow-${t}`);
+      row.classList.toggle('is-learning', s === 'learning');
+      row.classList.toggle('is-mastered', s === 'mastered');
+      $(`t${t}-learning`).classList.toggle('on-learning', s === 'learning');
+      $(`t${t}-mastered`).classList.toggle('on-mastered', s === 'mastered');
+      // headers light up when every fact in that table is at least learning
+      let allM = true, anyL = false;
+      for (let k = 1; k <= N; k++) { const f = factStatus(t, k); if (f !== 'mastered') allM = false; if (f !== 'none') anyL = true; }
+      for (const h of [$(`hr-${t}`), $(`hc-${t}`)]) {
+        h.classList.toggle('lit-mastered', allM);
+        h.classList.toggle('lit-learning', !allM && anyL);
+      }
+    }
+    const total = nM + nL + nT;
+    $('nMast').textContent = nM; $('nLearn').textContent = nL; $('nTodo').textContent = nT;
+    $('meterM').style.width = (100 * nM / total) + '%';
+    $('meterL').style.width = (100 * nL / total) + '%';
+    $('headline').innerHTML = nM === total
+      ? 'Every single fact is yours. <b>All 78.</b>'
+      : nM === 0 && nL === 0
+        ? 'Pick a table on the left to begin.'
+        : `<b>${nM}</b> of ${total} facts mastered${nL ? `, <b>${nL}</b> in progress` : ''}.`;
+    renderList('listLearn', learn, 'cntLearn', 'Nothing in progress right now.');
+    renderList('listStart', start, 'cntStart', 'Everything has been started — <b>nice</b>.');
+  }
+
+  function renderList(hostId, groups, cntId, emptyText) {
+    const host = $(hostId); host.innerHTML = '';
+    let n = 0;
+    for (const r of Object.keys(groups).map(Number).sort((a, b) => a - b)) {
+      const g = document.createElement('div'); g.className = 'group';
+      const lbl = el('div', 'g', `${r}s`); g.appendChild(lbl);
+      const chips = document.createElement('div'); chips.className = 'chips';
+      for (const c of groups[r]) {
+        const ch = document.createElement('button'); ch.type = 'button'; ch.className = 'chip';
+        ch.textContent = `${r} × ${c}`; ch.dataset.r = r; ch.dataset.c = c;
+        chips.appendChild(ch); n++;
+      }
+      g.appendChild(chips); host.appendChild(g);
+    }
+    if (!n) { const e = document.createElement('div'); e.className = 'empty'; e.innerHTML = emptyText; host.appendChild(e); }
+    $(cntId).textContent = n;
+  }
+  function setupLists() {
+    for (const id of ['listLearn', 'listStart']) {
+      $(id).addEventListener('click', e => {
+        const ch = e.target.closest('.chip'); if (!ch) return;
+        cycleFact(+ch.dataset.r, +ch.dataset.c);
+      });
+    }
+  }
+
+  /* ---------- persistence ---------- */
+  function storeLocal() {
+    try { localStorage.setItem(KEY, JSON.stringify({ tables: state.tables, overrides: state.overrides, stamp: localStamp })); } catch (e) {}
+  }
+  function changed() {
+    localStamp = Date.now();
+    dirty = true;
+    render();
+    storeLocal();
+    if (docRef) {
+      clearTimeout(saveTimer);
+      $('saveState').textContent = 'Saving…';
+      saveTimer = setTimeout(save, 400);
+    } else {
+      $('saveState').textContent = 'Saved on this device';
+    }
+  }
+  async function save() {
+    const stampAtSave = localStamp;
+    try {
+      await docRef.set({ tables: state.tables, overrides: state.overrides, stamp: stampAtSave, updatedAt: new Date(stampAtSave).toISOString() });
+      if (localStamp === stampAtSave) { dirty = false; $('saveState').innerHTML = '<b>Saved</b>'; }
+    } catch (e) {
+      $('saveState').textContent = 'Saved on this device only';
+    }
+  }
+  function loadLocal() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY));
+      if (s && s.tables) { state = { tables: s.tables || {}, overrides: s.overrides || {} }; localStamp = s.stamp || 0; }
+    } catch (e) {}
+  }
+  async function connect() {
+    if (!window.claude || !window.claude.use) { $('saveState').textContent = 'Saved on this device'; return; }
+    try { db = await window.claude.use('db'); } catch (e) { db = null; }
+    if (!db) { $('saveState').textContent = 'Saved on this device'; return; }
+    docRef = db.doc('progress/naya');
+    $('saveState').innerHTML = '<b>Saved</b>';
+    docRef.onSnapshot(snap => {
+      // Never let a remote snapshot undo something done on this device:
+      // only adopt remote state that is newer than the last local change,
+      // and never while a local save is still in flight.
+      if (dirty || snap.metadata.hasPendingWrites) return;
+      if (!snap.exists) {
+        if (localStamp) { dirty = true; save(); }   // this device has progress the account doesn't yet
+        return;
+      }
+      const d = snap.data();
+      const remoteStamp = d.stamp || (d.updatedAt ? Date.parse(d.updatedAt) : 0) || 0;
+      if (remoteStamp < localStamp) { dirty = true; save(); return; }
+      if (remoteStamp === localStamp && localStamp) return;
+      state = { tables: d.tables || {}, overrides: d.overrides || {} };
+      localStamp = remoteStamp;
+      render();
+      storeLocal();
+      $('saveState').innerHTML = '<b>Saved</b>';
+    }, () => { docRef = null; $('saveState').textContent = 'Saved on this device'; });
+  }
+
+  /* ---------- views ---------- */
+  function setupTabs() {
+    const tabs = document.querySelectorAll('nav.views [role="tab"]');
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(o => { o.setAttribute('aria-selected', o === t); $(o.getAttribute('aria-controls')).hidden = o !== t; });
+    }));
+  }
+
+  function start() {
+    buildTables(); buildGrid(); setupTabs(); setupLists();
+    loadLocal(); render();
+    $('resetBtn').addEventListener('click', () => {
+      if (!confirm('Clear every table and every fact? This cannot be undone.')) return;
+      state = { tables: {}, overrides: {} }; changed();
+    });
+    connect();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+</body>
+</html>
