@@ -140,6 +140,20 @@
   .cell.square { font-weight: 700; }
   .cell.override::after { content: ""; position: absolute; right: 4px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; }
   .chart-foot { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; color: var(--muted); font-size: 12.5px; margin-top: 12px; }
+  /* test mode */
+  .testbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 16px; margin-bottom: 14px; }
+  .testbar .size-toggle input { accent-color: var(--pink); }
+  .testbar .msg { font-size: 13px; color: var(--muted); }
+  .testbar .msg b { color: var(--pink); font-family: "Fredoka", sans-serif; font-size: 15px; }
+  .testbar .again { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 6px 14px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .testbar .again:hover { color: var(--text); border-color: var(--text); }
+  .grid.test .cell { color: transparent; text-shadow: none; }
+  .grid.test .cell::after { display: none; }
+  .grid.test .cell::before { content: "?"; position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,.18); font-weight: 600; }
+  .grid.test .cell.revealed { color: #fff; font-weight: 700; box-shadow: 0 0 0 2px #fff, 0 0 16px rgba(255,255,255,.55); z-index: 3; animation: pop .25s ease-out; }
+  .grid.test .cell.revealed::before { display: none; }
+  .grid.test .cell.mirror.revealed { color: #fff; }
+  @keyframes pop { from { transform: scale(.7); } to { transform: scale(1); } }
 
   /* ---------- work lists ---------- */
   .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; max-width: 1240px; margin-inline: auto; }
@@ -260,6 +274,11 @@
     </aside>
 
     <main class="panel">
+      <div class="testbar">
+        <label class="size-toggle" for="testBox"><input type="checkbox" id="testBox"> <b>Test mode</b> <span>hide every answer</span></label>
+        <span class="msg" id="testMsg" hidden>Say the answer, then tap the square to check. <b id="revealCount">0</b> revealed</span>
+        <button type="button" class="again" id="hideAgain" hidden>Hide them all again</button>
+      </div>
       <div class="chart-wrap"><div class="grid n12" id="grid" role="grid" aria-label="Multiplication chart"></div></div>
       <div class="chart-foot">
         <span>The striped half repeats the top half — 6 × 4 is the same as 4 × 6, so it only counts once.</span>
@@ -334,6 +353,7 @@
 
   let N = 12;
   let state = { tables: {}, overrides: {} };
+  let testMode = false, revealed = new Set();
   const $ = id => document.getElementById(id);
   const fk = (a, b) => `${Math.min(a, b)}x${Math.max(a, b)}`;
   const el = (tag, cls, text) => { const d = document.createElement(tag); if (cls) d.className = cls; if (text !== undefined) d.textContent = text; return d; };
@@ -382,7 +402,7 @@
     });
   }
   function buildGrid() {
-    const g = $('grid'); g.innerHTML = ''; g.className = 'grid n' + N;
+    const g = $('grid'); g.innerHTML = ''; g.className = 'grid n' + N + (testMode ? ' test' : ''); revealed.clear(); if ($('revealCount')) $('revealCount').textContent = '0';
     g.appendChild(el('div', 'hd corner', '×'));
     for (let c = 1; c <= N; c++) { const h = el('div', 'hd col-hd', c); h.id = `hc-${c}`; g.appendChild(h); }
     for (let r = 1; r <= N; r++) {
@@ -412,6 +432,7 @@
       cell.classList.toggle('learning', s === 'learning');
       cell.classList.toggle('mastered', s === 'mastered');
       cell.classList.toggle('override', c >= r && isOverridden(r, c));
+      cell.classList.toggle('revealed', testMode && revealed.has(`${r}-${c}`));
       if (c >= r) {
         if (s === 'mastered') nM++;
         else if (s === 'learning') { nL++; (learn[r] ||= []).push(c); }
@@ -457,6 +478,20 @@
     }
     if (!n) { const e = el('div', 'empty'); e.innerHTML = emptyText; host.appendChild(e); }
     $(cntId).textContent = n;
+  }
+  function setTestMode(on) {
+    testMode = on; revealed.clear();
+    $('grid').classList.toggle('test', on);
+    $('testBox').checked = on;
+    $('testMsg').hidden = !on; $('hideAgain').hidden = !on;
+    $('revealCount').textContent = '0';
+    render();
+  }
+  function reveal(r, c) {
+    const k = `${r}-${c}`;
+    revealed.has(k) ? revealed.delete(k) : revealed.add(k);
+    $('revealCount').textContent = revealed.size;
+    render();
   }
   function changed() {
     render();
@@ -607,7 +642,9 @@
   function start() {
     loadLocal();
     buildTables(); setupTabs(); buildTPick();
-    $('grid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (c) cycleFact(+c.dataset.r, +c.dataset.c); });
+    $('grid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (!c) return; testMode ? reveal(+c.dataset.r, +c.dataset.c) : cycleFact(+c.dataset.r, +c.dataset.c); });
+    $('testBox').addEventListener('change', e => setTestMode(e.target.checked));
+    $('hideAgain').addEventListener('click', () => setTestMode(true));
     for (const id of ['listLearn', 'listStart']) $(id).addEventListener('click', e => { const ch = e.target.closest('.chip'); if (ch) cycleFact(+ch.dataset.r, +ch.dataset.c); });
     $('resetBtn').addEventListener('click', () => { if (!confirm('Clear every table and every fact? This cannot be undone.')) return; state = { tables: {}, overrides: {} }; changed(); });
     $('sizeBox').addEventListener('change', e => setSize(e.target.checked ? 12 : 10));
