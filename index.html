@@ -223,6 +223,13 @@
 
 
   /* ---------- view 4: exploding dots ---------- */
+  .subnav { max-width: 1240px; margin: 0 auto 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .subnav button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 8px 16px 8px 8px; font-weight: 800; font-size: 13.5px; color: var(--muted); transition: all .15s; }
+  .subnav button .num { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.1); font-family: "Fredoka", sans-serif; font-size: 13px; color: var(--text); }
+  .subnav button:hover { color: var(--text); border-color: rgba(255,255,255,.4); }
+  .subnav button[aria-selected="true"] { color: #120a22; background: linear-gradient(120deg, var(--teal), var(--purple)); border-color: transparent; box-shadow: 0 0 14px rgba(46,242,207,.35); }
+  .subnav button[aria-selected="true"] .num { background: rgba(18,10,34,.25); color: #120a22; }
+
   .plist { display: grid; gap: 6px; }
   .plist h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 12px 0 4px; font-family: "Nunito", sans-serif; font-weight: 800; }
   .plist h3:first-child { margin-top: 0; }
@@ -232,9 +239,9 @@
   .prob.done { border-color: var(--pink); }
   .prob .tag { font-family: "Nunito", sans-serif; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 800; }
   .prob.done .tag { color: var(--pink); }
-  .custom { margin-top: 14px; display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 6px; align-items: center; }
-  .custom input { width: 100%; min-width: 0; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); border-radius: 10px; padding: 8px; font-family: "Fredoka", sans-serif; font-size: 17px; text-align: center; }
-  .custom select { border: 1px solid var(--line); background: #1c1336; color: var(--text); border-radius: 10px; padding: 8px 6px; font-family: "Fredoka", sans-serif; font-size: 17px; }
+  .custom { margin-top: 14px; display: flex; gap: 6px; align-items: center; }
+  .custom input { flex: 1; width: 100%; min-width: 0; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); border-radius: 10px; padding: 8px; font-family: "Fredoka", sans-serif; font-size: 17px; text-align: center; }
+  .custom .opx { font-family: "Fredoka", sans-serif; font-size: 20px; color: var(--muted); }
   .custom button { border: 0; border-radius: 10px; padding: 9px 12px; font-weight: 800; font-size: 13px; background: linear-gradient(120deg, var(--teal), var(--purple)); color: #120a22; }
   .rules { margin-top: 16px; display: grid; gap: 8px; font-size: 12.5px; color: var(--muted); }
   .rules div { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: center; }
@@ -243,51 +250,64 @@
   .rules .ic.y { background: #ffd166; }
 
   .machine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin-bottom: 14px; }
-  .machine-head .title { font-family: "Fredoka", sans-serif; font-size: 22px; font-weight: 600; }
-  .machine-head .title span { color: var(--muted); font-size: 14px; font-family: "Nunito", sans-serif; font-weight: 700; margin-left: 10px; }
+  .machine-head .title { font-family: "Fredoka", sans-serif; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .machine-head .title span { color: var(--muted); font-size: 14px; font-family: "Nunito", sans-serif; font-weight: 700; margin-right: 10px; }
   .tools { display: flex; flex-wrap: wrap; gap: 6px; }
   .tools button { border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 800; color: var(--muted); }
   .tools button:hover { color: var(--text); border-color: rgba(255,255,255,.4); }
-  .tools button.go { color: #120a22; background: linear-gradient(120deg, var(--pink), var(--purple)); border-color: transparent; box-shadow: 0 0 14px rgba(255,95,176,.45); }
 
   .machine-wrap { overflow-x: auto; padding: 4px 2px 8px; }
-  .machine { display: grid; gap: 12px; width: max-content; margin: 0 auto; min-width: 100%; justify-content: center; }
-  .mbox { position: relative; width: 206px; border: 2px solid rgba(46,242,207,.35); border-radius: 18px; background: rgba(255,255,255,.03); padding: 30px 8px 8px; display: flex; flex-direction: column; gap: 6px; transition: border-color .2s, box-shadow .2s, background .2s; }
+  .machine-wrap { --bw: 150px; --ds: 20px; }
+  .machine { display: grid; gap: 10px; width: max-content; margin: 0 auto; }
+  .mrow { display: grid; grid-template-columns: 84px auto; align-items: center; gap: 10px; }
+  .mrow.result { margin-top: 4px; padding-top: 12px; border-top: 2px solid rgba(255,255,255,.28); }
+  .mrow .rlabel { font-family: "Fredoka", sans-serif; font-size: 26px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mrow .rlabel.anti { color: var(--pink); }
+  .mrow .rlabel.eq { color: var(--muted); }
+  .mrow .boxes { display: flex; gap: 8px; }
+  .mbox { position: relative; width: var(--bw); border: 2px solid rgba(46,242,207,.35); border-radius: 14px; background: rgba(255,255,255,.03); padding: 22px 8px 6px; display: flex; flex-direction: column; gap: 4px; transition: border-color .2s, box-shadow .2s, background .2s; }
+  .mrow.src .mbox { border-color: rgba(255,255,255,.18); }
+  .mrow.src.anti .mbox { border-color: rgba(255,95,176,.3); }
   .mbox.full { border-color: var(--pink); box-shadow: 0 0 22px rgba(255,95,176,.4); }
   .mbox.over { background: rgba(46,242,207,.08); border-color: var(--teal); }
   .mbox.over.bad { background: rgba(255,95,176,.08); border-color: var(--pink); }
-  .mbox.boom { animation: boom .5s ease-out; }
   .mbox.pour { animation: pour .5s ease-out; }
   .mbox.shake { animation: shake .35s ease-in-out; }
-  @keyframes boom { 0% { box-shadow: 0 0 0 0 rgba(255,95,176,.9); } 100% { box-shadow: 0 0 0 30px rgba(255,95,176,0); } }
   @keyframes pour { 0% { box-shadow: 0 0 0 0 rgba(46,242,207,.9); } 100% { box-shadow: 0 0 0 30px rgba(46,242,207,0); } }
   @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-  .mbox .plabel { position: absolute; top: 8px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 800; pointer-events: none; }
-  .mbox .plabel b { font-family: "Fredoka", sans-serif; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--muted); }
-  .mbox .arrow { position: absolute; top: 46%; left: -21px; width: 30px; height: 30px; border-radius: 50%; background: #241a45; border: 1px solid var(--line); display: grid; place-items: center; z-index: 4; pointer-events: none; }
-  .mbox .arrow b { font-family: "Fredoka", sans-serif; font-size: 13px; color: var(--muted); }
-  .dotfield { position: relative; height: 230px; border-radius: 12px; touch-action: none; }
-  .dot { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(46,242,207,.6); cursor: grab; touch-action: none; transition: transform .3s, opacity .3s; z-index: 2; }
-    .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
+  .mbox .plabel { position: absolute; top: 5px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: baseline; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 800; pointer-events: none; }
+  .mbox .plabel b { font-family: "Fredoka", sans-serif; font-size: 12px; letter-spacing: 0; text-transform: none; color: var(--muted); }
+  .mbox .allbtn { position: absolute; top: 2px; right: 6px; z-index: 3; border: 1px solid var(--line); background: #1c1336; border-radius: 999px; padding: 2px 8px; font-size: 10.5px; font-weight: 800; color: var(--muted); }
+  .mbox .allbtn:hover { color: var(--text); border-color: var(--text); }
+  .dotfield { position: relative; height: var(--fh, 120px); border-radius: 10px; touch-action: none; }
+  .dot { position: absolute; width: var(--ds, 22px); height: var(--ds, 22px); border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(46,242,207,.6); cursor: grab; touch-action: none; transition: transform .3s, opacity .3s; z-index: 2; }
+  .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
   .dot.ten { box-shadow: 0 0 0 2px #fff, 0 0 12px rgba(255,255,255,.7); }
   .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; }
   .dot.spawn { animation: pop .3s ease-out; }
   .dot.gone { transform: scale(0); opacity: 0; }
-  .dot.hit { animation: hitpop .25s ease-out; }
-  @keyframes hitpop { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
   .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #fff; pointer-events: none; animation: spark .5s ease-out forwards; z-index: 5; }
   @keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
-  .mbox .count { display: flex; justify-content: center; align-items: baseline; gap: 6px; font-family: "Fredoka", sans-serif; font-size: 26px; font-weight: 700; min-height: 32px; pointer-events: none; }
-  .mbox .count small { font-size: 12px; color: var(--dim); font-family: "Nunito", sans-serif; font-weight: 800; }
-  .mbox .count.ok { color: var(--teal); }
+  .mbox .count { display: flex; justify-content: center; align-items: baseline; gap: 5px; font-family: "Fredoka", sans-serif; font-size: 20px; font-weight: 700; min-height: 24px; pointer-events: none; }
+  .mbox .count small { font-size: 11px; color: var(--dim); font-family: "Nunito", sans-serif; font-weight: 800; }
+  .mbox .count.ok { color: var(--muted); }
   .mbox .count.hot { color: var(--pink); }
   .mbox .count.neg { color: var(--pink); }
-  .mbox .cancelall { border: 1px solid var(--line); background: rgba(255,255,255,.05); border-radius: 9px; padding: 4px 9px; font-size: 11.5px; font-weight: 800; color: var(--muted); align-self: center; }
+  .mbox .cancelall { border: 1px solid var(--line); background: rgba(255,255,255,.05); border-radius: 9px; padding: 3px 8px; font-size: 11px; font-weight: 800; color: var(--muted); align-self: center; }
   .mbox .cancelall:hover { color: var(--text); border-color: var(--text); }
+
+  .readout { width: max-content; margin: 8px auto 0; display: grid; grid-template-columns: 84px auto; gap: 10px; align-items: center; }
+  .readout .check { justify-self: end; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #120a22; background: var(--teal); box-shadow: 0 0 18px rgba(46,242,207,.6); animation: pop .3s ease-out; }
+  .readout .cells { display: flex; gap: 8px; }
+  .readout .cell { width: var(--bw); text-align: center; font-family: "Fredoka", sans-serif; font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); position: relative; }
+  .readout .cell + .cell::before { content: ''; position: absolute; left: -5px; top: 15%; height: 70%; width: 2px; background: var(--dim); }
+  .readout .cell.hot { color: var(--pink); }
+  .readout .cell.dim { color: var(--dim); }
+  .readout.win .cell { color: var(--teal); text-shadow: 0 0 12px rgba(46,242,207,.5); }
 
   .tray { margin: 12px auto 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 22px; padding: 10px 16px; border-radius: 999px; border: 1px dashed var(--line); width: max-content; max-width: 100%; }
   .tray .supply { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 800; color: var(--muted); }
-  .tray .supply .dot { position: static; cursor: grab; }
+  .tray .supply .dot { position: static; cursor: grab; width: 22px; height: 22px; }
   .tray .bin { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; color: var(--dim); padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
   .tray .bin.over { border-color: var(--pink); color: var(--pink); }
 
@@ -298,16 +318,25 @@
   .coach .say.win { border-color: var(--teal); color: var(--text); background: rgba(46,242,207,.1); }
   .coach .say.win b { color: var(--teal); }
   .coach .say.oops { border-color: rgba(255,95,176,.5); }
-  .stack { font-family: "Fredoka", sans-serif; font-variant-numeric: tabular-nums; font-size: 24px; line-height: 1.15; display: grid; justify-items: end; padding: 8px 16px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); min-width: 150px; }
-  .stack .marks { display: flex; justify-content: flex-end; font-size: 12px; color: var(--pink); font-family: "Nunito", sans-serif; font-weight: 800; min-height: 16px; }
-  .stack .marks span { width: 22px; text-align: center; }
-  .stack .marks span.b { color: var(--teal); }
-  .stack .row { display: flex; }
-  .stack .row span { width: 22px; text-align: center; }
-  .stack .row.op { color: var(--muted); }
-  .stack .rule { width: 100%; height: 2px; background: var(--muted); margin: 4px 0; }
-  .stack .row.ans span { color: var(--teal); text-shadow: 0 0 10px rgba(46,242,207,.5); }
-  .stack .row.ans span.pending { color: var(--dim); text-shadow: none; }
+
+  /* notebook page for the regrouping section */
+  .notebook { position: relative; padding: 18px 26px 16px 40px; border-radius: 6px 14px 14px 6px; background: #fbf7ec; background-image: repeating-linear-gradient(180deg, transparent 0 35px, rgba(120,160,220,.35) 35px 36px); color: #1b1633; font-family: "Fredoka", sans-serif; font-variant-numeric: tabular-nums; box-shadow: 0 8px 30px rgba(0,0,0,.35); min-width: 200px; }
+  .notebook::before { content: ''; position: absolute; top: 0; bottom: 0; left: 26px; width: 2px; background: rgba(255,95,176,.55); }
+  .notebook .nb-cols { display: flex; justify-content: flex-end; align-items: flex-end; min-height: 36px; }
+  .notebook .nb-col { width: 48px; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start; }
+  .notebook .nb-col span { position: relative; line-height: 36px; font-size: 32px; font-weight: 600; }
+  .notebook .nb-col span.ink { color: #2a6fd6; font-size: 24px; line-height: 30px; }
+  .notebook .nb-col span.x::after { content: ''; position: absolute; left: -3px; right: -3px; top: 50%; height: 3px; border-radius: 2px; background: #e0327c; transform: rotate(-20deg); }
+  .notebook .nb-row { display: flex; justify-content: flex-end; position: relative; line-height: 36px; font-size: 32px; font-weight: 600; }
+  .notebook .nb-row span { width: 48px; text-align: center; }
+  .notebook .nb-row .op { position: absolute; left: -30px; width: auto; color: #6a6480; }
+  .notebook .nb-rule { height: 3px; background: #1b1633; margin: 3px 0 4px; border-radius: 2px; }
+  .notebook .nb-row.ans input { width: 42px; height: 36px; margin: 0 3px; text-align: center; font-family: inherit; font-size: 28px; font-weight: 600; border: 0; border-bottom: 3px dashed #b9b3c9; background: transparent; color: #2a6fd6; border-radius: 0; }
+  .notebook .nb-row.ans input:disabled { border-bottom-color: #ddd8e6; }
+  .notebook .nb-row.ans input:focus { outline: none; border-bottom-color: #2a6fd6; }
+  .notebook .nb-row.ans.ok input { color: #12a37a; border-bottom-color: #12a37a; }
+  .notebook .nb-check { position: absolute; top: -14px; right: -14px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; font-weight: 800; color: #120a22; background: var(--teal); box-shadow: 0 0 18px rgba(46,242,207,.7); animation: pop .3s ease-out; }
+  .notebook .nb-lock { position: absolute; bottom: 10px; right: 10px; font-family: "Nunito", sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #a49ebb; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -433,41 +462,39 @@
 
 <!-- ================= VIEW 4: EXPLODING DOTS ================= -->
 <section id="view-dots" role="tabpanel" aria-labelledby="tab-dots" hidden>
+  <div class="subnav" id="subnav" role="tablist" aria-label="Exploding dots sections">
+    <button type="button" role="tab" data-mode="make" aria-selected="true"><span class="num">1</span>Make a number</button>
+    <button type="button" role="tab" data-mode="add" aria-selected="false"><span class="num">2</span>Add</button>
+    <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">3</span>Subtract</button>
+    <button type="button" role="tab" data-mode="regroup" aria-selected="false"><span class="num">4</span>Regroup</button>
+  </div>
   <div class="layout wide-side">
     <aside class="panel">
-      <h2>Problems</h2>
-      <p class="hint">Pick one, then move the dots around with your finger. Nothing happens until you make it happen.</p>
+      <h2 id="plistTitle">Numbers</h2>
+      <p class="hint" id="plistHint"></p>
       <div class="plist" id="plist"></div>
       <h3 style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:14px 0 4px;font-family:Nunito,sans-serif;font-weight:800">Make your own</h3>
-      <div class="custom">
-        <input type="number" id="ca" min="0" max="99999" placeholder="345" aria-label="first number">
-        <select id="cop" aria-label="operation"><option value="+">+</option><option value="-">−</option></select>
-        <input type="number" id="cb" min="0" max="99999" placeholder="178" aria-label="second number">
-        <button type="button" id="cgo">Go</button>
-      </div>
-      <div class="rules">
-        <div><span class="ic">10</span><span>When a box has ten or more, grabbing one dot picks up <b>ten</b>. Carry them into the box on the left and they become one dot.</span></div>
-        <div><span class="ic y">1</span><span>Drag one dot into the box on its <b>right</b> and it turns into ten.</span></div>
-        <div><span class="ic p">×</span><span>Drop a dot onto an anti-dot and they <b>cancel</b> — both disappear.</span></div>
-      </div>
+      <div class="custom" id="custom"></div>
+      <div class="rules" id="rules"></div>
     </aside>
     <main class="panel">
       <div class="machine-head">
-        <div class="title" id="mTitle">1 ← 10 machine</div>
+        <div class="title" id="mTitle"></div>
         <div class="tools">
-          <button type="button" id="stepBtn" class="go">Start</button>
-          <button type="button" id="resetMachine">Clear</button>
+          <button type="button" id="resetMachine">Start over</button>
         </div>
       </div>
-      <div class="machine-wrap"><div class="machine" id="machine"></div></div>
-      <div class="tray" id="tray">
-        <div class="supply"><div class="dot" id="supplyDot" title="drag me into a box"></div><span>dots — drag one in</span></div>
-        <div class="supply"><div class="dot anti" id="supplyAnti" title="drag me into a box"></div><span>anti-dots</span></div>
+      <div class="machine-wrap">
+        <div class="machine" id="machine"></div>
+        <div class="readout" id="readout"></div>
+      </div>
+      <div class="tray" id="tray" hidden>
+        <div class="supply"><div class="dot" id="supplyDot" title="drag me into a box"></div><span>dots — drag one into a box</span></div>
         <div class="bin" id="bin">drop here to throw a dot away</div>
       </div>
       <div class="coach">
-        <div class="say" id="coach">Pick a problem on the left, or drag dots in from the tray.</div>
-        <div class="stack" id="stack" hidden></div>
+        <div class="say" id="coach"></div>
+        <div class="notebook" id="notebook" hidden></div>
       </div>
     </main>
   </div>
@@ -765,99 +792,168 @@
 
 
   /* ================= VIEW 4: EXPLODING DOTS ================= */
-  const PROBLEMS = [
-    { h: 'Addition · two digits' },
-    { a: 47, b: 38, op: '+' }, { a: 65, b: 29, op: '+' }, { a: 58, b: 76, op: '+' },
-    { h: 'Addition · three digits' },
-    { a: 247, b: 185, op: '+' }, { a: 368, b: 457, op: '+' }, { a: 596, b: 247, op: '+' }, { a: 709, b: 293, op: '+' },
-    { h: 'Subtraction · two digits' },
-    { a: 52, b: 27, op: '-' }, { a: 81, b: 46, op: '-' }, { a: 70, b: 34, op: '-' },
-    { h: 'Subtraction · across zeros' },
-    { a: 403, b: 178, op: '-' }, { a: 500, b: 236, op: '-' }, { a: 612, b: 359, op: '-' }, { a: 800, b: 407, op: '-' }, { a: 1000, b: 463, op: '-' },
-  ];
   const PLACE = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands', 'hundred-thousands'];
-  const FW = 190, FH = 230, DS = 22, GX = 34, GY = 34, COLS = 5;   // field size, dot size, grid pitch
-  let M = { n: 4, dots: [], prob: null, phase: 'free', marks: {}, done: new Set(), seq: 0 };
+  const ADD_LIST = [
+    { h: 'Two digits' }, { a: 47, b: 38 }, { a: 65, b: 29 }, { a: 58, b: 76 },
+    { h: 'Three digits' }, { a: 358, b: 287 }, { a: 247, b: 185 }, { a: 368, b: 457 }, { a: 596, b: 247 }, { a: 709, b: 293 },
+  ];
+  const SUB_LIST = [
+    { h: 'Two digits' }, { a: 52, b: 27 }, { a: 81, b: 46 }, { a: 70, b: 34 },
+    { h: 'Three digits' }, { a: 324, b: 158 }, { a: 612, b: 359 }, { a: 845, b: 267 },
+    { h: 'Across zeros' }, { a: 403, b: 178 }, { a: 500, b: 236 }, { a: 800, b: 407 }, { a: 1000, b: 463 },
+  ];
+  const MODES = {
+    make: {
+      title: 'Numbers', hint: 'Pick a number, then drag dots from the tray into the boxes until the machine holds exactly that number.',
+      geo: { BW: 180, DS: 22, GX: 32, GY: 32, COLS: 5, FH: 200 },
+      list: [{ h: 'Two digits' }, { t: 47 }, { t: 83 }, { h: 'Three digits' }, { t: 138 }, { t: 356 }, { t: 856 }, { t: 409 }, { h: 'Four digits' }, { t: 1204 }, { t: 2050 }, { t: 3417 }],
+      rules: [['10', 'Ten dots in one box are worth <b>one</b> dot in the box on their left. Grab one and all ten come along.'], ['1', 'One dot dragged to its <b>right</b> becomes ten.'], ['×', 'Drop a dot on the bin to throw it away.']],
+    },
+    add: {
+      title: 'Addition', hint: 'Both numbers sit in their own rows. Drag every dot straight down into the answer row, then tidy up any box that holds ten or more.',
+      geo: { BW: 150, DS: 20, GX: 27, GY: 27, COLS: 5, FH: 150, FHS: 76 },
+      list: ADD_LIST,
+      rules: [['↓', 'A dot only moves <b>straight down</b> into the box below it — ones stay ones, tens stay tens.'], ['10', 'In the answer row, ten dots in one box travel together into the box on their <b>left</b> and become one dot.'], ['all', 'The little <b>all ↓</b> button drops a whole box at once.']],
+    },
+    sub: {
+      title: 'Subtraction', hint: 'The number being taken away is made of anti-dots. Drag everything down into the answer row and let dots and anti-dots cancel.',
+      geo: { BW: 150, DS: 20, GX: 27, GY: 27, COLS: 5, FH: 150, FHS: 76 },
+      list: SUB_LIST,
+      rules: [['×', 'Drop a dot onto an anti-dot and they <b>cancel</b> — both disappear.'], ['1', 'Not enough dots in a box? Drag one dot from the box on the <b>left</b> into it and it unexplodes into ten.'], ['↓', 'Dots only move <b>straight down</b> into the answer row.']],
+    },
+    regroup: {
+      title: 'Regrouping', hint: 'The standard algorithm, one column at a time. Rearrange the dots so every column has enough to take away from, and watch the notebook rewrite the number as you go.',
+      geo: { BW: 170, DS: 22, GX: 30, GY: 30, COLS: 5, FH: 150 },
+      list: [{ h: 'Across zeros' }, { a: 500, b: 134 }, { a: 403, b: 178 }, { a: 700, b: 256 }, { a: 1000, b: 463 }, { h: 'One borrow' }, { a: 82, b: 37 }, { a: 645, b: 218 }, { a: 531, b: 274 }],
+      rules: [['1', 'Drag one dot into the box on its <b>right</b> and it becomes ten. The notebook crosses out the old digits and writes the new ones.'], ['✓', 'When every column has at least as many dots as the digit under it, a check mark appears and the answer line unlocks.'], ['10', 'Changed your mind? Ten dots grabbed together travel back to the <b>left</b> as one.']],
+    },
+  };
+  let M = { mode: 'make', n: 3, rows: [], dots: [], prob: null, seq: 0, done: new Set(), hist: [], geo: MODES.make.geo, unlocked: false, solved: false };
   let drag = null;
 
-  const field = k => $(`field-${k}`);
-  const counts = k => M.dots.reduce((c, d) => { if (d.k === k) { d.anti ? c.anti++ : c.dots++; } return c; }, { dots: 0, anti: 0 });
+  const field = (r, k) => $(`field-${r}-${k}`);
+  const counts = (r, k) => M.dots.reduce((c, d) => { if (d.r === r && d.k === k) { d.anti ? c.anti++ : c.dots++; } return c; }, { dots: 0, anti: 0 });
   const digitsOf = n => String(n).split('').reverse().map(Number);
-  const clampX = x => Math.max(2, Math.min(FW - DS - 2, x));
-  const clampY = y => Math.max(2, Math.min(FH - DS - 2, y));
-  function machineValue() { return M.dots.reduce((s, d) => s + (d.anti ? -1 : 1) * 10 ** d.k, 0); }
+  const clampX = x => Math.max(2, Math.min(M.geo.BW - 16 - M.geo.DS - 2, x));
+  const clampY = (y, r) => Math.max(2, Math.min(M.rows[r].fh - M.geo.DS - 2, y));
+  const rowValue = r => M.dots.reduce((s, d) => s + (d.r === r ? (d.anti ? -1 : 1) * 10 ** d.k : 0), 0);
+  const resultRow = () => M.rows.findIndex(r => r.kind === 'result');
+  const probKey = () => M.prob && M.prob.idx != null ? `${M.mode}:${M.prob.idx}` : null;
 
-  /* ---- problems ---- */
+  /* ---- sections + problem lists ---- */
+  function setMode(mode) {
+    M.mode = mode;
+    document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
+    const cfg = MODES[mode];
+    $('plistTitle').textContent = cfg.title; $('plistHint').textContent = cfg.hint;
+    $('rules').innerHTML = cfg.rules.map(([ic, txt]) => `<div><span class="ic ${ic === '×' ? 'p' : ic === '1' ? 'y' : ''}">${ic}</span><span>${txt}</span></div>`).join('');
+    buildPList(); buildCustom();
+    $('tray').hidden = mode !== 'make';
+    const first = cfg.list.findIndex(p => !p.h);
+    loadProblem(first);
+  }
   function buildPList() {
     const host = $('plist'); host.innerHTML = '';
-    PROBLEMS.forEach((p, i) => {
+    MODES[M.mode].list.forEach((p, i) => {
       if (p.h) { host.appendChild(el('h3', '', p.h)); return; }
       const b = document.createElement('button'); b.type = 'button'; b.className = 'prob'; b.dataset.i = i;
-      b.innerHTML = `<span>${p.a} ${p.op === '+' ? '+' : '−'} ${p.b}</span><span class="tag"></span>`;
+      b.innerHTML = `<span>${probText(p)}</span><span class="tag"></span>`;
+      if (M.done.has(`${M.mode}:${i}`)) { b.classList.add('done'); b.querySelector('.tag').textContent = 'done'; }
       b.addEventListener('click', () => loadProblem(i));
       host.appendChild(b);
     });
+  }
+  function probText(p) { return p.t != null ? p.t.toLocaleString() : `${p.a} ${M.mode === 'add' ? '+' : '−'} ${p.b}`; }
+  function buildCustom() {
+    const host = $('custom');
+    if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="856" aria-label="number to make"><button type="button" id="cgo">Go</button>`;
+    else host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     $('cgo').addEventListener('click', () => {
-      const a = +$('ca').value, b = +$('cb').value, op = $('cop').value;
+      const a = +$('ca').value;
+      if (M.mode === 'make') { if (!$('ca').value || a < 0) { coachSay('Type a number first.'); return; } loadProblem(null, { t: a }); return; }
+      const b = +$('cb').value;
       if (!$('ca').value || !$('cb').value || a < 0 || b < 0) { coachSay('Type two numbers first.'); return; }
-      if (op === '-' && b > a) { coachSay('For subtraction, put the bigger number first.'); return; }
-      loadProblem(null, { a, b, op });
+      if (M.mode !== 'add' && b > a) { coachSay('Put the bigger number first when subtracting.'); return; }
+      loadProblem(null, { a, b });
     });
   }
   function loadProblem(i, custom) {
-    const p = custom || PROBLEMS[i];
-    M.prob = { ...p, idx: i }; M.marks = {}; M.phase = 'loaded';
-    M.n = Math.max(String(p.a).length, String(p.b).length) + (p.op === '+' ? 1 : 0);
+    const p = custom || MODES[M.mode].list[i];
+    M.prob = { ...p, idx: custom ? null : i }; M.unlocked = false; M.solved = false; M.hist = [];
+    M.geo = MODES[M.mode].geo;
     document.querySelectorAll('.prob').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
-    $('mTitle').innerHTML = `${p.a} ${p.op === '+' ? '+' : '−'} ${p.b}`;
+    const g = M.geo;
+    if (M.mode === 'make') {
+      const len = String(p.t).length; M.n = Math.min(5, len >= 4 ? len : len + 1);
+      M.rows = [{ kind: 'free', label: '', fh: g.FH }];
+      $('mTitle').innerHTML = `<span>Make</span>${p.t.toLocaleString()}`;
+    } else if (M.mode === 'add') {
+      M.n = Math.max(String(p.a).length, String(p.b).length) + 1;
+      M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS }, { kind: 'src', label: '+ ' + p.b, fh: g.FHS }, { kind: 'result', label: '=', fh: g.FH }];
+      $('mTitle').innerHTML = `${p.a} + ${p.b}`;
+    } else if (M.mode === 'sub') {
+      M.n = String(p.a).length;
+      M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS }, { kind: 'src', anti: true, label: '− ' + p.b, fh: g.FHS }, { kind: 'result', label: '=', fh: g.FH }];
+      $('mTitle').innerHTML = `${p.a} − ${p.b}`;
+    } else {
+      M.n = String(p.a).length;
+      M.rows = [{ kind: 'free', label: String(p.a), fh: g.FH }];
+      M.hist = digitsOf(p.a).map(d => [d]);
+      $('mTitle').innerHTML = `${p.a} − ${p.b}`;
+    }
     buildMachine();
-    digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(k, false, gridSpot(k)); });
+    if (M.mode === 'add') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, false, gridSpot(1, k)); }); }
+    if (M.mode === 'sub') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, true, gridSpot(1, k)); }); }
+    if (M.mode === 'regroup') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); buildNotebook(); }
+    $('notebook').hidden = M.mode !== 'regroup';
     refresh();
   }
-  function clearMachine() {
-    M.prob = null; M.phase = 'free'; M.marks = {}; M.n = 4;
-    document.querySelectorAll('.prob').forEach(b => b.classList.remove('on'));
-    $('mTitle').textContent = '1 ← 10 machine';
-    buildMachine(); refresh();
-  }
-  function stepAction() {
-    const p = M.prob; if (!p || M.phase !== 'loaded') return;
-    M.phase = 'working';
-    digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(k, p.op === '-', gridSpot(k), true); });
-    refresh();
-  }
+  function restart() { if (M.prob) loadProblem(M.prob.idx, M.prob.idx == null ? M.prob : null); }
 
   /* ---- machine + dots ---- */
   function buildMachine() {
     M.dots = [];
     const host = $('machine'); host.innerHTML = '';
-    host.style.gridTemplateColumns = `repeat(${M.n}, 206px)`;
-    for (let k = M.n - 1; k >= 0; k--) {
-      const box = el('div', 'mbox'); box.id = `mbox-${k}`; box.dataset.k = k;
-      box.innerHTML = `<div class="plabel"><span>${PLACE[k] || '10^' + k}</span><b>${k === 0 ? '1' : '1' + '0'.repeat(k)}</b></div>` + (k < M.n - 1 ? `<div class="arrow"><b>←</b></div>` : '');
-      const f = el('div', 'dotfield'); f.id = `field-${k}`; f.dataset.k = k; box.appendChild(f);
-      const c = el('div', 'count'); c.id = `count-${k}`; box.appendChild(c);
-      const ca = document.createElement('button'); ca.type = 'button'; ca.className = 'cancelall'; ca.id = `cancel-${k}`; ca.textContent = 'Cancel all pairs'; ca.hidden = true;
-      ca.addEventListener('click', () => cancelAll(k)); box.appendChild(ca);
-      host.appendChild(box);
-    }
+    const wrap = host.parentElement; wrap.style.setProperty('--bw', M.geo.BW + 'px'); wrap.style.setProperty('--ds', M.geo.DS + 'px');
+    M.rows.forEach((row, r) => {
+      const line = el('div', 'mrow ' + row.kind + (row.anti ? ' anti' : ''));
+      const lab = el('div', 'rlabel' + (row.anti ? ' anti' : '') + (row.label === '=' ? ' eq' : ''), row.label); line.appendChild(lab);
+      const boxes = el('div', 'boxes');
+      for (let k = M.n - 1; k >= 0; k--) {
+        const box = el('div', 'mbox'); box.id = `mbox-${r}-${k}`;
+        box.innerHTML = `<div class="plabel"><span>${r === 0 ? (PLACE[k] || '10^' + k) : ''}</span><b>${r === 0 ? (k === 0 ? '1' : '1' + '0'.repeat(k)) : ''}</b></div>`;
+        if (row.kind === 'src') { const ab = document.createElement('button'); ab.type = 'button'; ab.className = 'allbtn'; ab.textContent = 'all ↓'; ab.addEventListener('click', () => moveAll(r, k)); box.appendChild(ab); }
+        const f = el('div', 'dotfield'); f.id = `field-${r}-${k}`; f.dataset.r = r; f.dataset.k = k; f.style.setProperty('--fh', row.fh + 'px'); box.appendChild(f);
+        const c = el('div', 'count'); c.id = `count-${r}-${k}`; box.appendChild(c);
+        if (row.kind !== 'src') { const ca = document.createElement('button'); ca.type = 'button'; ca.className = 'cancelall'; ca.id = `cancel-${r}-${k}`; ca.textContent = 'Cancel all pairs'; ca.hidden = true; ca.addEventListener('click', () => cancelAll(r, k)); box.appendChild(ca); }
+        boxes.appendChild(box);
+      }
+      line.appendChild(boxes); host.appendChild(line);
+    });
   }
-  // next free slot in a tidy 5-wide grid, so tens are easy to see at a glance
-  function gridSpot(k) {
-    const taken = new Set(M.dots.filter(d => d.k === k).map(d => Math.round(d.y / GY) * COLS + Math.round(d.x / GX)));
-    for (let i = 0; i < 60; i++) if (!taken.has(i)) return { x: 6 + (i % COLS) * GX, y: 6 + Math.floor(i / COLS) * GY };
-    return { x: 6, y: 6 };
+  // next free slot in a tidy grid, so tens are easy to see at a glance
+  function gridSpot(r, k) {
+    const { GX, GY, COLS } = M.geo;
+    const taken = new Set(M.dots.filter(d => d.r === r && d.k === k).map(d => Math.round((d.y - 4) / GY) * COLS + Math.round((d.x - 4) / GX)));
+    for (let i = 0; i < 60; i++) if (!taken.has(i)) return { x: 4 + (i % COLS) * GX, y: 4 + Math.floor(i / COLS) * GY };
+    return { x: 4, y: 4 };
   }
-  function localPoint(k, client) { const r = field(k).getBoundingClientRect(); return { x: clampX(client.x - r.left - DS / 2), y: clampY(client.y - r.top - DS / 2) }; }
-  function spawnDot(k, anti, pos, pop) {
-    const d = { id: ++M.seq, k, anti, x: clampX(pos.x), y: clampY(pos.y) };
+  function localPoint(r, k, client) { const rect = field(r, k).getBoundingClientRect(); return { x: clampX(client.x - rect.left - M.geo.DS / 2), y: clampY(client.y - rect.top - M.geo.DS / 2, r) }; }
+  function spawnDot(r, k, anti, pos, pop) {
+    const d = { id: ++M.seq, r, k, anti, x: clampX(pos.x), y: clampY(pos.y, r) };
     M.dots.push(d);
     const e = el('div', 'dot' + (anti ? ' anti' : '') + (pop ? ' spawn' : '')); e.dataset.id = d.id;
     e.style.left = d.x + 'px'; e.style.top = d.y + 'px';
-    field(k).appendChild(e);
+    field(r, k).appendChild(e);
     return d;
   }
   const dotEl = id => document.querySelector(`.dot[data-id="${id}"]`);
+  function placeDot(d, r, k, pos) {
+    d.r = r; d.k = k; d.x = clampX(pos.x); d.y = clampY(pos.y, r);
+    const e = dotEl(d.id); if (!e) return;
+    e.style.left = d.x + 'px'; e.style.top = d.y + 'px';
+    if (e.parentElement !== field(r, k)) { field(r, k).appendChild(e); e.classList.remove('spawn'); void e.offsetWidth; e.classList.add('spawn'); }
+  }
   function removeDot(id, animateTo) {
     const i = M.dots.findIndex(d => d.id === id); if (i < 0) return;
     M.dots.splice(i, 1);
@@ -865,80 +961,91 @@
     if (animateTo) { e.style.transition = 'left .25s, top .25s, transform .3s, opacity .3s'; e.style.left = animateTo.x + 'px'; e.style.top = animateTo.y + 'px'; }
     e.classList.add('gone'); setTimeout(() => e.remove(), 350);
   }
-  function sparks(k, x, y, n = 10) {
-    const f = field(k); if (!f) return;
+  function sparks(r, k, x, y, n = 10) {
+    const f = field(r, k); if (!f) return; const DS = M.geo.DS;
     for (let i = 0; i < n; i++) { const s = el('div', 'spark'); const a = (i / n) * Math.PI * 2; s.style.left = (x + DS / 2 - 4) + 'px'; s.style.top = (y + DS / 2 - 4) + 'px'; s.style.setProperty('--dx', Math.cos(a) * (40 + Math.random() * 40) + 'px'); s.style.setProperty('--dy', Math.sin(a) * (40 + Math.random() * 40) + 'px'); f.appendChild(s); setTimeout(() => s.remove(), 520); }
   }
-  function flash(k, cls) { const b = $(`mbox-${k}`); if (!b) return; b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); }
+  function flash(r, k, cls) { const b = $(`mbox-${r}-${k}`); if (!b) return; b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); }
+  function noteHist(...ks) { if (M.mode !== 'regroup') return; ks.forEach(k => { if (M.hist[k]) M.hist[k].push(counts(0, k).dots); }); }
 
   // ten dots carried into the next box become one dot there
-  function explodeGroup(group, toK, dropLocal) {
+  function explodeGroup(group, r, toK, dropLocal) {
+    const fromK = group[0].k;
     group.forEach(d => removeDot(d.id));
-    sparks(toK, dropLocal.x, dropLocal.y, 14); flash(toK, 'pour');
-    spawnDot(toK, group[0].anti, dropLocal, true);
-    if (!group[0].anti) M.marks[toK] = (M.marks[toK] || '') + '1';
+    sparks(r, toK, dropLocal.x, dropLocal.y, 14); flash(r, toK, 'pour');
+    spawnDot(r, toK, group[0].anti, dropLocal, true);
+    noteHist(fromK, toK);
     refresh();
   }
   // one dot carried into the box on its right becomes ten there, clustered where it landed
-  function unexplode(dot, toK, dropLocal) {
-    const anti = dot.anti;
+  function unexplode(dot, r, toK, dropLocal) {
+    const anti = dot.anti, fromK = dot.k, { DS, COLS } = M.geo;
     removeDot(dot.id);
     for (let j = 0; j < 10; j++) {
       const col = j % COLS, row = Math.floor(j / COLS);
-      spawnDot(toK, anti, { x: dropLocal.x + (col - 2) * (DS + 4), y: dropLocal.y + (row - 0.5) * (DS + 4) }, true);
+      spawnDot(r, toK, anti, { x: dropLocal.x + (col - 2) * (DS + 4), y: dropLocal.y + (row - 0.5) * (DS + 4) }, true);
     }
-    sparks(toK, dropLocal.x, dropLocal.y, 10); flash(toK, 'pour');
-    if (!anti) { M.marks[toK + 1] = (M.marks[toK + 1] || '') + '−1'; M.marks[toK] = (M.marks[toK] || '') + '+10'; }
+    sparks(r, toK, dropLocal.x, dropLocal.y, 10); flash(r, toK, 'pour');
+    noteHist(fromK, toK);
     refresh();
   }
   function cancelPair(a, b) {
     if (!M.dots.includes(a) || !M.dots.includes(b)) return;
     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    sparks(a.k, mx, my, 8);
+    sparks(a.r, a.k, mx, my, 8);
     removeDot(a.id, { x: mx, y: my }); removeDot(b.id, { x: mx, y: my });
     refresh();
   }
-  function cancelAll(k) {
-    const ds = M.dots.filter(d => d.k === k && !d.anti), as = M.dots.filter(d => d.k === k && d.anti);
+  function cancelAll(r, k) {
+    const ds = M.dots.filter(d => d.r === r && d.k === k && !d.anti), as = M.dots.filter(d => d.r === r && d.k === k && d.anti);
     const n = Math.min(ds.length, as.length);
     for (let i = 0; i < n; i++) setTimeout(() => cancelPair(ds[i], as[i]), i * 70);
+  }
+  function moveAll(r, k) {
+    const to = resultRow(); if (to < 0) return;
+    M.dots.filter(d => d.r === r && d.k === k).forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
   }
 
   /* ---- dragging (single dots, or a hand of ten) ---- */
   function onDown(e) {
     const t = e.target.closest('.dot'); if (!t || e.button > 0) return;
     e.preventDefault();
-    const supply = t.id === 'supplyDot' ? 'dot' : t.id === 'supplyAnti' ? 'anti' : null;
+    const supply = t.id === 'supplyDot';
     let group = [];
     if (!supply) {
       const dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('gone')) return;
-      const same = M.dots.filter(d => d.k === dot.k && d.anti === dot.anti);
-      const other = M.dots.some(d => d.k === dot.k && d.anti !== dot.anti);
-      if (same.length >= 10 && !other) {
+      const same = M.dots.filter(d => d.r === dot.r && d.k === dot.k && d.anti === dot.anti);
+      const other = M.dots.some(d => d.r === dot.r && d.k === dot.k && d.anti !== dot.anti);
+      if (same.length >= 10 && !other && M.rows[dot.r].kind !== 'src') {
         // pick up ten: the one grabbed plus its nine nearest neighbours
         group = same.filter(d => d !== dot).sort((p, q) => ((p.x - dot.x) ** 2 + (p.y - dot.y) ** 2) - ((q.x - dot.x) ** 2 + (q.y - dot.y) ** 2)).slice(0, 9);
         group.unshift(dot);
       } else group = [dot];
     }
-    const anti = supply ? supply === 'anti' : group[0].anti;
+    const anti = supply ? false : group[0].anti, { DS, COLS } = M.geo;
     // ghosts live on <body>: panels use backdrop-filter, which would trap position:fixed inside them
     const ghosts = (supply ? [null] : group).map((d, i) => {
       const g = el('div', 'dot' + (anti ? ' anti' : '') + ' dragging');
+      g.style.width = g.style.height = DS + 'px';
       const col = i % COLS, row = Math.floor(i / COLS);
       g.dataset.ox = group.length > 1 ? (col - 2) * (DS + 4) : 0; g.dataset.oy = group.length > 1 ? (row - 0.5) * (DS + 4) : 0;
       document.body.appendChild(g); return g;
     });
     group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.add('ten'); e.style.visibility = 'hidden'; } });
-    drag = { ghosts, group, supply, anti, fromK: supply ? null : group[0].k };
+    drag = { ghosts, group, supply, anti, fromR: supply ? null : group[0].r, fromK: supply ? null : group[0].k };
     moveGhosts(e);
     window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onUp);
   }
-  function moveGhosts(e) { drag.ghosts.forEach(g => { g.style.left = (e.clientX - DS / 2 + +g.dataset.ox) + 'px'; g.style.top = (e.clientY - DS / 2 + +g.dataset.oy) + 'px'; }); }
-  function legalTarget(k) {
-    if (drag.supply) return true;
-    if (k === drag.fromK) return true;
-    if (drag.group.length === 10) return k === drag.fromK + 1;   // ten travel left as a hand
-    return k === drag.fromK - 1;                                  // one travels right and unexplodes
+  function moveGhosts(e) { const DS = M.geo.DS; drag.ghosts.forEach(g => { g.style.left = (e.clientX - DS / 2 + +g.dataset.ox) + 'px'; g.style.top = (e.clientY - DS / 2 + +g.dataset.oy) + 'px'; }); }
+  function legalTarget(r, k, dg = drag) {
+    if (dg.supply) return M.rows[r].kind === 'free';
+    if (r === dg.fromR) {
+      if (k === dg.fromK) return true;
+      if (M.rows[r].kind === 'src') return false;
+      if (dg.group.length === 10 && k === dg.fromK + 1) return true;   // ten travel left as a hand
+      return k === dg.fromK - 1;                                        // one travels right and unexplodes (the rest of a hand stays put)
+    }
+    return M.rows[dg.fromR].kind === 'src' && M.rows[r].kind === 'result' && k === dg.fromK;   // straight down into the answer row
   }
   function onMove(e) {
     if (!drag) return; moveGhosts(e);
@@ -946,110 +1053,158 @@
     document.querySelectorAll('.mbox.over').forEach(b => b.classList.remove('over', 'bad'));
     $('bin').classList.toggle('over', !!(under && under.closest('#bin')));
     const f = under && under.closest('.dotfield');
-    if (f) { const k = +f.dataset.k; const box = f.closest('.mbox'); box.classList.add('over'); if (!legalTarget(k)) box.classList.add('bad'); }
+    if (f) { const box = f.closest('.mbox'); box.classList.add('over'); if (!legalTarget(+f.dataset.r, +f.dataset.k)) box.classList.add('bad'); }
   }
   function restore(group) { group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.remove('ten'); e.style.visibility = ''; } }); }
   function onUp(e) {
     window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp);
     if (!drag) return;
-    const { ghosts, group, supply, anti, fromK } = drag; drag = null;
+    const dg = drag, { ghosts, group, supply, fromR, fromK } = drag; drag = null;
     document.querySelectorAll('.mbox.over').forEach(b => b.classList.remove('over', 'bad')); $('bin').classList.remove('over');
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const f = under && under.closest('.dotfield');
     const overDot = under && under.closest('.dot') ? M.dots.find(d => d.id === +under.closest('.dot').dataset.id) : null;
     const inBin = under && under.closest('#bin');
-    const client = { x: e.clientX, y: e.clientY };
+    const client = { x: e.clientX, y: e.clientY }, DS = M.geo.DS;
     const done = () => ghosts.forEach(g => g.remove());
     if (supply) {
       done();
-      if (f) { spawnDot(+f.dataset.k, anti, localPoint(+f.dataset.k, client), true); if (M.phase === 'loaded') M.phase = 'working'; refresh(); }
+      if (f && M.rows[+f.dataset.r].kind === 'free') { const r = +f.dataset.r, k = +f.dataset.k; spawnDot(r, k, false, localPoint(r, k, client), true); refresh(); }
       return;
     }
     if (!group.every(d => M.dots.includes(d))) { done(); restore(group); return; }
-    if (M.phase === 'loaded') M.phase = 'working';
     const single = group.length === 1, dot = group[0];
-    if (inBin && single) { done(); removeDot(dot.id); refresh(); return; }
+    if (inBin && single && M.mode === 'make') { done(); removeDot(dot.id); refresh(); return; }
     if (!f) { done(); restore(group); return; }
-    const k = +f.dataset.k, local = localPoint(k, client);
-    if (k === fromK) {
+    const r = +f.dataset.r, k = +f.dataset.k, local = localPoint(r, k, client);
+    if (r === fromR && k === fromK) {
       done(); restore(group);
-      if (single && overDot && overDot.anti !== dot.anti && overDot.k === k) { cancelPair(dot, overDot); return; }
-      group.forEach((d, i) => { const g = ghosts[i]; d.x = clampX(local.x + +g.dataset.ox); d.y = clampY(local.y + +g.dataset.oy); const el2 = dotEl(d.id); el2.style.left = d.x + 'px'; el2.style.top = d.y + 'px'; });
+      if (single && overDot && overDot.anti !== dot.anti && overDot.r === r && overDot.k === k) { cancelPair(dot, overDot); return; }
+      group.forEach((d, i) => { const g = ghosts[i]; placeDot(d, r, k, { x: local.x + +g.dataset.ox, y: local.y + +g.dataset.oy }); });
       refresh(); return;
     }
-    if (!single && k === fromK + 1) {
+    if (legalTarget(r, k, dg) && r !== fromR) {
+      done(); restore(group);
+      if (single && overDot && overDot.anti !== dot.anti && overDot.r === r && overDot.k === k) { placeDot(dot, r, k, local); cancelPair(dot, overDot); return; }
+      group.forEach((d, i) => { const g = ghosts[i]; placeDot(d, r, k, { x: local.x + +g.dataset.ox, y: local.y + +g.dataset.oy }); });
+      refresh(); return;
+    }
+    if (legalTarget(r, k, dg) && !single && k === fromK - 1) { done(); restore(group.slice(1)); unexplode(dot, r, k, local); return; }
+    if (legalTarget(r, k, dg) && !single) {
       // converge: the ten ghosts slide to the drop point, then one dot appears there
       ghosts.forEach(g => { g.style.transition = 'left .3s ease-in, top .3s ease-in, transform .3s'; g.style.left = (client.x - DS / 2) + 'px'; g.style.top = (client.y - DS / 2) + 'px'; g.style.transform = 'scale(.6)'; });
-      setTimeout(() => { done(); explodeGroup(group, k, local); }, 320);
+      setTimeout(() => { done(); explodeGroup(group, r, k, local); }, 320);
       return;
     }
-    if (single && k === fromK - 1) { done(); unexplode(dot, k, local); return; }
+    if (legalTarget(r, k, dg) && single) { done(); unexplode(dot, r, k, local); return; }
     // not a legal move: shake the box and put everything back
-    done(); restore(group); flash(k, 'shake');
-    if (!single) coachSay(`Ten dots travel together only into the box on their <b>left</b>.`, true);
+    done(); restore(group); flash(r, k, 'shake');
+    if (r !== fromR) coachSay(M.rows[fromR].kind === 'src' ? `A dot moves <b>straight down</b> into the box right under it.` : `Dots in the answer row stay in the answer row.`, true);
+    else if (M.rows[r].kind === 'src') coachSay(`The top rows stay as they are — the moving happens in the answer row.`, true);
     else if (k > fromK) coachSay(`One dot on its own can't go left. It takes <b>ten</b> to make one dot there.`, true);
     else coachSay(`A dot only unexplodes into the box <b>right next to it</b>.`, true);
   }
 
-  /* ---- coach + stack: describe, don't instruct ---- */
+  /* ---- readout, notebook, coach: describe, don't instruct ---- */
   function coachSay(html, oops) { const s = $('coach'); s.classList.remove('win', 'oops'); if (oops) s.classList.add('oops'); s.innerHTML = html; }
-  function boxResolved(c) { return c.anti === 0 && c.dots < 10; }
+  const settled = c => c.anti === 0 && c.dots < 10;
   function refresh() {
-    for (let k = 0; k < M.n; k++) {
-      const c = counts(k), count = $(`count-${k}`), box = $(`mbox-${k}`);
-      count.className = 'count';
-      if (c.anti && c.dots) count.innerHTML = `<span>${c.dots}</span><small>dots</small><span>${c.anti}</span><small>anti</small>`;
-      else if (c.anti) { count.innerHTML = `<span>−${c.anti}</span>`; count.classList.add('neg'); }
-      else { count.innerHTML = `<span>${c.dots}</span>`; count.classList.add(c.dots >= 10 ? 'hot' : 'ok'); }
-      box.classList.toggle('full', (c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots));
-      $(`cancel-${k}`).hidden = !(c.dots && c.anti);
-    }
-    const step = $('stepBtn');
-    if (M.prob && M.phase === 'loaded') { step.hidden = false; step.textContent = (M.prob.op === '+' ? 'Add ' : 'Take away ') + M.prob.b; } else step.hidden = true;
+    M.rows.forEach((row, r) => {
+      for (let k = 0; k < M.n; k++) {
+        const c = counts(r, k), count = $(`count-${r}-${k}`), box = $(`mbox-${r}-${k}`);
+        count.className = 'count';
+        if (c.anti && c.dots) count.innerHTML = `<span>${c.dots}</span><small>dots</small><span>${c.anti}</span><small>anti</small>`;
+        else if (c.anti) { count.innerHTML = `<span>−${c.anti}</span>`; count.classList.add('neg'); }
+        else { count.innerHTML = `<span>${c.dots}</span>`; count.classList.add(c.dots >= 10 && M.mode !== 'regroup' ? 'hot' : 'ok'); }
+        box.classList.toggle('full', row.kind !== 'src' && M.mode !== 'regroup' && ((c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots)));
+        const ca = $(`cancel-${r}-${k}`); if (ca) ca.hidden = !(c.dots && c.anti);
+        const ab = box.querySelector('.allbtn'); if (ab) ab.hidden = !(c.dots || c.anti);
+      }
+    });
+    renderReadout();
+    if (M.mode === 'regroup') renderNotebook();
     renderCoach();
   }
-  function describe(cs) {
-    return cs.map((c, k) => { const parts = []; if (c.dots) parts.push(`${c.dots} dot${c.dots > 1 ? 's' : ''}`); if (c.anti) parts.push(`${c.anti} anti`); return parts.length ? `<b>${PLACE[k]}</b> ${parts.join(' + ')}` : null; }).filter(Boolean).reverse().join(' · ');
+  function describe(r) {
+    return Array.from({ length: M.n }, (_, k) => { const c = counts(r, k); const parts = []; if (c.dots) parts.push(`${c.dots} dot${c.dots > 1 ? 's' : ''}`); if (c.anti) parts.push(`${c.anti} anti`); return parts.length ? `<b>${PLACE[k]}</b> ${parts.join(' + ')}` : null; }).filter(Boolean).reverse().join(' · ');
+  }
+  function status() {
+    const p = M.prob;
+    if (M.mode === 'make') { const r = 0; const cs = Array.from({ length: M.n }, (_, k) => counts(r, k)); return { row: r, cs, win: rowValue(r) === p.t && cs.every(settled) }; }
+    if (M.mode === 'regroup') { const cs = Array.from({ length: M.n }, (_, k) => counts(0, k)); const b = digitsOf(p.b); return { row: 0, cs, win: cs.every((c, k) => c.dots >= (b[k] || 0)) }; }
+    const r = resultRow(); const cs = Array.from({ length: M.n }, (_, k) => counts(r, k));
+    const srcLeft = M.dots.filter(d => M.rows[d.r].kind === 'src').length;
+    return { row: r, cs, srcLeft, win: srcLeft === 0 && cs.every(settled) };
+  }
+  function renderReadout() {
+    const { cs, win } = status(), ro = $('readout');
+    ro.classList.toggle('win', win);
+    const cells = cs.map(c => { const txt = c.anti && c.dots ? `${c.dots}−${c.anti}` : c.anti ? `−${c.anti}` : String(c.dots); return `<span class="cell ${(c.dots >= 10 && M.mode !== 'regroup') || c.anti ? 'hot' : c.dots ? '' : 'dim'}">${txt}</span>`; }).reverse().join('');
+    ro.innerHTML = `<div>${win && M.mode !== 'regroup' ? '<div class="check">✓</div>' : ''}</div><div class="cells">${cells}</div>`;
+  }
+  function buildNotebook() {
+    const nb = $('notebook'), p = M.prob, b = digitsOf(p.b);
+    const cols = Array.from({ length: M.n }, (_, i) => `<div class="nb-col" data-k="${M.n - 1 - i}"></div>`).join('');
+    const sub = Array.from({ length: M.n }, (_, i) => { const d = b[M.n - 1 - i]; return `<span>${d == null ? '' : d}</span>`; }).join('');
+    const ans = Array.from({ length: M.n }, (_, i) => `<input type="text" inputmode="numeric" maxlength="1" data-k="${M.n - 1 - i}" aria-label="${PLACE[M.n - 1 - i]} digit of the answer" disabled>`).join('');
+    nb.innerHTML = `<div class="nb-cols" id="nbCols">${cols}</div><div class="nb-row sub"><span class="op">−</span>${sub}</div><div class="nb-rule"></div><div class="nb-row ans" id="nbAns">${ans}</div><div class="nb-lock" id="nbLock">answer line locked</div>`;
+    nb.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/\D/g, '').slice(-1);
+      if (inp.value) { const nx = inp.nextElementSibling; if (nx && nx.tagName === 'INPUT') nx.focus(); }
+      checkAnswer();
+    }));
+  }
+  function renderNotebook() {
+    const { win } = status();
+    M.hist.forEach((h, k) => {
+      const col = $('nbCols').querySelector(`.nb-col[data-k="${k}"]`); if (!col) return;
+      col.innerHTML = h.map((v, i) => `<span class="${i ? 'ink' : ''} ${i < h.length - 1 ? 'x' : ''}">${v}</span>`).join('');
+    });
+    const nb = $('notebook');
+    nb.querySelectorAll('input').forEach(i => i.disabled = !win);
+    $('nbLock').hidden = win;
+    const chk = nb.querySelector('.nb-check');
+    if (win && !chk) nb.insertAdjacentHTML('beforeend', '<div class="nb-check">✓</div>');
+    if (!win && chk) chk.remove();
+  }
+  function checkAnswer() {
+    const inputs = [...$('notebook').querySelectorAll('input')];
+    if (inputs.some(i => i.value === '')) return;
+    const typed = +inputs.map(i => i.value).join(''), answer = M.prob.a - M.prob.b;
+    if (typed === answer) { M.solved = true; $('nbAns').classList.add('ok'); markDone(); renderCoach(); }
+    else { $('nbAns').classList.remove('ok'); coachSay(`Hmm — <b>${typed}</b> isn't it. Check each column against its dots.`, true); }
+  }
+  function markDone() {
+    const key = probKey(); if (!key || M.done.has(key)) return;
+    M.done.add(key);
+    const b = document.querySelector(`.prob[data-i="${M.prob.idx}"]`); if (b) { b.classList.add('done'); b.querySelector('.tag').textContent = 'done'; }
   }
   function renderCoach() {
     const say = $('coach'); say.classList.remove('win', 'oops');
-    const stack = $('stack');
-    const cs = Array.from({ length: M.n }, (_, k) => counts(k));
-    if (!M.prob) {
-      stack.hidden = true;
-      say.innerHTML = M.dots.length ? `${describe(cs)} — the machine is holding <b>${machineValue().toLocaleString()}</b>.` : 'Pick a problem on the left, or drag dots in from the tray and see what the machine does.';
-      return;
+    const p = M.prob, st = status();
+    if (M.mode === 'make') {
+      const v = rowValue(0);
+      if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${p.t.toLocaleString()}</b> — every box holds fewer than ten and the boxes read the number straight across.`; markDone(); return; }
+      if (!M.dots.length) { say.innerHTML = `Drag dots from the tray into the boxes. Each box is worth ten times the one on its right.`; return; }
+      if (v === p.t) { say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>, but a box has ten or more. Numbers are written with fewer than ten in every box.`; return; }
+      say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>.`; return;
     }
-    const p = M.prob, answer = p.op === '+' ? p.a + p.b : p.a - p.b;
-    stack.hidden = false;
-    const w = M.n;
-    const pad = n => { const d = digitsOf(n); while (d.length < w) d.push(''); return d.reverse(); };
-    const marks = Array.from({ length: w }, (_, i) => M.marks[w - 1 - i] || '');
-    const resolvedAll = cs.every(boxResolved);
-    const ans = Array.from({ length: w }, (_, i) => resolvedAll && M.phase === 'working' ? String(cs[w - 1 - i].dots) : '');
-    let lead = true;
-    stack.innerHTML = `<div class="marks">${marks.map(m => `<span class="${/^[−+]/.test(m) ? 'b' : ''}">${m}</span>`).join('')}</div>
-      <div class="row">${pad(p.a).map(d => `<span>${d}</span>`).join('')}</div>
-      <div class="row op"><span style="position:absolute;margin-left:-26px">${p.op === '+' ? '+' : '−'}</span>${pad(p.b).map(d => `<span>${d}</span>`).join('')}</div>
-      <div class="rule"></div>
-      <div class="row ans">${ans.map((d, i) => { if (d === '') return '<span class="pending">·</span>'; if (d === '0' && lead && i < w - 1) return '<span></span>'; lead = false; return `<span>${d}</span>`; }).join('')}</div>`;
-    if (M.phase === 'loaded') { say.innerHTML = `The machine is holding <b>${p.a}</b>. Tap <b>${p.op === '+' ? 'Add ' + p.b : 'Take away ' + p.b}</b> when you're ready.`; return; }
-    if (resolvedAll && machineValue() === answer) {
-      say.classList.add('win');
-      say.innerHTML = `<b>${answer.toLocaleString()}</b> — every box is settled and the answer reads straight off the boxes.`;
-      if (p.idx != null && !M.done.has(p.idx)) { M.done.add(p.idx); const b = document.querySelector(`.prob[data-i="${p.idx}"]`); if (b) { b.classList.add('done'); b.querySelector('.tag').textContent = 'solved'; } }
-      return;
+    if (M.mode === 'regroup') {
+      const b = digitsOf(p.b);
+      if (M.solved) { say.classList.add('win'); say.innerHTML = `<b>${p.a} − ${p.b} = ${p.a - p.b}</b>. The dots and the notebook agree.`; return; }
+      if (st.win) { say.classList.add('win'); say.innerHTML = `Every column has enough to take away from. <b>${p.a}</b> is now written as <b>${st.cs.map(c => c.dots).reverse().join(' | ')}</b>. Fill in the answer line on the notebook.`; return; }
+      say.innerHTML = `${describe(0)}. Compare each box with the digit under it on the notebook.`; return;
     }
-    if (resolvedAll) { say.classList.add('oops'); say.innerHTML = `Every box is settled and they read <b>${machineValue().toLocaleString()}</b> — but that isn't ${p.a} ${p.op === '+' ? '+' : '−'} ${p.b}. A dot went missing or snuck in somewhere. Tap the problem to start again.`; return; }
-    say.innerHTML = describe(cs) + '.';
+    if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${rowValue(st.row).toLocaleString()}</b> — every box in the answer row is settled and the number reads straight across.`; markDone(); return; }
+    const left = st.srcLeft ? `<b>${st.srcLeft}</b> still up top` : `the top rows are empty`;
+    say.innerHTML = (M.dots.some(d => d.r === st.row) ? `Answer row: ${describe(st.row)}` : `The answer row is empty`) + ` — ${left}.`;
   }
   function setupDots() {
-    buildPList();
-    $('stepBtn').addEventListener('click', stepAction);
-    $('resetMachine').addEventListener('click', clearMachine);
+    document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    $('resetMachine').addEventListener('click', restart);
     $('machine').addEventListener('pointerdown', onDown);
     $('tray').addEventListener('pointerdown', onDown);
-    loadProblem(1);
+    setMode('make');
   }
 
   /* ================= tabs + boot ================= */
