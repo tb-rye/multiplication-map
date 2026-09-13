@@ -267,9 +267,8 @@
   .mbox .arrow { position: absolute; top: 46%; left: -21px; width: 30px; height: 30px; border-radius: 50%; background: #241a45; border: 1px solid var(--line); display: grid; place-items: center; z-index: 4; pointer-events: none; }
   .mbox .arrow b { font-family: "Fredoka", sans-serif; font-size: 13px; color: var(--muted); }
   .dotfield { position: relative; height: 230px; border-radius: 12px; touch-action: none; }
-  .dot { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(46,242,207,.6); cursor: grab; touch-action: none; transition: left .35s cubic-bezier(.2,.9,.3,1.2), top .35s cubic-bezier(.2,.9,.3,1.2), transform .3s, opacity .3s; will-change: left, top; z-index: 2; }
-  .dot.new { background: #ffd166; box-shadow: 0 0 8px rgba(255,209,102,.7); }
-  .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
+  .dot { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(46,242,207,.6); cursor: grab; touch-action: none; transition: transform .3s, opacity .3s; z-index: 2; }
+    .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
   .dot.ten { box-shadow: 0 0 0 2px #fff, 0 0 12px rgba(255,255,255,.7); }
   .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; }
   .dot.spawn { animation: pop .3s ease-out; }
@@ -437,7 +436,7 @@
   <div class="layout wide-side">
     <aside class="panel">
       <h2>Problems</h2>
-      <p class="hint">Pick one, then move the dots around with your finger and watch what the machine does.</p>
+      <p class="hint">Pick one, then move the dots around with your finger. Nothing happens until you make it happen.</p>
       <div class="plist" id="plist"></div>
       <h3 style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:14px 0 4px;font-family:Nunito,sans-serif;font-weight:800">Make your own</h3>
       <div class="custom">
@@ -447,8 +446,8 @@
         <button type="button" id="cgo">Go</button>
       </div>
       <div class="rules">
-        <div><span class="ic">10</span><span>Ten dots in one box <b>explode</b> into a single dot in the box to the left.</span></div>
-        <div><span class="ic y">1</span><span>Drag one dot into the box to its right and it <b>unexplodes</b> into ten.</span></div>
+        <div><span class="ic">10</span><span>When a box has ten or more, grabbing one dot picks up <b>ten</b>. Carry them into the box on the left and they become one dot.</span></div>
+        <div><span class="ic y">1</span><span>Drag one dot into the box on its <b>right</b> and it turns into ten.</span></div>
         <div><span class="ic p">×</span><span>Drop a dot onto an anti-dot and they <b>cancel</b> — both disappear.</span></div>
       </div>
     </aside>
@@ -777,14 +776,15 @@
     { a: 403, b: 178, op: '-' }, { a: 500, b: 236, op: '-' }, { a: 612, b: 359, op: '-' }, { a: 800, b: 407, op: '-' }, { a: 1000, b: 463, op: '-' },
   ];
   const PLACE = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands', 'hundred-thousands'];
-  const FW = 190, FH = 230, DS = 22;           // field width/height, dot size (px)
-  let M = { n: 4, dots: [], prob: null, phase: 'free', marks: {}, done: new Set(), busy: 0, seq: 0 };
+  const FW = 190, FH = 230, DS = 22, GX = 34, GY = 34, COLS = 5;   // field size, dot size, grid pitch
+  let M = { n: 4, dots: [], prob: null, phase: 'free', marks: {}, done: new Set(), seq: 0 };
   let drag = null;
 
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo);
   const field = k => $(`field-${k}`);
   const counts = k => M.dots.reduce((c, d) => { if (d.k === k) { d.anti ? c.anti++ : c.dots++; } return c; }, { dots: 0, anti: 0 });
   const digitsOf = n => String(n).split('').reverse().map(Number);
+  const clampX = x => Math.max(2, Math.min(FW - DS - 2, x));
+  const clampY = y => Math.max(2, Math.min(FH - DS - 2, y));
   function machineValue() { return M.dots.reduce((s, d) => s + (d.anti ? -1 : 1) * 10 ** d.k, 0); }
 
   /* ---- problems ---- */
@@ -809,9 +809,9 @@
     M.prob = { ...p, idx: i }; M.marks = {}; M.phase = 'loaded';
     M.n = Math.max(String(p.a).length, String(p.b).length) + (p.op === '+' ? 1 : 0);
     document.querySelectorAll('.prob').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
-    $('mTitle').innerHTML = `${p.a} ${p.op === '+' ? '+' : '−'} ${p.b} <span>${p.op === '+' ? 'add the dots, then watch them explode' : 'add anti-dots, cancel pairs, unexplode when you run short'}</span>`;
+    $('mTitle').innerHTML = `${p.a} ${p.op === '+' ? '+' : '−'} ${p.b}`;
     buildMachine();
-    digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(k, false, false); });
+    digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(k, false, gridSpot(k)); });
     refresh();
   }
   function clearMachine() {
@@ -823,16 +823,13 @@
   function stepAction() {
     const p = M.prob; if (!p || M.phase !== 'loaded') return;
     M.phase = 'working';
-    digitsOf(p.b).forEach((d, k) => {
-      const f = field(k); const r = f.getBoundingClientRect();
-      for (let j = 0; j < d; j++) spawnDot(k, p.op === '-', p.op === '+', { x: r.left + r.width / 2, y: r.top - 30 }, j * 60);
-    });
+    digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(k, p.op === '-', gridSpot(k), true); });
     refresh();
   }
 
   /* ---- machine + dots ---- */
   function buildMachine() {
-    M.dots = []; M.busy = 0;
+    M.dots = [];
     const host = $('machine'); host.innerHTML = '';
     host.style.gridTemplateColumns = `repeat(${M.n}, 206px)`;
     for (let k = M.n - 1; k >= 0; k--) {
@@ -845,17 +842,19 @@
       host.appendChild(box);
     }
   }
-  function randomSpot() { return { x: rnd(4, FW - DS - 4), y: rnd(4, FH - DS - 4) }; }
-  function localPoint(k, client) { const r = field(k).getBoundingClientRect(); return { x: client.x - r.left - DS / 2, y: client.y - r.top - DS / 2 }; }
-  function spawnDot(k, anti, fresh, fromClient, delay = 0) {
-    const d = { id: ++M.seq, k, anti, fresh, ...randomSpot() };
+  // next free slot in a tidy 5-wide grid, so tens are easy to see at a glance
+  function gridSpot(k) {
+    const taken = new Set(M.dots.filter(d => d.k === k).map(d => Math.round(d.y / GY) * COLS + Math.round(d.x / GX)));
+    for (let i = 0; i < 60; i++) if (!taken.has(i)) return { x: 6 + (i % COLS) * GX, y: 6 + Math.floor(i / COLS) * GY };
+    return { x: 6, y: 6 };
+  }
+  function localPoint(k, client) { const r = field(k).getBoundingClientRect(); return { x: clampX(client.x - r.left - DS / 2), y: clampY(client.y - r.top - DS / 2) }; }
+  function spawnDot(k, anti, pos, pop) {
+    const d = { id: ++M.seq, k, anti, x: clampX(pos.x), y: clampY(pos.y) };
     M.dots.push(d);
-    const e = el('div', 'dot' + (anti ? ' anti' : fresh ? ' new' : '') + ' spawn'); e.dataset.id = d.id;
+    const e = el('div', 'dot' + (anti ? ' anti' : '') + (pop ? ' spawn' : '')); e.dataset.id = d.id;
+    e.style.left = d.x + 'px'; e.style.top = d.y + 'px';
     field(k).appendChild(e);
-    if (fromClient) { const p = localPoint(k, fromClient); e.style.transition = 'none'; e.style.left = p.x + 'px'; e.style.top = p.y + 'px'; void e.offsetWidth; e.style.transition = ''; }
-    else { e.style.transition = 'none'; e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; void e.offsetWidth; e.style.transition = ''; }
-    if (delay) { e.style.transitionDelay = delay + 'ms'; e.style.animationDelay = delay + 'ms'; setTimeout(() => { e.style.transitionDelay = ''; }, delay + 400); }
-    requestAnimationFrame(() => { e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; });
     return d;
   }
   const dotEl = id => document.querySelector(`.dot[data-id="${id}"]`);
@@ -863,44 +862,38 @@
     const i = M.dots.findIndex(d => d.id === id); if (i < 0) return;
     M.dots.splice(i, 1);
     const e = dotEl(id); if (!e) return;
-    if (animateTo) { e.style.left = animateTo.x + 'px'; e.style.top = animateTo.y + 'px'; }
+    if (animateTo) { e.style.transition = 'left .25s, top .25s, transform .3s, opacity .3s'; e.style.left = animateTo.x + 'px'; e.style.top = animateTo.y + 'px'; }
     e.classList.add('gone'); setTimeout(() => e.remove(), 350);
   }
   function sparks(k, x, y, n = 10) {
-    const f = field(k);
-    for (let i = 0; i < n; i++) { const s = el('div', 'spark'); const a = (i / n) * Math.PI * 2; s.style.left = (x + DS / 2 - 4) + 'px'; s.style.top = (y + DS / 2 - 4) + 'px'; s.style.setProperty('--dx', Math.cos(a) * rnd(40, 80) + 'px'); s.style.setProperty('--dy', Math.sin(a) * rnd(40, 80) + 'px'); f.appendChild(s); setTimeout(() => s.remove(), 520); }
+    const f = field(k); if (!f) return;
+    for (let i = 0; i < n; i++) { const s = el('div', 'spark'); const a = (i / n) * Math.PI * 2; s.style.left = (x + DS / 2 - 4) + 'px'; s.style.top = (y + DS / 2 - 4) + 'px'; s.style.setProperty('--dx', Math.cos(a) * (40 + Math.random() * 40) + 'px'); s.style.setProperty('--dy', Math.sin(a) * (40 + Math.random() * 40) + 'px'); f.appendChild(s); setTimeout(() => s.remove(), 520); }
   }
   function flash(k, cls) { const b = $(`mbox-${k}`); if (!b) return; b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); }
 
-  function explode(k, anti) {
-    const group = M.dots.filter(d => d.k === k && d.anti === anti).slice(0, 10);
-    if (group.length < 10 || k + 1 >= M.n) return;
-    M.busy++;
-    const cx = FW / 2 - DS / 2, cy = FH / 2 - DS / 2;
-    group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.add('ten'); e.style.left = cx + 'px'; e.style.top = cy + 'px'; } });
-    setTimeout(() => {
-      group.forEach(d => removeDot(d.id));
-      sparks(k, cx, cy, 14); flash(k, 'boom');
-      const r = field(k).getBoundingClientRect();
-      spawnDot(k + 1, anti, true, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
-      flash(k + 1, 'pour');
-      if (!anti) M.marks[k + 1] = (M.marks[k + 1] || '') + '1';
-      M.busy--; refresh();
-    }, 420);
+  // ten dots carried into the next box become one dot there
+  function explodeGroup(group, toK, dropLocal) {
+    group.forEach(d => removeDot(d.id));
+    sparks(toK, dropLocal.x, dropLocal.y, 14); flash(toK, 'pour');
+    spawnDot(toK, group[0].anti, dropLocal, true);
+    if (!group[0].anti) M.marks[toK] = (M.marks[toK] || '') + '1';
+    refresh();
   }
-  function unexplode(dot, toK, dropClient) {
+  // one dot carried into the box on its right becomes ten there, clustered where it landed
+  function unexplode(dot, toK, dropLocal) {
     const anti = dot.anti;
     removeDot(dot.id);
-    for (let j = 0; j < 10; j++) spawnDot(toK, anti, !anti, dropClient, j * 30);
-    flash(toK, 'pour'); flash(toK + 1, 'boom');
+    for (let j = 0; j < 10; j++) {
+      const col = j % COLS, row = Math.floor(j / COLS);
+      spawnDot(toK, anti, { x: dropLocal.x + (col - 2) * (DS + 4), y: dropLocal.y + (row - 0.5) * (DS + 4) }, true);
+    }
+    sparks(toK, dropLocal.x, dropLocal.y, 10); flash(toK, 'pour');
     if (!anti) { M.marks[toK + 1] = (M.marks[toK + 1] || '') + '−1'; M.marks[toK] = (M.marks[toK] || '') + '+10'; }
     refresh();
   }
   function cancelPair(a, b) {
     if (!M.dots.includes(a) || !M.dots.includes(b)) return;
     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    const ea = dotEl(a.id), eb = dotEl(b.id);
-    if (ea) ea.classList.add('hit'); if (eb) eb.classList.add('hit');
     sparks(a.k, mx, my, 8);
     removeDot(a.id, { x: mx, y: my }); removeDot(b.id, { x: mx, y: my });
     refresh();
@@ -910,73 +903,95 @@
     const n = Math.min(ds.length, as.length);
     for (let i = 0; i < n; i++) setTimeout(() => cancelPair(ds[i], as[i]), i * 70);
   }
-  function checkExplosions() {
-    if (M.busy) return;
-    for (let k = 0; k < M.n - 1; k++) {
-      const c = counts(k);
-      if (c.dots >= 10 && !c.anti) { M.busy++; setTimeout(() => { M.busy--; explode(k, false); }, 380); return; }
-      if (c.anti >= 10 && !c.dots) { M.busy++; setTimeout(() => { M.busy--; explode(k, true); }, 380); return; }
-    }
-  }
 
-  /* ---- dragging ---- */
+  /* ---- dragging (single dots, or a hand of ten) ---- */
   function onDown(e) {
     const t = e.target.closest('.dot'); if (!t || e.button > 0) return;
     e.preventDefault();
     const supply = t.id === 'supplyDot' ? 'dot' : t.id === 'supplyAnti' ? 'anti' : null;
-    let dot = null, orig = null;
-    if (!supply) { dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('ten') || t.classList.contains('gone')) return; orig = t; orig.style.visibility = 'hidden'; }
-    // the ghost lives on <body> so position:fixed is measured against the viewport (panels use backdrop-filter, which would otherwise trap it)
-    const ghost = el('div', 'dot' + ((supply === 'anti' || (dot && dot.anti)) ? ' anti' : (dot && !dot.anti && dot.fresh) ? ' new' : '') + ' dragging');
-    document.body.appendChild(ghost);
-    drag = { ghost, orig, dot, supply, ox: DS / 2, oy: DS / 2, moved: false };
-    moveGhost(e);
+    let group = [];
+    if (!supply) {
+      const dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('gone')) return;
+      const same = M.dots.filter(d => d.k === dot.k && d.anti === dot.anti);
+      const other = M.dots.some(d => d.k === dot.k && d.anti !== dot.anti);
+      if (same.length >= 10 && !other) {
+        // pick up ten: the one grabbed plus its nine nearest neighbours
+        group = same.filter(d => d !== dot).sort((p, q) => ((p.x - dot.x) ** 2 + (p.y - dot.y) ** 2) - ((q.x - dot.x) ** 2 + (q.y - dot.y) ** 2)).slice(0, 9);
+        group.unshift(dot);
+      } else group = [dot];
+    }
+    const anti = supply ? supply === 'anti' : group[0].anti;
+    // ghosts live on <body>: panels use backdrop-filter, which would trap position:fixed inside them
+    const ghosts = (supply ? [null] : group).map((d, i) => {
+      const g = el('div', 'dot' + (anti ? ' anti' : '') + ' dragging');
+      const col = i % COLS, row = Math.floor(i / COLS);
+      g.dataset.ox = group.length > 1 ? (col - 2) * (DS + 4) : 0; g.dataset.oy = group.length > 1 ? (row - 0.5) * (DS + 4) : 0;
+      document.body.appendChild(g); return g;
+    });
+    group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.add('ten'); e.style.visibility = 'hidden'; } });
+    drag = { ghosts, group, supply, anti, fromK: supply ? null : group[0].k };
+    moveGhosts(e);
     window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onUp);
   }
-  function moveGhost(e) { drag.ghost.style.left = (e.clientX - drag.ox) + 'px'; drag.ghost.style.top = (e.clientY - drag.oy) + 'px'; }
+  function moveGhosts(e) { drag.ghosts.forEach(g => { g.style.left = (e.clientX - DS / 2 + +g.dataset.ox) + 'px'; g.style.top = (e.clientY - DS / 2 + +g.dataset.oy) + 'px'; }); }
+  function legalTarget(k) {
+    if (drag.supply) return true;
+    if (k === drag.fromK) return true;
+    if (drag.group.length === 10) return k === drag.fromK + 1;   // ten travel left as a hand
+    return k === drag.fromK - 1;                                  // one travels right and unexplodes
+  }
   function onMove(e) {
-    if (!drag) return; drag.moved = true; moveGhost(e);
+    if (!drag) return; moveGhosts(e);
     const under = document.elementFromPoint(e.clientX, e.clientY);
     document.querySelectorAll('.mbox.over').forEach(b => b.classList.remove('over', 'bad'));
     $('bin').classList.toggle('over', !!(under && under.closest('#bin')));
     const f = under && under.closest('.dotfield');
-    if (f) { const k = +f.dataset.k; const bad = drag.dot && k > drag.dot.k; const box = f.closest('.mbox'); box.classList.add('over'); if (bad) box.classList.add('bad'); }
+    if (f) { const k = +f.dataset.k; const box = f.closest('.mbox'); box.classList.add('over'); if (!legalTarget(k)) box.classList.add('bad'); }
   }
+  function restore(group) { group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.remove('ten'); e.style.visibility = ''; } }); }
   function onUp(e) {
     window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp);
     if (!drag) return;
-    const { ghost, orig, dot, supply } = drag; drag = null;
-    ghost.remove();
-    if (orig) orig.style.visibility = '';
+    const { ghosts, group, supply, anti, fromK } = drag; drag = null;
     document.querySelectorAll('.mbox.over').forEach(b => b.classList.remove('over', 'bad')); $('bin').classList.remove('over');
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const f = under && under.closest('.dotfield');
-    const overDot = under && under.closest('.dot') && !under.closest('.dot').classList.contains('dragging') ? M.dots.find(d => d.id === +under.closest('.dot').dataset.id) : null;
+    const overDot = under && under.closest('.dot') ? M.dots.find(d => d.id === +under.closest('.dot').dataset.id) : null;
     const inBin = under && under.closest('#bin');
     const client = { x: e.clientX, y: e.clientY };
+    const done = () => ghosts.forEach(g => g.remove());
     if (supply) {
-      if (f) { spawnDot(+f.dataset.k, supply === 'anti', supply !== 'anti', client); if (M.phase === 'loaded') M.phase = 'working'; refresh(); }
+      done();
+      if (f) { spawnDot(+f.dataset.k, anti, localPoint(+f.dataset.k, client), true); if (M.phase === 'loaded') M.phase = 'working'; refresh(); }
       return;
     }
-    // a real dot was dragged
-    if (!M.dots.includes(dot)) return;
-    const settle = (k, pt) => { const p = pt || { x: dot.x, y: dot.y }; dot.x = Math.max(2, Math.min(FW - DS - 2, p.x)); dot.y = Math.max(2, Math.min(FH - DS - 2, p.y)); orig.style.left = dot.x + 'px'; orig.style.top = dot.y + 'px'; };
-    if (inBin) { removeDot(dot.id); if (M.phase === 'loaded') M.phase = 'working'; refresh(); return; }
-    if (!f) { settle(dot.k); return; }
-    const k = +f.dataset.k;
+    if (!group.every(d => M.dots.includes(d))) { done(); restore(group); return; }
     if (M.phase === 'loaded') M.phase = 'working';
-    if (k === dot.k) {
-      if (overDot && overDot.anti !== dot.anti && overDot.k === k) { settle(k, { x: overDot.x, y: overDot.y }); cancelPair(dot, overDot); return; }
-      settle(k, localPoint(k, client)); refresh(); return;
+    const single = group.length === 1, dot = group[0];
+    if (inBin && single) { done(); removeDot(dot.id); refresh(); return; }
+    if (!f) { done(); restore(group); return; }
+    const k = +f.dataset.k, local = localPoint(k, client);
+    if (k === fromK) {
+      done(); restore(group);
+      if (single && overDot && overDot.anti !== dot.anti && overDot.k === k) { cancelPair(dot, overDot); return; }
+      group.forEach((d, i) => { const g = ghosts[i]; d.x = clampX(local.x + +g.dataset.ox); d.y = clampY(local.y + +g.dataset.oy); const el2 = dotEl(d.id); el2.style.left = d.x + 'px'; el2.style.top = d.y + 'px'; });
+      refresh(); return;
     }
-    if (k === dot.k - 1) { settle(dot.k); unexplode(dot, k, client); return; }
-    // anything else is not a legal move — bounce back and explain
-    settle(dot.k); flash(k, 'shake');
-    if (k > dot.k) coachSay(`One dot can't move left on its own. <b>Ten</b> dots in the ${PLACE[dot.k]} box become one ${PLACE[k]} dot — gather ten and watch.`, true);
-    else coachSay(`A dot only unexplodes into the box <b>right next to it</b>. Move it one box at a time.`, true);
+    if (!single && k === fromK + 1) {
+      // converge: the ten ghosts slide to the drop point, then one dot appears there
+      ghosts.forEach(g => { g.style.transition = 'left .3s ease-in, top .3s ease-in, transform .3s'; g.style.left = (client.x - DS / 2) + 'px'; g.style.top = (client.y - DS / 2) + 'px'; g.style.transform = 'scale(.6)'; });
+      setTimeout(() => { done(); explodeGroup(group, k, local); }, 320);
+      return;
+    }
+    if (single && k === fromK - 1) { done(); unexplode(dot, k, local); return; }
+    // not a legal move: shake the box and put everything back
+    done(); restore(group); flash(k, 'shake');
+    if (!single) coachSay(`Ten dots travel together only into the box on their <b>left</b>.`, true);
+    else if (k > fromK) coachSay(`One dot on its own can't go left. It takes <b>ten</b> to make one dot there.`, true);
+    else coachSay(`A dot only unexplodes into the box <b>right next to it</b>.`, true);
   }
 
-  /* ---- coach + stack ---- */
+  /* ---- coach + stack: describe, don't instruct ---- */
   function coachSay(html, oops) { const s = $('coach'); s.classList.remove('win', 'oops'); if (oops) s.classList.add('oops'); s.innerHTML = html; }
   function boxResolved(c) { return c.anti === 0 && c.dots < 10; }
   function refresh() {
@@ -991,8 +1006,10 @@
     }
     const step = $('stepBtn');
     if (M.prob && M.phase === 'loaded') { step.hidden = false; step.textContent = (M.prob.op === '+' ? 'Add ' : 'Take away ') + M.prob.b; } else step.hidden = true;
-    checkExplosions();
     renderCoach();
+  }
+  function describe(cs) {
+    return cs.map((c, k) => { const parts = []; if (c.dots) parts.push(`${c.dots} dot${c.dots > 1 ? 's' : ''}`); if (c.anti) parts.push(`${c.anti} anti`); return parts.length ? `<b>${PLACE[k]}</b> ${parts.join(' + ')}` : null; }).filter(Boolean).reverse().join(' · ');
   }
   function renderCoach() {
     const say = $('coach'); say.classList.remove('win', 'oops');
@@ -1000,8 +1017,7 @@
     const cs = Array.from({ length: M.n }, (_, k) => counts(k));
     if (!M.prob) {
       stack.hidden = true;
-      const v = machineValue();
-      say.innerHTML = M.dots.length ? `The machine is holding <b>${v.toLocaleString()}</b>. Keep dragging — try getting ten in one box.` : 'Pick a problem on the left, or drag dots in from the tray.';
+      say.innerHTML = M.dots.length ? `${describe(cs)} — the machine is holding <b>${machineValue().toLocaleString()}</b>.` : 'Pick a problem on the left, or drag dots in from the tray and see what the machine does.';
       return;
     }
     const p = M.prob, answer = p.op === '+' ? p.a + p.b : p.a - p.b;
@@ -1009,7 +1025,7 @@
     const w = M.n;
     const pad = n => { const d = digitsOf(n); while (d.length < w) d.push(''); return d.reverse(); };
     const marks = Array.from({ length: w }, (_, i) => M.marks[w - 1 - i] || '');
-    const resolvedAll = cs.every(boxResolved) && !M.busy;
+    const resolvedAll = cs.every(boxResolved);
     const ans = Array.from({ length: w }, (_, i) => resolvedAll && M.phase === 'working' ? String(cs[w - 1 - i].dots) : '');
     let lead = true;
     stack.innerHTML = `<div class="marks">${marks.map(m => `<span class="${/^[−+]/.test(m) ? 'b' : ''}">${m}</span>`).join('')}</div>
@@ -1017,26 +1033,15 @@
       <div class="row op"><span style="position:absolute;margin-left:-26px">${p.op === '+' ? '+' : '−'}</span>${pad(p.b).map(d => `<span>${d}</span>`).join('')}</div>
       <div class="rule"></div>
       <div class="row ans">${ans.map((d, i) => { if (d === '') return '<span class="pending">·</span>'; if (d === '0' && lead && i < w - 1) return '<span></span>'; lead = false; return `<span>${d}</span>`; }).join('')}</div>`;
-    if (M.phase === 'loaded') { say.innerHTML = `The machine is holding <b>${p.a}</b>. Tap <b>${p.op === '+' ? 'Add ' + p.b : 'Take away ' + p.b}</b> to ${p.op === '+' ? 'drop the new dots in' : 'put in the anti-dots'}.`; return; }
+    if (M.phase === 'loaded') { say.innerHTML = `The machine is holding <b>${p.a}</b>. Tap <b>${p.op === '+' ? 'Add ' + p.b : 'Take away ' + p.b}</b> when you're ready.`; return; }
     if (resolvedAll && machineValue() === answer) {
       say.classList.add('win');
-      say.innerHTML = `<b>${answer.toLocaleString()}</b> — read straight off the boxes. ${p.op === '+' ? 'Every explosion was a carry.' : 'Every unexplode was a borrow.'}`;
+      say.innerHTML = `<b>${answer.toLocaleString()}</b> — every box is settled and the answer reads straight off the boxes.`;
       if (p.idx != null && !M.done.has(p.idx)) { M.done.add(p.idx); const b = document.querySelector(`.prob[data-i="${p.idx}"]`); if (b) { b.classList.add('done'); b.querySelector('.tag').textContent = 'solved'; } }
       return;
     }
-    if (resolvedAll) { say.classList.add('oops'); say.innerHTML = `The boxes read <b>${machineValue().toLocaleString()}</b>, but ${p.a} ${p.op === '+' ? '+' : '−'} ${p.b} isn't that. A dot got added or thrown away somewhere — tap the problem again to reset it.`; return; }
-    const hot = cs.findIndex(c => (c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots));
-    if (hot >= 0) { say.innerHTML = `<b>${cs[hot].dots >= 10 ? cs[hot].dots : cs[hot].anti}</b> in the ${PLACE[hot]} box — that's ten or more. Watch…`; return; }
-    const pairs = cs.findIndex(c => c.dots && c.anti);
-    if (pairs >= 0) { say.innerHTML = `The <b>${PLACE[pairs]}</b> box has dots and anti-dots together. Drag a dot onto an anti-dot and they cancel — or tap <b>Cancel all pairs</b>.`; return; }
-    const short = cs.findIndex(c => c.anti && !c.dots);
-    if (short >= 0) {
-      const left = cs[short + 1];
-      if (left && left.dots) say.innerHTML = `The <b>${PLACE[short]}</b> box has ${cs[short].anti} anti-dot${cs[short].anti > 1 ? 's' : ''} and nothing to cancel them. Drag <b>one</b> dot from the ${PLACE[short + 1]} box into it and see what happens.`;
-      else say.innerHTML = `The <b>${PLACE[short]}</b> box needs dots, and the ${PLACE[short + 1]} box is empty too. Start further left: drag a ${PLACE[short + 2] || 'higher'} dot into the ${PLACE[short + 1]} box first.`;
-      return;
-    }
-    say.innerHTML = 'Keep going.';
+    if (resolvedAll) { say.classList.add('oops'); say.innerHTML = `Every box is settled and they read <b>${machineValue().toLocaleString()}</b> — but that isn't ${p.a} ${p.op === '+' ? '+' : '−'} ${p.b}. A dot went missing or snuck in somewhere. Tap the problem to start again.`; return; }
+    say.innerHTML = describe(cs) + '.';
   }
   function setupDots() {
     buildPList();
