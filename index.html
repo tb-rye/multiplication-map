@@ -271,7 +271,7 @@
   .dot.new { background: #ffd166; box-shadow: 0 0 8px rgba(255,209,102,.7); }
   .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
   .dot.ten { box-shadow: 0 0 0 2px #fff, 0 0 12px rgba(255,255,255,.7); }
-  .dot.dragging { transition: none; position: fixed; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; }
+  .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; }
   .dot.spawn { animation: pop .3s ease-out; }
   .dot.gone { transform: scale(0); opacity: 0; }
   .dot.hit { animation: hitpop .25s ease-out; }
@@ -924,10 +924,12 @@
     const t = e.target.closest('.dot'); if (!t || e.button > 0) return;
     e.preventDefault();
     const supply = t.id === 'supplyDot' ? 'dot' : t.id === 'supplyAnti' ? 'anti' : null;
-    let ghost, dot = null;
-    if (supply) { ghost = el('div', 'dot' + (supply === 'anti' ? ' anti' : '') + ' dragging'); document.body.appendChild(ghost); }
-    else { dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('ten') || t.classList.contains('gone')) return; ghost = t; t.classList.add('dragging'); }
-    drag = { ghost, dot, supply, ox: DS / 2, oy: DS / 2, moved: false };
+    let dot = null, orig = null;
+    if (!supply) { dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('ten') || t.classList.contains('gone')) return; orig = t; orig.style.visibility = 'hidden'; }
+    // the ghost lives on <body> so position:fixed is measured against the viewport (panels use backdrop-filter, which would otherwise trap it)
+    const ghost = el('div', 'dot' + ((supply === 'anti' || (dot && dot.anti)) ? ' anti' : (dot && !dot.anti && dot.fresh) ? ' new' : '') + ' dragging');
+    document.body.appendChild(ghost);
+    drag = { ghost, orig, dot, supply, ox: DS / 2, oy: DS / 2, moved: false };
     moveGhost(e);
     window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onUp);
   }
@@ -943,7 +945,9 @@
   function onUp(e) {
     window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp);
     if (!drag) return;
-    const { ghost, dot, supply } = drag; drag = null;
+    const { ghost, orig, dot, supply } = drag; drag = null;
+    ghost.remove();
+    if (orig) orig.style.visibility = '';
     document.querySelectorAll('.mbox.over').forEach(b => b.classList.remove('over', 'bad')); $('bin').classList.remove('over');
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const f = under && under.closest('.dotfield');
@@ -951,14 +955,12 @@
     const inBin = under && under.closest('#bin');
     const client = { x: e.clientX, y: e.clientY };
     if (supply) {
-      ghost.remove();
       if (f) { spawnDot(+f.dataset.k, supply === 'anti', supply !== 'anti', client); if (M.phase === 'loaded') M.phase = 'working'; refresh(); }
       return;
     }
     // a real dot was dragged
-    ghost.classList.remove('dragging');
     if (!M.dots.includes(dot)) return;
-    const settle = (k, pt) => { const p = pt || { x: dot.x, y: dot.y }; dot.x = Math.max(2, Math.min(FW - DS - 2, p.x)); dot.y = Math.max(2, Math.min(FH - DS - 2, p.y)); ghost.style.left = dot.x + 'px'; ghost.style.top = dot.y + 'px'; };
+    const settle = (k, pt) => { const p = pt || { x: dot.x, y: dot.y }; dot.x = Math.max(2, Math.min(FW - DS - 2, p.x)); dot.y = Math.max(2, Math.min(FH - DS - 2, p.y)); orig.style.left = dot.x + 'px'; orig.style.top = dot.y + 'px'; };
     if (inBin) { removeDot(dot.id); if (M.phase === 'loaded') M.phase = 'working'; refresh(); return; }
     if (!f) { settle(dot.k); return; }
     const k = +f.dataset.k;
