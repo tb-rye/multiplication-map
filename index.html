@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Naya's Multiplication Map</title>
+<title>NumberViz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
@@ -221,17 +221,95 @@
   .note.prime { border-color: rgba(255,95,176,.5); }
   .note.square { border-color: rgba(46,242,207,.5); }
 
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* ---------- view 4: exploding dots ---------- */
+  .nav-group { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); padding: 0 6px; align-self: center; }
+  .plist { display: grid; gap: 6px; }
+  .plist h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 12px 0 4px; font-family: "Nunito", sans-serif; font-weight: 800; }
+  .plist h3:first-child { margin-top: 0; }
+  .prob { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 12px; padding: 8px 12px; text-align: left; font-family: "Fredoka", sans-serif; font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; transition: all .15s; }
+  .prob:hover { border-color: rgba(255,255,255,.35); }
+  .prob.on { border-color: var(--teal); background: rgba(46,242,207,.12); box-shadow: 0 0 14px rgba(46,242,207,.25); }
+  .prob.done { border-color: var(--pink); }
+  .prob .tag { font-family: "Nunito", sans-serif; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 800; }
+  .prob.done .tag { color: var(--pink); }
+  .custom { margin-top: 14px; display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 6px; align-items: center; }
+  .custom input { width: 100%; min-width: 0; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); border-radius: 10px; padding: 8px; font-family: "Fredoka", sans-serif; font-size: 17px; text-align: center; }
+  .custom select { border: 1px solid var(--line); background: #1c1336; color: var(--text); border-radius: 10px; padding: 8px 6px; font-family: "Fredoka", sans-serif; font-size: 17px; }
+  .custom button { border: 0; border-radius: 10px; padding: 9px 12px; font-weight: 800; font-size: 13px; background: linear-gradient(120deg, var(--teal), var(--purple)); color: #120a22; }
+
+  .machine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin-bottom: 14px; }
+  .machine-head .title { font-family: "Fredoka", sans-serif; font-size: 22px; font-weight: 600; }
+  .machine-head .title span { color: var(--muted); font-size: 14px; font-family: "Nunito", sans-serif; font-weight: 700; margin-left: 10px; }
+  .tools { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tools button { border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 800; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; }
+  .tools button:hover { color: var(--text); border-color: rgba(255,255,255,.4); }
+  .tools button.on { color: #120a22; background: linear-gradient(120deg, var(--teal), var(--purple)); border-color: transparent; }
+  .tools button.go { color: #120a22; background: linear-gradient(120deg, var(--pink), var(--purple)); border-color: transparent; box-shadow: 0 0 14px rgba(255,95,176,.45); }
+  .tools button:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .dotico { width: 12px; height: 12px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 6px var(--teal); display: inline-block; }
+  .dotico.anti { background: transparent; border: 2px solid var(--pink); box-shadow: 0 0 6px var(--pink); }
+
+  .machine-wrap { overflow-x: auto; padding: 4px 2px 8px; }
+  .machine { display: grid; gap: 10px; width: max-content; margin: 0 auto; min-width: 100%; justify-content: center; }
+  .mbox { position: relative; width: 200px; border: 2px solid rgba(46,242,207,.35); border-radius: 18px; background: rgba(255,255,255,.03); padding: 34px 10px 12px; min-height: 196px; display: flex; flex-direction: column; gap: 8px; transition: border-color .2s, box-shadow .2s; }
+  .mbox.full { border-color: var(--pink); box-shadow: 0 0 22px rgba(255,95,176,.4); }
+  .mbox.boom { animation: boom .45s ease-out; }
+  .mbox.pour { animation: pour .45s ease-out; }
+  @keyframes boom { 0% { box-shadow: 0 0 0 0 rgba(255,95,176,.9); } 100% { box-shadow: 0 0 0 26px rgba(255,95,176,0); } }
+  @keyframes pour { 0% { box-shadow: 0 0 0 0 rgba(46,242,207,.9); } 100% { box-shadow: 0 0 0 26px rgba(46,242,207,0); } }
+  .mbox .plabel { position: absolute; top: 8px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 800; }
+  .mbox .plabel b { font-family: "Fredoka", sans-serif; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--muted); }
+  .mbox .arrow { position: absolute; top: 50%; left: -19px; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; background: #241a45; border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; color: var(--dim); z-index: 2; }
+  .mbox .arrow b { font-family: "Fredoka", sans-serif; font-size: 12px; color: var(--muted); }
+  .dotfield { flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 5px; cursor: crosshair; padding: 2px; border-radius: 10px; min-height: 96px; }
+  .dotfield:hover { background: rgba(255,255,255,.03); }
+  .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(46,242,207,.6); animation: pop .22s ease-out; flex: none; }
+  .dot.new { background: #ffd166; box-shadow: 0 0 8px rgba(255,209,102,.7); }
+  .dot.anti { background: transparent; border: 2.5px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
+  .dot.gone { animation: gone .35s ease-in forwards; }
+  @keyframes gone { to { transform: scale(0); opacity: 0; } }
+  .mbox .count { display: flex; justify-content: center; align-items: baseline; gap: 6px; font-family: "Fredoka", sans-serif; font-size: 26px; font-weight: 700; min-height: 32px; }
+  .mbox .count small { font-size: 12px; color: var(--dim); font-family: "Nunito", sans-serif; font-weight: 800; }
+  .mbox .count.ok { color: var(--teal); }
+  .mbox .count.hot { color: var(--pink); }
+  .mbox .count.neg { color: var(--pink); }
+  .mbox .bactions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .mbox .bactions .explode { grid-column: 1 / -1; }
+  .mbox .bactions button { border: 1px solid var(--line); background: rgba(255,255,255,.05); border-radius: 9px; padding: 5px 9px; font-size: 11.5px; font-weight: 800; color: var(--muted); }
+  .mbox .bactions button:disabled { opacity: .25; cursor: default; }
+  .mbox .bactions button.explode:not(:disabled) { color: #120a22; background: linear-gradient(120deg, var(--pink), var(--purple)); border-color: transparent; box-shadow: 0 0 12px rgba(255,95,176,.5); }
+  .mbox .bactions button.cancel:not(:disabled) { color: #120a22; background: linear-gradient(120deg, var(--teal), #7fa1ff); border-color: transparent; }
+  .mbox .bactions button.unexplode:not(:disabled) { color: var(--teal); border-color: var(--teal); }
+
+  .coach { margin-top: 14px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: center; }
+  @media (max-width: 700px) { .coach { grid-template-columns: 1fr; } }
+  .coach .say { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); font-size: 14.5px; color: var(--muted); }
+  .coach .say b { color: var(--text); }
+  .coach .say.win { border-color: var(--teal); color: var(--text); background: rgba(46,242,207,.1); }
+  .coach .say.win b { color: var(--teal); }
+  .stack { font-family: "Fredoka", sans-serif; font-variant-numeric: tabular-nums; font-size: 24px; line-height: 1.15; display: grid; justify-items: end; padding: 8px 16px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); min-width: 150px; }
+  .stack .marks { display: flex; justify-content: flex-end; font-size: 12px; color: var(--pink); font-family: "Nunito", sans-serif; font-weight: 800; min-height: 16px; letter-spacing: 0; }
+  .stack .marks span { width: 22px; text-align: center; }
+  .stack .marks span.b { color: var(--teal); }
+  .stack .row { display: flex; }
+  .stack .row span { width: 22px; text-align: center; }
+  .stack .row.op { color: var(--muted); }
+  .stack .rule { width: 100%; height: 2px; background: var(--muted); margin: 4px 0; }
+  .stack .row.ans span { color: var(--teal); text-shadow: 0 0 10px rgba(46,242,207,.5); }
+  .stack .row.ans span.pending { color: var(--dim); text-shadow: none; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
 
 <header class="top">
   <div class="brand">
-    <div class="orb">×</div>
+    <div class="orb">N</div>
     <div>
-      <h1>Naya's Multiplication Map</h1>
-      <p>Every fact up to 12 × 12, and the shapes hiding inside them.</p>
+      <h1>NumberViz</h1>
+      <p>Naya's maps, machines, and shapes for seeing how numbers work.</p>
     </div>
   </div>
   <div class="controls">
@@ -239,8 +317,9 @@
       <button role="tab" id="tab-chart" aria-selected="true" aria-controls="view-chart">My chart</button>
       <button role="tab" id="tab-skip" aria-selected="false" aria-controls="view-skip">Skip counts</button>
       <button role="tab" id="tab-shapes" aria-selected="false" aria-controls="view-shapes">Factor shapes</button>
+      <button role="tab" id="tab-dots" aria-selected="false" aria-controls="view-dots" data-nosize="1">Exploding dots</button>
     </nav>
-    <label class="size-toggle" for="sizeBox"><input type="checkbox" id="sizeBox" checked> <b>12 × 12</b> <span>include 11s and 12s</span></label>
+    <label class="size-toggle" for="sizeBox" id="sizeToggle"><input type="checkbox" id="sizeBox" checked> <b>12 × 12</b> <span>include 11s and 12s</span></label>
   </div>
 </header>
 
@@ -338,6 +417,40 @@
     <main class="panel">
       <div class="chart-wrap"><div class="grid n12" id="sgrid" role="grid" aria-label="Factor chart"></div></div>
       <div class="chart-foot"><span>A rectangle's area is the number of squares inside it — count them and you get the product.</span></div>
+    </main>
+  </div>
+</section>
+
+<!-- ================= VIEW 4: EXPLODING DOTS ================= -->
+<section id="view-dots" role="tabpanel" aria-labelledby="tab-dots" hidden>
+  <div class="layout wide-side">
+    <aside class="panel">
+      <h2>Problems</h2>
+      <p class="hint">Pick one and work it out in the machine. Ten dots in a box always explode into one dot in the box to the left.</p>
+      <div class="plist" id="plist"></div>
+      <h3 style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:14px 0 4px;font-family:Nunito,sans-serif;font-weight:800">Make your own</h3>
+      <div class="custom">
+        <input type="number" id="ca" min="0" max="99999" placeholder="345" aria-label="first number">
+        <select id="cop" aria-label="operation"><option value="+">+</option><option value="-">−</option></select>
+        <input type="number" id="cb" min="0" max="99999" placeholder="178" aria-label="second number">
+        <button type="button" id="cgo">Go</button>
+      </div>
+    </aside>
+    <main class="panel">
+      <div class="machine-head">
+        <div class="title" id="mTitle">1 ← 10 machine</div>
+        <div class="tools">
+          <button type="button" id="toolDot" class="on"><i class="dotico"></i>Add dots</button>
+          <button type="button" id="toolAnti"><i class="dotico anti"></i>Add anti-dots</button>
+          <button type="button" id="stepBtn" class="go">Start</button>
+          <button type="button" id="resetMachine">Clear</button>
+        </div>
+      </div>
+      <div class="machine-wrap"><div class="machine" id="machine"></div></div>
+      <div class="coach">
+        <div class="say" id="coach">Pick a problem on the left, or tap inside a box to drop dots in.</div>
+        <div class="stack" id="stack" hidden></div>
+      </div>
     </main>
   </div>
 </section>
@@ -632,16 +745,175 @@
     else note.innerHTML = `<div class="note">Tap a rectangle on the left to see just that one. Every shape here holds exactly <b>${product}</b> little squares.</div>`;
   }
 
+
+  /* ================= VIEW 4: EXPLODING DOTS ================= */
+  const PROBLEMS = [
+    { h: 'Addition · two digits' },
+    { a: 47, b: 38, op: '+' }, { a: 65, b: 29, op: '+' }, { a: 58, b: 76, op: '+' },
+    { h: 'Addition · three digits' },
+    { a: 247, b: 185, op: '+' }, { a: 368, b: 457, op: '+' }, { a: 596, b: 247, op: '+' }, { a: 709, b: 293, op: '+' },
+    { h: 'Subtraction · two digits' },
+    { a: 52, b: 27, op: '-' }, { a: 81, b: 46, op: '-' }, { a: 70, b: 34, op: '-' },
+    { h: 'Subtraction · across zeros' },
+    { a: 403, b: 178, op: '-' }, { a: 500, b: 236, op: '-' }, { a: 612, b: 359, op: '-' }, { a: 800, b: 407, op: '-' }, { a: 1000, b: 463, op: '-' },
+  ];
+  const PLACE = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands', 'hundred-thousands'];
+  let M = { boxes: [], prob: null, phase: 'free', tool: 'dot', marks: {}, done: new Set() };
+
+  function buildPList() {
+    const host = $('plist'); host.innerHTML = '';
+    PROBLEMS.forEach((p, i) => {
+      if (p.h) { host.appendChild(el('h3', '', p.h)); return; }
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'prob'; b.dataset.i = i;
+      b.innerHTML = `<span>${p.a} ${p.op === '+' ? '+' : '−'} ${p.b}</span><span class="tag">${M.done.has(i) ? 'solved' : ''}</span>`;
+      b.addEventListener('click', () => loadProblem(i));
+      host.appendChild(b);
+    });
+    $('cgo').addEventListener('click', () => {
+      const a = +$('ca').value, b = +$('cb').value, op = $('cop').value;
+      if (!(a >= 0) || !(b >= 0) || (op === '-' && b > a)) { $('coach').innerHTML = op === '-' ? 'For subtraction, put the bigger number first.' : 'Type two numbers first.'; return; }
+      loadProblem(null, { a, b, op });
+    });
+  }
+  function digitsOf(n) { return String(n).split('').reverse().map(Number); }
+  function loadProblem(i, custom) {
+    const p = custom || PROBLEMS[i];
+    M.prob = { ...p, idx: i };
+    const nBox = Math.max(String(p.a).length, String(p.b).length) + (p.op === '+' ? 1 : 0);
+    M.boxes = Array.from({ length: nBox }, () => ({ dots: 0, anti: 0, fresh: 0 }));
+    digitsOf(p.a).forEach((d, k) => M.boxes[k].dots = d);
+    M.phase = 'loaded'; M.marks = {};
+    document.querySelectorAll('.prob').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
+    $('mTitle').innerHTML = `${p.a} ${p.op === '+' ? '+' : '−'} ${p.b} <span>${p.op === '+' ? 'add the dots, then explode' : 'add anti-dots, cancel pairs, unexplode when you run short'}</span>`;
+    renderMachine();
+  }
+  function clearMachine() {
+    M.prob = null; M.phase = 'free'; M.marks = {};
+    M.boxes = Array.from({ length: 4 }, () => ({ dots: 0, anti: 0, fresh: 0 }));
+    document.querySelectorAll('.prob').forEach(b => b.classList.remove('on'));
+    $('mTitle').textContent = '1 ← 10 machine';
+    renderMachine();
+  }
+  function machineValue() { return M.boxes.reduce((s, b, k) => s + (b.dots - b.anti) * 10 ** k, 0); }
+  function stepAction() {
+    const p = M.prob; if (!p || M.phase !== 'loaded') return;
+    digitsOf(p.b).forEach((d, k) => { if (p.op === '+') { M.boxes[k].dots += d; M.boxes[k].fresh = d; } else M.boxes[k].anti += d; });
+    M.phase = 'working';
+    renderMachine();
+  }
+  function explode(k) {
+    const b = M.boxes[k]; if (b.dots < 10 || k + 1 >= M.boxes.length) return;
+    b.dots -= 10; b.fresh = Math.max(0, b.fresh - 10); M.boxes[k + 1].dots += 1; M.boxes[k + 1].fresh += 1;
+    M.marks[k + 1] = (M.marks[k + 1] || '') + '1';
+    renderMachine(); flash(k, 'boom'); flash(k + 1, 'pour');
+  }
+  function unexplode(k) {
+    const left = M.boxes[k + 1]; if (!left || left.dots < 1) return;
+    left.dots -= 1; M.boxes[k].dots += 10; M.boxes[k].fresh += 10;
+    M.marks[k + 1] = (M.marks[k + 1] || '') + '−1'; M.marks[k] = (M.marks[k] || '') + '+10';
+    renderMachine(); flash(k + 1, 'boom'); flash(k, 'pour');
+  }
+  function cancelPairs(k) {
+    const b = M.boxes[k]; const n = Math.min(b.dots, b.anti); if (!n) return;
+    b.dots -= n; b.anti -= n; b.fresh = Math.min(b.fresh, b.dots);
+    renderMachine(); flash(k, 'boom');
+  }
+  function flash(k, cls) { const box = $(`mbox-${k}`); if (!box) return; box.classList.remove(cls); void box.offsetWidth; box.classList.add(cls); }
+  function addDot(k) {
+    if (M.tool === 'dot') { M.boxes[k].dots++; M.boxes[k].fresh++; } else M.boxes[k].anti++;
+    if (M.phase === 'loaded') M.phase = 'working';
+    renderMachine();
+  }
+  function boxResolved(b) { return b.anti === 0 && b.dots < 10; }
+  function renderMachine() {
+    const host = $('machine'); host.innerHTML = '';
+    host.style.gridTemplateColumns = `repeat(${M.boxes.length}, 200px)`;
+    for (let k = M.boxes.length - 1; k >= 0; k--) {
+      const b = M.boxes[k];
+      const box = el('div', 'mbox'); box.id = `mbox-${k}`;
+      if (b.dots >= 10) box.classList.add('full');
+      box.innerHTML = `<div class="plabel"><span>${PLACE[k] || '10^' + k}</span><b>${k === 0 ? '1' : '1' + '0'.repeat(k)}</b></div>` + (k < M.boxes.length - 1 ? `<div class="arrow" title="ten here become one there"><b>←</b></div>` : '');
+      const field = el('div', 'dotfield'); field.title = 'tap to add';
+      for (let i = 0; i < b.dots; i++) field.appendChild(el('div', 'dot' + (i >= b.dots - b.fresh ? ' new' : '')));
+      for (let i = 0; i < b.anti; i++) field.appendChild(el('div', 'dot anti'));
+      field.addEventListener('click', e => { if (e.target === field) addDot(k); });
+      box.appendChild(field);
+      const count = el('div', 'count');
+      const net = b.dots - b.anti;
+      if (b.anti && b.dots) count.innerHTML = `<span>${b.dots}</span><small>dots</small><span>${b.anti}</span><small>anti</small>`;
+      else if (b.anti) { count.innerHTML = `<span>−${b.anti}</span>`; count.classList.add('neg'); }
+      else { count.innerHTML = `<span>${b.dots}</span>`; count.classList.add(b.dots >= 10 ? 'hot' : 'ok'); }
+      box.appendChild(count);
+      const acts = el('div', 'bactions');
+      const ex = document.createElement('button'); ex.type = 'button'; ex.className = 'explode'; ex.textContent = 'Explode'; ex.disabled = !(b.dots >= 10 && k + 1 < M.boxes.length); ex.addEventListener('click', () => explode(k));
+      const ca = document.createElement('button'); ca.type = 'button'; ca.className = 'cancel'; ca.textContent = 'Cancel'; ca.disabled = !(b.dots && b.anti); ca.addEventListener('click', () => cancelPairs(k));
+      const un = document.createElement('button'); un.type = 'button'; un.className = 'unexplode'; un.textContent = 'Unexplode'; un.disabled = !(M.boxes[k + 1] && M.boxes[k + 1].dots >= 1 && (!M.prob || b.anti > b.dots)); un.addEventListener('click', () => unexplode(k));
+      acts.append(ex, ca, un); box.appendChild(acts);
+      host.appendChild(box);
+    }
+    const step = $('stepBtn');
+    if (M.prob && M.phase === 'loaded') { step.hidden = false; step.textContent = (M.prob.op === '+' ? 'Add ' : 'Take away ') + M.prob.b; }
+    else step.hidden = true;
+    renderCoach();
+  }
+  function renderCoach() {
+    const say = $('coach'); say.classList.remove('win');
+    const stack = $('stack');
+    if (!M.prob) { stack.hidden = true; say.innerHTML = machineValue() ? `The machine is holding <b>${machineValue().toLocaleString()}</b>. Add dots, explode, and read it off.` : 'Pick a problem on the left, or tap inside a box to drop dots in.'; return; }
+    const p = M.prob, answer = p.op === '+' ? p.a + p.b : p.a - p.b;
+    stack.hidden = false;
+    const w = M.boxes.length;
+    const pad = n => { const d = digitsOf(n); while (d.length < w) d.push(''); return d.reverse(); };
+    const marks = Array.from({ length: w }, (_, i) => M.marks[w - 1 - i] || '');
+    const resolvedAll = M.boxes.every(boxResolved);
+    const ansDigits = Array.from({ length: w }, (_, i) => { const k = w - 1 - i; const b = M.boxes[k]; return resolvedAll && M.phase === 'working' ? String(b.dots) : ''; });
+    // trim leading zeros in the answer display only when everything is resolved
+    stack.innerHTML = `<div class="marks">${marks.map(m => `<span class="${m.startsWith('−') || m.startsWith('+') ? 'b' : ''}">${m}</span>`).join('')}</div>
+      <div class="row">${pad(p.a).map(d => `<span>${d}</span>`).join('')}</div>
+      <div class="row op"><span style="position:absolute;margin-left:-26px">${p.op === '+' ? '+' : '−'}</span>${pad(p.b).map(d => `<span>${d}</span>`).join('')}</div>
+      <div class="rule"></div>
+      <div class="row ans">${ansDigits.map((d, i) => `<span class="${d === '' ? 'pending' : ''}">${d === '' ? '·' : (d === '0' && resolvedAll && ansDigits.slice(0, i).every(x => x === '0') && i < w - 1 ? '' : d)}</span>`).join('')}</div>`;
+    if (M.phase === 'loaded') { say.innerHTML = `The machine is holding <b>${p.a}</b>. Tap <b>${p.op === '+' ? 'Add ' + p.b : 'Take away ' + p.b}</b> to ${p.op === '+' ? 'drop the new dots in' : 'put in the anti-dots'}.`; return; }
+    const hot = M.boxes.findIndex(b => b.dots >= 10);
+    const pairs = M.boxes.findIndex(b => b.dots && b.anti);
+    const short = M.boxes.findIndex(b => b.anti && !b.dots);
+    if (resolvedAll && machineValue() === answer) {
+      say.classList.add('win');
+      say.innerHTML = `<b>${answer.toLocaleString()}</b> — read straight off the boxes. ${p.op === '+' ? 'Every explosion was a carry.' : 'Every unexplode was a borrow.'}`;
+      if (p.idx != null && !M.done.has(p.idx)) { M.done.add(p.idx); const b = document.querySelector(`.prob[data-i="${p.idx}"]`); if (b) { b.classList.add('done'); b.querySelector('.tag').textContent = 'solved'; } }
+      return;
+    }
+    if (resolvedAll) { say.innerHTML = `The boxes read <b>${machineValue().toLocaleString()}</b>, but ${p.a} ${p.op === '+' ? '+' : '−'} ${p.b} isn't that. A dot got added or lost somewhere — tap Clear and pick the problem again.`; return; }
+    if (pairs >= 0) { say.innerHTML = `The <b>${PLACE[pairs]}</b> box has dots and anti-dots together. A dot and an anti-dot cancel out — tap <b>Cancel</b>.`; return; }
+    if (short >= 0) {
+      const left = M.boxes[short + 1];
+      if (left && left.dots) say.innerHTML = `The <b>${PLACE[short]}</b> box still has ${M.boxes[short].anti} anti-dot${M.boxes[short].anti > 1 ? 's' : ''} and nothing to cancel them. Tap <b>Unexplode</b> there to turn one ${PLACE[short + 1]} dot into ten ${PLACE[short]} dots.`;
+      else say.innerHTML = `The <b>${PLACE[short]}</b> box needs dots, and the ${PLACE[short + 1]} box is empty too. Unexplode further left first — a ${PLACE[short + 2] || 'higher'} dot becomes ten ${PLACE[short + 1]} dots, then one of those becomes ten ${PLACE[short]}.`;
+      return;
+    }
+    if (hot >= 0) { say.innerHTML = `The <b>${PLACE[hot]}</b> box has ${M.boxes[hot].dots} dots — too many. Ten of them explode into one dot in the ${PLACE[hot + 1]} box. Tap <b>Explode</b>.`; return; }
+    say.innerHTML = 'Keep going.';
+  }
+  function setupDots() {
+    buildPList();
+    $('toolDot').addEventListener('click', () => { M.tool = 'dot'; $('toolDot').classList.add('on'); $('toolAnti').classList.remove('on'); });
+    $('toolAnti').addEventListener('click', () => { M.tool = 'anti'; $('toolAnti').classList.add('on'); $('toolDot').classList.remove('on'); });
+    $('stepBtn').addEventListener('click', stepAction);
+    $('resetMachine').addEventListener('click', clearMachine);
+    loadProblem(1);
+  }
+
   /* ================= tabs + boot ================= */
   function setupTabs() {
     const tabs = document.querySelectorAll('nav.views [role="tab"]');
     tabs.forEach(t => t.addEventListener('click', () => {
       tabs.forEach(o => { o.setAttribute('aria-selected', o === t); $(o.getAttribute('aria-controls')).hidden = o !== t; });
+      $('sizeToggle').hidden = !!t.dataset.nosize;
     }));
   }
   function start() {
     loadLocal();
-    buildTables(); setupTabs(); buildTPick();
+    buildTables(); setupTabs(); buildTPick(); setupDots();
     $('grid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (!c) return; testMode ? reveal(+c.dataset.r, +c.dataset.c) : cycleFact(+c.dataset.r, +c.dataset.c); });
     $('testBox').addEventListener('change', e => setTestMode(e.target.checked));
     $('hideAgain').addEventListener('click', () => setTestMode(true));
