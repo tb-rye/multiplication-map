@@ -231,10 +231,36 @@
   .subnav button[aria-selected="true"] { color: #120a22; background: linear-gradient(120deg, var(--teal), var(--purple)); border-color: transparent; box-shadow: 0 0 14px rgba(46,242,207,.35); }
   .subnav button[aria-selected="true"] .num { background: rgba(18,10,34,.25); color: #120a22; }
 
-  .dotsframe { max-width: 1240px; margin: 0 auto; }
-  .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 10px 14px; border-radius: 16px; background: rgba(255,255,255,.035); border: 1px solid var(--line); margin-bottom: 10px; }
-  .toolbar .gen { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-  .toolbar .lbl { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 800; margin-right: 4px; }
+  .dotsframe { max-width: 1400px; margin: 0 auto; }
+  /* compact chrome while the dots view is open: tagline hidden, section pills live in the header, tighter page padding */
+  body.dotsmode { padding-block: 12px 12px; padding-inline: clamp(12px, 2vw, 28px); }
+  body.dotsmode .top { margin-bottom: 12px; max-width: 1400px; }
+  body.dotsmode .brand p { display: none; }
+  body.dotsmode .orb { width: 38px; height: 38px; font-size: 18px; }
+  body.dotsmode .brand h1 { font-size: 22px; }
+  body.dotsmode .subnav { margin: 0; flex: 1 1 auto; justify-content: center; }
+  body.dotsmode .subnav { gap: 5px; }
+  body.dotsmode .subnav button { padding: 5px 10px 5px 5px; font-size: 12px; gap: 5px; }
+  body.dotsmode .subnav button .num { width: 18px; height: 18px; font-size: 11px; }
+  body.dotsmode nav.views { padding: 4px; gap: 3px; }
+  body.dotsmode nav.views button { padding: 6px 10px; font-size: 12.5px; }
+  body.dotsmode .top { gap: 8px 12px; }
+  body.dotsmode .brand { gap: 10px; }
+  @media (max-width: 900px) { body.dotsmode .subnav { order: 3; flex-basis: 100%; justify-content: flex-start; } }
+  .machine-head .title span.meta { color: var(--dim); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-left: 10px; }
+  .tools button.go { color: #120a22; background: linear-gradient(120deg, var(--pink), var(--purple)); border-color: transparent; box-shadow: 0 0 14px rgba(255,95,176,.45); }
+  .pop { position: absolute; top: 46px; right: 0; width: 340px; max-width: calc(100vw - 40px); background: #1c1336; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; padding: 14px 16px 16px; box-shadow: 0 20px 60px rgba(0,0,0,.6); z-index: 50; text-align: left; }
+  .pop h4 { margin: 0 0 6px; font-family: "Fredoka", sans-serif; font-size: 18px; font-weight: 600; }
+  .pop .lbl { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 800; margin: 10px 0 6px; }
+  .pop .chips button { padding: 7px 12px; }
+  .pop .own { display: flex; align-items: center; gap: 6px; }
+  .pop .own input { width: 96px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); border-radius: 10px; padding: 8px; font-family: "Fredoka", sans-serif; font-size: 17px; text-align: center; }
+  .pop .own .opx { font-family: "Fredoka", sans-serif; font-size: 20px; color: var(--muted); }
+  .pop .own button { border: 0; border-radius: 10px; padding: 9px 12px; font-weight: 800; font-size: 13px; background: linear-gradient(120deg, var(--teal), var(--purple)); color: #120a22; }
+  .pop .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  .pop .actions button { border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 8px 14px; font-weight: 800; font-size: 13px; color: var(--muted); }
+  .pop .actions button.go { border: 0; background: linear-gradient(120deg, var(--pink), var(--purple)); color: #120a22; box-shadow: 0 0 14px rgba(255,95,176,.4); }
+  .machine-head .tools { position: relative; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chips:empty { display: none; }
   .chips button { border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 800; color: var(--muted); transition: all .15s; }
@@ -266,24 +292,25 @@
   .rules .ic.p { background: var(--pink); color: #fff; }
   .rules .ic.y { background: #ffd166; }
 
-  .machine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin-bottom: 14px; }
+  .machine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px; margin-bottom: 8px; }
   .machine-head .title { font-family: "Fredoka", sans-serif; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .machine-head .title span { color: var(--muted); font-size: 14px; font-family: "Nunito", sans-serif; font-weight: 700; margin-right: 10px; }
   .tools { display: flex; flex-wrap: wrap; gap: 6px; }
   .tools button { border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 800; color: var(--muted); }
   .tools button:hover { color: var(--text); border-color: rgba(255,255,255,.4); }
 
-  .machine-wrap { overflow-x: auto; padding: 4px 2px 8px; }
+  .machine-wrap { padding: 2px 2px 4px; }
   .machine-wrap { --bw: 150px; --ds: 20px; }
-  .machine { display: grid; gap: 10px; width: max-content; margin: 0 auto; }
+  .machine { display: grid; gap: 8px; width: max-content; margin: 0 auto; }
   .mrow { display: grid; grid-template-columns: auto; align-items: center; gap: 10px; }
   .mrow.result { margin-top: 4px; padding-top: 12px; border-top: 2px solid rgba(255,255,255,.28); }
   .mrow .rlabel { display: none; }
   .mrow .rlabel.anti { color: var(--pink); }
   .mrow .rlabel.eq { color: var(--muted); }
   .mrow .boxes { display: flex; gap: 8px; }
-  .mbox { position: relative; width: var(--bw); border: 2px solid rgba(46,242,207,.35); border-radius: 14px; background: rgba(255,255,255,.03); padding: 22px 8px 6px; display: flex; flex-direction: column; gap: 4px; transition: border-color .2s, box-shadow .2s, background .2s; }
+  .mbox { position: relative; width: var(--bw); border: 2px solid rgba(46,242,207,.35); border-radius: 14px; background: rgba(255,255,255,.03); padding: 20px 8px 4px; display: flex; flex-direction: column; gap: 2px; transition: border-color .2s, box-shadow .2s, background .2s; }
   .mrow.src .mbox { border-color: rgba(255,255,255,.18); }
+  .mrow:not(:first-child) .mbox { padding-top: 6px; }
   .mrow.src.anti .mbox { border-color: rgba(255,95,176,.3); }
   .mbox.full { border-color: var(--pink); box-shadow: 0 0 22px rgba(255,95,176,.4); }
   .mbox.over { background: rgba(46,242,207,.08); border-color: var(--teal); }
@@ -301,7 +328,7 @@
   .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
   .dot.pro { box-shadow: 0 0 0 2px rgba(255,255,255,.85), 0 0 12px var(--dc); }   /* ten that are ready to become one dot of the next place */
   .dot.ten { box-shadow: 0 0 0 2px #fff, 0 0 12px rgba(255,255,255,.7); }
-  .keyrow { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; margin: 10px auto 0; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .keyrow { width: 0; min-width: 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; margin: 6px auto 0; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
   .keyrow span { display: inline-flex; align-items: center; gap: 6px; }
   .keyrow i { width: 12px; height: 12px; border-radius: 50%; background: var(--dc); box-shadow: 0 0 6px var(--dc); }
   .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; }
@@ -309,7 +336,7 @@
   .dot.gone { transform: scale(0); opacity: 0; }
   .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #fff; pointer-events: none; animation: spark .5s ease-out forwards; z-index: 5; }
   @keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
-  .mbox .count { display: flex; justify-content: center; align-items: baseline; gap: 5px; font-family: "Fredoka", sans-serif; font-size: 20px; font-weight: 700; min-height: 24px; pointer-events: none; }
+  .mbox .count { display: flex; justify-content: center; align-items: baseline; gap: 5px; font-family: "Fredoka", sans-serif; font-size: 18px; font-weight: 700; min-height: 22px; line-height: 22px; pointer-events: none; }
   .mbox .count small { font-size: 11px; color: var(--dim); font-family: "Nunito", sans-serif; font-weight: 800; }
   .mbox .count.ok { color: var(--muted); }
   .mbox .count.hot { color: var(--pink); }
@@ -320,13 +347,13 @@
   .readout { position: relative; width: max-content; margin: 8px auto 0; display: grid; grid-template-columns: auto; align-items: center; }
   .readout .check { position: absolute; left: -54px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #120a22; background: var(--teal); box-shadow: 0 0 18px rgba(46,242,207,.6); animation: pop .3s ease-out; }
   .readout .cells { display: flex; gap: 8px; }
-  .readout .cell { width: var(--bw); text-align: center; font-family: "Fredoka", sans-serif; font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); position: relative; }
+  .readout .cell { width: var(--bw); text-align: center; font-family: "Fredoka", sans-serif; font-size: 26px; line-height: 1.2; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); position: relative; }
   .readout .cell + .cell::before { content: ''; position: absolute; left: -5px; top: 15%; height: 70%; width: 2px; background: var(--dim); }
   .readout .cell.hot { color: var(--pink); }
   .readout .cell.dim { color: var(--dim); }
   .readout.win .cell { color: var(--teal); text-shadow: 0 0 12px rgba(46,242,207,.5); }
 
-  .tray { margin: 12px auto 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 22px; padding: 10px 16px; border-radius: 999px; border: 1px dashed var(--line); width: max-content; max-width: 100%; }
+  .tray { margin: 8px auto 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 22px; padding: 10px 16px; border-radius: 999px; border: 1px dashed var(--line); width: max-content; max-width: 100%; }
   .tray .supply { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 800; color: var(--muted); cursor: grab; touch-action: none; padding: 4px 10px; border-radius: 12px; border: 1px solid transparent; }
   .tray .supply:hover { border-color: var(--line); color: var(--text); }
   .tray .supply b { font-family: "Fredoka", sans-serif; font-size: 20px; color: var(--text); }
@@ -335,9 +362,27 @@
   .tray .trayhint { font-size: 12px; font-weight: 800; color: var(--dim); }
 
   .stage { display: flex; flex-wrap: wrap; gap: 18px 12px; align-items: flex-start; }
-  .stage .machine-wrap { flex: 1 1 auto; min-width: 0; }
+  .stage .machine-wrap { flex: 0 1 auto; min-width: 0; }
+  .stage:has(#notebook[hidden]) .machine-wrap, .stage.stack .machine-wrap { margin: 0 auto; }
+  .machine-wrap.tight .plabel b { display: none; }
+  .machine-wrap.tight .plabel { font-size: 9px; letter-spacing: .04em; }
+  .machine-wrap.tight .keyrow { display: none; }
+  body.dotsmode #view-dots main.panel { padding: 12px 14px 12px; }
   .stage .notebook { flex: 0 0 auto; margin: 6px 6px 0 auto; }
-  .coach { margin-top: 14px; }
+  .coach { margin-top: 8px; }
+  .coach .say { padding: 8px 14px; min-height: 0; font-size: 13.5px; }
+  .stage { gap: 10px 14px; }
+  .stage .notebook { margin: 2px 0 0 auto; }
+  .notebook.compact { padding: 12px 14px 10px 30px; }
+  .notebook.compact::before { left: 20px; }
+  .notebook.compact .nb-col, .notebook.compact .nb-row span { width: 34px; }
+  .notebook.compact .nb-col span, .notebook.compact .nb-row { font-size: 25px; line-height: 30px; }
+  .notebook.compact .nb-col span.ink { font-size: 19px; line-height: 24px; }
+  .notebook.compact .nb-row.ans span, .notebook.compact .nb-row.ans input { width: 30px; height: 32px; line-height: 32px; font-size: 22px; min-height: 32px; }
+  .notebook.compact .nb-row .op { left: -22px; }
+  .notebook.compact .nb-row.carry { min-height: 20px; line-height: 20px; }
+  .notebook.compact .nb-row.carry span { font-size: 15px; }
+  .stage.stack .notebook { margin: 6px auto 0; }
   .coach .say { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); font-size: 14.5px; color: var(--muted); min-height: 46px; }
   .coach .say b { color: var(--text); }
   .coach .say.win { border-color: var(--teal); color: var(--text); background: rgba(46,242,207,.1); }
@@ -507,20 +552,21 @@
   </div>
   <div class="dotsframe">
     <main class="panel">
-      <div class="toolbar">
-        <div class="gen">
-          <span class="lbl">Generate problem</span>
-          <div class="chips" id="digitChips"></div>
-          <div class="chips" id="kindChips"></div>
-          <button type="button" class="genbtn" id="genBtn">New problem</button>
-        </div>
-        <div class="own" id="custom"></div>
-      </div>
-      <p class="hint" id="plistHint"></p>
       <div class="machine-head">
-        <div class="title" id="mTitle"></div>
+        <div class="title"><span id="mTitle"></span><span class="meta" id="mMeta"></span></div>
         <div class="tools">
           <button type="button" id="resetMachine">Start over</button>
+          <button type="button" id="newBtn" class="go" aria-expanded="false" aria-controls="pop">＋ New problem</button>
+          <div class="pop" id="pop" hidden>
+            <h4>New problem</h4>
+            <div class="lbl">Digits</div>
+            <div class="chips" id="digitChips"></div>
+            <div class="lbl" id="kindLbl">Type</div>
+            <div class="chips" id="kindChips"></div>
+            <div class="lbl">Or make your own</div>
+            <div class="own" id="custom"></div>
+            <div class="actions"><button type="button" id="popClose">Cancel</button><button type="button" class="go" id="genBtn">Generate</button></div>
+          </div>
         </div>
       </div>
       <div class="stage">
@@ -919,36 +965,33 @@
   function setMode(mode) {
     M.mode = mode;
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
-    const cfg = MODES[mode];
-    $('plistHint').textContent = cfg.hint;
     buildChips(); buildCustom();
     $('tray').hidden = mode !== 'make';
     loadProblem(null, generate());
   }
   function buildChips() {
     const dc = $('digitChips'); dc.innerHTML = '';
-    [2, 3, 4, 5].forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n + ' digits'; b.setAttribute('aria-pressed', GEN.digits === n); b.addEventListener('click', () => { GEN.digits = n; buildChips(); loadProblem(null, generate()); }); dc.appendChild(b); });
-    const kc = $('kindChips'); kc.innerHTML = '';
-    KINDS[M.mode].forEach(([k, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', GEN.kind[M.mode] === k); b.addEventListener('click', () => { GEN.kind[M.mode] = k; buildChips(); loadProblem(null, generate()); }); kc.appendChild(b); });
+    [2, 3, 4, 5].forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n + ' digits'; b.setAttribute('aria-pressed', GEN.digits === n); b.addEventListener('click', () => { GEN.digits = n; buildChips(); }); dc.appendChild(b); });
+    const kc = $('kindChips'); kc.innerHTML = ''; $('kindLbl').hidden = !KINDS[M.mode].length;
+    KINDS[M.mode].forEach(([k, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', GEN.kind[M.mode] === k); b.addEventListener('click', () => { GEN.kind[M.mode] = k; buildChips(); }); kc.appendChild(b); });
   }
   function buildCustom() {
     const host = $('custom');
-    if (M.mode === 'make') host.innerHTML = `<span class="lbl">Make your own</span><input type="number" id="ca" min="0" max="99999" placeholder="856" aria-label="number to make"><button type="button" id="cgo">Go</button>`;
-    else host.innerHTML = `<span class="lbl">Make your own</span><input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
+    if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="856" aria-label="number to make"><button type="button" id="cgo">Go</button>`;
+    else host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     $('cgo').addEventListener('click', () => {
       const a = +$('ca').value;
-      if (M.mode === 'make') { if (!$('ca').value || a < 0) { coachSay('Type a number first.'); return; } loadProblem(null, { t: a }); return; }
+      if (M.mode === 'make') { if (!$('ca').value || a < 0) { coachSay('Type a number first.'); return; } openPop(false); loadProblem(null, { t: a, own: true }); return; }
       const b = +$('cb').value;
       if (!$('ca').value || !$('cb').value || a < 0 || b < 0) { coachSay('Type two numbers first.'); return; }
       if (M.mode !== 'add' && b > a) { coachSay('Put the bigger number first when subtracting.'); return; }
-      loadProblem(null, { a, b });
+      openPop(false); loadProblem(null, { a, b, own: true });
     });
   }
   function loadProblem(i, custom) {
     const p = custom || M.prob;
     M.prob = { ...p, idx: null }; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {};
-    M.geo = MODES[M.mode].geo;
-    const g = M.geo;
+    const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
       const len = String(p.t).length; M.n = Math.min(6, len >= 4 ? len : len + 1);
       M.rows = [{ kind: 'free', label: '', fh: g.FH }];
@@ -967,16 +1010,69 @@
       M.hist = digitsOf(p.a).map(d => [d]);
       $('mTitle').innerHTML = `${p.a} − ${p.b}`;
     }
+    const kindLabel = (KINDS[M.mode].find(([k]) => k === GEN.kind[M.mode]) || [])[1];
+    $('mMeta').textContent = custom && custom.own ? 'your own' : `${GEN.digits} digits${kindLabel ? ' · ' + kindLabel : ''}`;
+    $('notebook').hidden = !(M.mode === 'regroup' || M.mode === 'add');
+    if (M.mode === 'regroup') buildNotebook();
+    if (M.mode === 'add') buildNotebookAdd();
+    fitGeo();
     buildMachine();
     $('keyrow').innerHTML = Array.from({ length: M.n }, (_, k) => `<span><i style="--dc:${COL[k] || COL[5]}"></i>${PLACE[k] || '10^' + k}</span>`).reverse().join('');
     if (M.mode === 'add') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, false, gridSpot(1, k)); }); }
     if (M.mode === 'sub') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, true, gridSpot(1, k)); }); }
-    if (M.mode === 'regroup') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); buildNotebook(); }
-    if (M.mode === 'add') buildNotebookAdd();
-    $('notebook').hidden = !(M.mode === 'regroup' || M.mode === 'add');
+    if (M.mode === 'regroup') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); }
     refresh();
   }
   function restart() { if (M.prob) loadProblem(null, M.prob); }
+
+  /* ---- fit: size the boxes so the whole problem, notebook included, sits on one screen ---- */
+  function fitGeo() {
+    const g = M.geo, n = M.n, main = document.querySelector('#view-dots main.panel');
+    const cs = getComputedStyle(main), W = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;   // panel content width
+    const nb = $('notebook'), hasNb = !nb.hidden;
+    nb.classList.toggle('compact', W < 1150 || n >= 5);
+    const nbW = hasNb ? nb.offsetWidth : 0;                            // measured, so the fit is exact
+    const gaps = (n - 1) * 8;
+    let bw = Math.floor((W - nbW - (nbW ? 16 : 0) - gaps) / n);
+    M.stack = false;
+    if (bw < 96 && nbW) { M.stack = true; bw = Math.floor((W - gaps) / n); }   // portrait: notebook goes under the machine
+    bw = Math.max(88, Math.min(g.BW, bw));
+    g.BW = bw;
+    g.DS = bw >= 150 ? 20 : bw >= 120 ? 18 : 16;
+    g.GX = g.GY = Math.max(g.DS + 3, Math.floor((bw - 16 - g.DS - 4) / 4));
+    // vertical budget
+    const top = $('machine').getBoundingClientRect().top || 160;
+    const chrome = 52 + (bw < 130 ? 0 : 26) + (M.mode === 'make' ? 58 : 0) + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
+    const avail = Math.max(200, window.innerHeight - top - chrome - 10);
+    if (M.mode === 'add' || M.mode === 'sub') {
+      const fixed = 52 + 38 + 32 + 24 + 38;                             // row chrome (labelled row, plain row, drop row, gaps, result row)
+      let fhs = 60, fh = avail - 2 * fhs - fixed;
+      if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
+      g.FHS = fhs; g.FH = Math.max(86, Math.min(150, fh));
+    } else {
+      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - 52));
+    }
+    M.rows.forEach(r => { r.fh = r.kind === 'src' ? g.FHS : g.FH; });
+    document.querySelector('.stage').classList.toggle('stack', M.stack);
+    $('machine').parentElement.classList.toggle('tight', bw < 130);
+  }
+  // window resized or rotated: keep every dot where it is, proportionally, in the new box size
+  function relayout() {
+    if (!M.prob) return;
+    const old = { ...M.geo }, oldFh = M.rows.map(r => r.fh);
+    fitGeo();
+    const wrap = $('machine').parentElement; wrap.style.setProperty('--bw', M.geo.BW + 'px'); wrap.style.setProperty('--ds', M.geo.DS + 'px');
+    M.rows.forEach((row, r) => { for (let k = 0; k < M.n; k++) { const f = field(r, k); if (f) f.style.setProperty('--fh', row.fh + 'px'); } });
+    const sx = (M.geo.BW - 16 - M.geo.DS) / Math.max(1, old.BW - 16 - old.DS);
+    M.dots.forEach(d => { const sy = (M.rows[d.r].fh - M.geo.DS) / Math.max(1, oldFh[d.r] - old.DS); d.x = clampX(d.x * sx); d.y = clampY(d.y * sy, d.r); const e = dotEl(d.id); if (e) { e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; } });
+  }
+  let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(relayout, 120); });
+
+  /* ---- "New problem" popover ---- */
+  function openPop(on) {
+    $('pop').hidden = !on; $('newBtn').setAttribute('aria-expanded', String(on));
+    if (on) { buildChips(); const ca = $('ca'); if (ca) ca.value = ''; const cb = $('cb'); if (cb) cb.value = ''; }
+  }
 
   /* ---- machine + dots ---- */
   function buildMachine() {
@@ -1303,19 +1399,26 @@
   }
   function setupDots() {
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
-    $('genBtn').addEventListener('click', () => loadProblem(null, generate()));
+    $('genBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
+    $('newBtn').addEventListener('click', () => openPop($('pop').hidden));
+    $('popClose').addEventListener('click', () => openPop(false));
+    document.addEventListener('pointerdown', e => { if (!$('pop').hidden && !e.target.closest('#pop') && !e.target.closest('#newBtn')) openPop(false); });
     $('resetMachine').addEventListener('click', restart);
     $('machine').addEventListener('pointerdown', onDown);
     $('tray').addEventListener('pointerdown', onDown);
-    setMode('make');
   }
 
   /* ================= tabs + boot ================= */
   function setupTabs() {
     const tabs = document.querySelectorAll('nav.views [role="tab"]');
+    const sub = $('subnav'), home = sub.parentElement;
     tabs.forEach(t => t.addEventListener('click', () => {
       tabs.forEach(o => { o.setAttribute('aria-selected', o === t); $(o.getAttribute('aria-controls')).hidden = o !== t; });
       $('sizeToggle').hidden = !!t.dataset.nosize;
+      const dots = t.id === 'tab-dots';
+      document.body.classList.toggle('dotsmode', dots);
+      if (dots) { document.querySelector('header.top .brand').after(sub); if (M.prob) relayout(); else setMode(M.mode); }
+      else home.prepend(sub);
     }));
   }
   function start() {
