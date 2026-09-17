@@ -88,7 +88,8 @@
   /* ---------- layout + panels ---------- */
   .layout { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 22px; align-items: start; }
   .layout.wide-side { grid-template-columns: 300px minmax(0, 1fr); }
-  @media (max-width: 860px) { .layout, .layout.wide-side { grid-template-columns: 1fr; } }
+  .layout.dots-side { grid-template-columns: 250px minmax(0, 1fr); }
+  @media (max-width: 860px) { .layout, .layout.wide-side, .layout.dots-side { grid-template-columns: 1fr; } }
   .panel { border-radius: 22px; background: var(--surface); border: 1px solid var(--line); padding: 18px; backdrop-filter: blur(6px); }
   .panel h2 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
   .panel .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
@@ -259,9 +260,9 @@
   .machine-wrap { overflow-x: auto; padding: 4px 2px 8px; }
   .machine-wrap { --bw: 150px; --ds: 20px; }
   .machine { display: grid; gap: 10px; width: max-content; margin: 0 auto; }
-  .mrow { display: grid; grid-template-columns: 84px auto; align-items: center; gap: 10px; }
+  .mrow { display: grid; grid-template-columns: 66px auto; align-items: center; gap: 10px; }
   .mrow.result { margin-top: 4px; padding-top: 12px; border-top: 2px solid rgba(255,255,255,.28); }
-  .mrow .rlabel { font-family: "Fredoka", sans-serif; font-size: 26px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mrow .rlabel { font-family: "Fredoka", sans-serif; font-size: 22px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .mrow .rlabel.anti { color: var(--pink); }
   .mrow .rlabel.eq { color: var(--muted); }
   .mrow .boxes { display: flex; gap: 8px; }
@@ -296,7 +297,7 @@
   .mbox .cancelall { border: 1px solid var(--line); background: rgba(255,255,255,.05); border-radius: 9px; padding: 3px 8px; font-size: 11px; font-weight: 800; color: var(--muted); align-self: center; }
   .mbox .cancelall:hover { color: var(--text); border-color: var(--text); }
 
-  .readout { width: max-content; margin: 8px auto 0; display: grid; grid-template-columns: 84px auto; gap: 10px; align-items: center; }
+  .readout { width: max-content; margin: 8px auto 0; display: grid; grid-template-columns: 66px auto; gap: 10px; align-items: center; }
   .readout .check { justify-self: end; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #120a22; background: var(--teal); box-shadow: 0 0 18px rgba(46,242,207,.6); animation: pop .3s ease-out; }
   .readout .cells { display: flex; gap: 8px; }
   .readout .cell { width: var(--bw); text-align: center; font-family: "Fredoka", sans-serif; font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); position: relative; }
@@ -318,8 +319,10 @@
   .mbox .hand.anti .pile i { background: transparent; border: 2px solid var(--pink); }
   .mbox .hand:hover { border-color: #fff; }
 
-  .coach { margin-top: 14px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: center; }
-  @media (max-width: 700px) { .coach { grid-template-columns: 1fr; } }
+  .stage { display: flex; flex-wrap: wrap; gap: 18px 12px; align-items: flex-start; }
+  .stage .machine-wrap { flex: 1 1 auto; min-width: 0; }
+  .stage .notebook { flex: 0 0 auto; margin: 6px 6px 0 auto; }
+  .coach { margin-top: 14px; }
   .coach .say { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); font-size: 14.5px; color: var(--muted); min-height: 46px; }
   .coach .say b { color: var(--text); }
   .coach .say.win { border-color: var(--teal); color: var(--text); background: rgba(46,242,207,.1); }
@@ -327,21 +330,33 @@
   .coach .say.oops { border-color: rgba(255,95,176,.5); }
 
   /* notebook page for the regrouping section */
-  .notebook { position: relative; padding: 18px 26px 16px 40px; border-radius: 6px 14px 14px 6px; background: #fbf7ec; background-image: repeating-linear-gradient(180deg, transparent 0 35px, rgba(120,160,220,.35) 35px 36px); color: #1b1633; font-family: "Fredoka", sans-serif; font-variant-numeric: tabular-nums; box-shadow: 0 8px 30px rgba(0,0,0,.35); min-width: 200px; }
+  .notebook { position: relative; padding: 16px 20px 14px 36px; border-radius: 6px 14px 14px 6px; background: #fbf7ec; background-image: repeating-linear-gradient(180deg, transparent 0 35px, rgba(120,160,220,.35) 35px 36px); color: #1b1633; font-family: "Fredoka", sans-serif; font-variant-numeric: tabular-nums; box-shadow: 0 8px 30px rgba(0,0,0,.35); min-width: 200px; }
   .notebook::before { content: ''; position: absolute; top: 0; bottom: 0; left: 26px; width: 2px; background: rgba(255,95,176,.55); }
   .notebook .nb-cols { display: flex; justify-content: flex-end; align-items: flex-end; min-height: 36px; }
-  .notebook .nb-col { width: 48px; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start; }
+  .notebook .nb-col { width: 42px; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start; }
   .notebook .nb-col span { position: relative; line-height: 36px; font-size: 32px; font-weight: 600; }
   .notebook .nb-col span.ink { color: #2a6fd6; font-size: 24px; line-height: 30px; }
   .notebook .nb-col span.x::after { content: ''; position: absolute; left: -3px; right: -3px; top: 50%; height: 3px; border-radius: 2px; background: #e0327c; transform: rotate(-20deg); }
   .notebook .nb-row { display: flex; justify-content: flex-end; position: relative; line-height: 36px; font-size: 32px; font-weight: 600; }
-  .notebook .nb-row span { width: 48px; text-align: center; }
+  .notebook .nb-row span { width: 42px; text-align: center; }
   .notebook .nb-row .op { position: absolute; left: -30px; width: auto; color: #6a6480; }
   .notebook .nb-rule { height: 3px; background: #1b1633; margin: 3px 0 4px; border-radius: 2px; }
-  .notebook .nb-row.ans input { width: 42px; height: 36px; margin: 0 3px; text-align: center; font-family: inherit; font-size: 28px; font-weight: 600; border: 0; border-bottom: 3px dashed #b9b3c9; background: transparent; color: #2a6fd6; border-radius: 0; }
+  .notebook .nb-row.ans input { width: 38px; height: 36px; margin: 0 3px; text-align: center; font-family: inherit; font-size: 28px; font-weight: 600; border: 0; border-bottom: 3px dashed #b9b3c9; background: transparent; color: #2a6fd6; border-radius: 0; }
   .notebook .nb-row.ans input:disabled { border-bottom-color: #ddd8e6; }
   .notebook .nb-row.ans input:focus { outline: none; border-bottom-color: #2a6fd6; }
   .notebook .nb-row.ans.ok input { color: #12a37a; border-bottom-color: #12a37a; }
+  .notebook .nb-row.carry { min-height: 24px; line-height: 24px; }
+  .notebook .nb-row.carry span { font-size: 18px; color: #2a6fd6; font-weight: 700; }
+  .notebook .nb-row.ans span { min-height: 40px; border-bottom: 3px dashed #ddd8e6; margin: 0 3px; width: 38px; line-height: 40px; }
+  .notebook .nb-row.ans span.two { font-size: 22px; color: #2a6fd6; }
+  .notebook .nb-row.ans span.filled { border-bottom-color: #b9b3c9; }
+  .notebook .nb-row.ans.ok span { color: #12a37a; border-bottom-color: #12a37a; }
+  .mbox .count .was { color: var(--dim); opacity: .75; }
+  .mrow.drop { margin-top: -4px; }
+  .mrow.drop .boxes { gap: 8px; }
+  .dropbtn { width: var(--bw); border: 1px solid var(--line); background: rgba(255,255,255,.05); border-radius: 999px; padding: 6px 0; font-size: 12.5px; font-weight: 800; color: var(--text); transition: all .15s; }
+  .dropbtn:hover { border-color: var(--teal); color: var(--teal); }
+  .dropbtn:disabled { opacity: .3; cursor: default; }
   .notebook .nb-check { position: absolute; top: -14px; right: -14px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; font-weight: 800; color: #120a22; background: var(--teal); box-shadow: 0 0 18px rgba(46,242,207,.7); animation: pop .3s ease-out; }
   .notebook .nb-lock { position: absolute; bottom: 10px; right: 10px; font-family: "Nunito", sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #a49ebb; }
 
@@ -475,7 +490,7 @@
     <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">3</span>Subtract</button>
     <button type="button" role="tab" data-mode="regroup" aria-selected="false"><span class="num">4</span>Regroup</button>
   </div>
-  <div class="layout wide-side">
+  <div class="layout dots-side">
     <aside class="panel">
       <h2 id="plistTitle">Numbers</h2>
       <p class="hint" id="plistHint"></p>
@@ -491,9 +506,12 @@
           <button type="button" id="resetMachine">Start over</button>
         </div>
       </div>
-      <div class="machine-wrap">
-        <div class="machine" id="machine"></div>
-        <div class="readout" id="readout"></div>
+      <div class="stage">
+        <div class="machine-wrap">
+          <div class="machine" id="machine"></div>
+          <div class="readout" id="readout"></div>
+        </div>
+        <div class="notebook" id="notebook" hidden></div>
       </div>
       <div class="tray" id="tray" hidden>
         <div class="supply" data-n="1"><div class="pile"><i></i></div><b>1</b></div>
@@ -503,7 +521,6 @@
       </div>
       <div class="coach">
         <div class="say" id="coach"></div>
-        <div class="notebook" id="notebook" hidden></div>
       </div>
     </main>
   </div>
@@ -820,13 +837,13 @@
     },
     add: {
       title: 'Addition', hint: 'Both numbers sit in their own rows. Drag every dot straight down into the answer row, then tidy up any box that holds ten or more.',
-      geo: { BW: 150, DS: 20, GX: 27, GY: 27, COLS: 5, FH: 150, FHS: 76 },
+      geo: { BW: 138, DS: 19, GX: 24, GY: 24, COLS: 5, FH: 140, FHS: 68 },
       list: ADD_LIST,
-      rules: [['↓', 'A dot only moves <b>straight down</b> into the box below it — ones stay ones, tens stay tens.'], ['10', 'When an answer box holds ten or more, drag its <b>ten</b> handle into the box on the left: the ten become one dot.'], ['×', 'Drop a dot outside the boxes and it is gone — the answer will come out short.']],
+      rules: [['↓', 'Drag dots <b>straight down</b> one at a time, or tap a column’s <b>↓ drop</b> button to send that whole column below the line. The notebook writes what lands there.'], ['10', 'When an answer box holds ten or more, drag its <b>ten</b> handle into the box on the left: the ten become one dot and a carry appears on the notebook.'], ['×', 'Drop a dot outside the boxes and it is gone — the answer will come out short.']],
     },
     sub: {
       title: 'Subtraction', hint: 'The number being taken away is made of anti-dots. Drag everything down into the answer row and let dots and anti-dots cancel.',
-      geo: { BW: 150, DS: 20, GX: 27, GY: 27, COLS: 5, FH: 150, FHS: 76 },
+      geo: { BW: 138, DS: 19, GX: 24, GY: 24, COLS: 5, FH: 140, FHS: 68 },
       list: SUB_LIST,
       rules: [['×', 'Drop a dot onto an anti-dot and they <b>cancel</b> — both disappear.'], ['1', 'Not enough dots in a box? Drag one dot from the box on the <b>left</b> into it and it unexplodes into ten.'], ['↓', 'Dots only move <b>straight down</b> into the answer row.']],
     },
@@ -888,7 +905,7 @@
   }
   function loadProblem(i, custom) {
     const p = custom || MODES[M.mode].list[i];
-    M.prob = { ...p, idx: custom ? null : i }; M.unlocked = false; M.solved = false; M.hist = [];
+    M.prob = { ...p, idx: custom ? null : i }; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {};
     M.geo = MODES[M.mode].geo;
     document.querySelectorAll('.prob').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
     const g = M.geo;
@@ -898,11 +915,11 @@
       $('mTitle').innerHTML = `<span>Make</span>${p.t.toLocaleString()}`;
     } else if (M.mode === 'add') {
       M.n = Math.max(String(p.a).length, String(p.b).length) + 1;
-      M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS }, { kind: 'src', label: '+ ' + p.b, fh: g.FHS }, { kind: 'result', label: '=', fh: g.FH }];
+      M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS, digits: digitsOf(p.a) }, { kind: 'src', label: '+ ' + p.b, fh: g.FHS, digits: digitsOf(p.b) }, { kind: 'result', label: '=', fh: g.FH }];
       $('mTitle').innerHTML = `${p.a} + ${p.b}`;
     } else if (M.mode === 'sub') {
       M.n = String(p.a).length;
-      M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS }, { kind: 'src', anti: true, label: '− ' + p.b, fh: g.FHS }, { kind: 'result', label: '=', fh: g.FH }];
+      M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS, digits: digitsOf(p.a) }, { kind: 'src', anti: true, label: '− ' + p.b, fh: g.FHS, digits: digitsOf(p.b) }, { kind: 'result', label: '=', fh: g.FH }];
       $('mTitle').innerHTML = `${p.a} − ${p.b}`;
     } else {
       M.n = String(p.a).length;
@@ -914,7 +931,8 @@
     if (M.mode === 'add') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, false, gridSpot(1, k)); }); }
     if (M.mode === 'sub') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, true, gridSpot(1, k)); }); }
     if (M.mode === 'regroup') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); buildNotebook(); }
-    $('notebook').hidden = M.mode !== 'regroup';
+    if (M.mode === 'add') buildNotebookAdd();
+    $('notebook').hidden = !(M.mode === 'regroup' || M.mode === 'add');
     refresh();
   }
   function restart() { if (M.prob) loadProblem(M.prob.idx, M.prob.idx == null ? M.prob : null); }
@@ -925,13 +943,19 @@
     const host = $('machine'); host.innerHTML = '';
     const wrap = host.parentElement; wrap.style.setProperty('--bw', M.geo.BW + 'px'); wrap.style.setProperty('--ds', M.geo.DS + 'px');
     M.rows.forEach((row, r) => {
+      if (row.kind === 'result') {
+        // one button per place column: drop every dot above it into the answer row
+        const dl = el('div', 'mrow drop'); dl.appendChild(el('div', 'rlabel'));
+        const db = el('div', 'boxes');
+        for (let k = M.n - 1; k >= 0; k--) { const b = document.createElement('button'); b.type = 'button'; b.className = 'dropbtn'; b.id = `drop-${k}`; b.textContent = '↓ drop'; b.addEventListener('click', () => dropColumn(k)); db.appendChild(b); }
+        dl.appendChild(db); host.appendChild(dl);
+      }
       const line = el('div', 'mrow ' + row.kind + (row.anti ? ' anti' : ''));
       const lab = el('div', 'rlabel' + (row.anti ? ' anti' : '') + (row.label === '=' ? ' eq' : ''), row.label); line.appendChild(lab);
       const boxes = el('div', 'boxes');
       for (let k = M.n - 1; k >= 0; k--) {
         const box = el('div', 'mbox'); box.id = `mbox-${r}-${k}`;
         box.innerHTML = `<div class="plabel"><span>${r === 0 ? (PLACE[k] || '10^' + k) : ''}</span><b>${r === 0 ? (k === 0 ? '1' : '1' + '0'.repeat(k)) : ''}</b></div>`;
-        if (row.kind === 'src') { const ab = document.createElement('button'); ab.type = 'button'; ab.className = 'allbtn'; ab.textContent = 'all ↓'; ab.addEventListener('click', () => moveAll(r, k)); box.appendChild(ab); }
         const f = el('div', 'dotfield'); f.id = `field-${r}-${k}`; f.dataset.r = r; f.dataset.k = k; f.style.setProperty('--fh', row.fh + 'px'); box.appendChild(f);
         const c = el('div', 'count'); c.id = `count-${r}-${k}`; box.appendChild(c);
         if (row.kind !== 'src') { const h = el('div', 'hand'); h.id = `hand-${r}-${k}`; h.dataset.r = r; h.dataset.k = k; h.hidden = true; h.innerHTML = '<div class="pile">' + '<i></i>'.repeat(10) + '</div><span>ten</span>'; box.appendChild(h); }
@@ -985,6 +1009,7 @@
     sparks(r, toK, dropLocal.x, dropLocal.y, 14); flash(r, toK, 'pour');
     spawnDot(r, toK, group[0].anti, dropLocal, true);
     noteHist(fromK, toK);
+    if (M.mode === 'add') M.carry[toK] = (M.carry[toK] || 0) + 1;
     refresh();
   }
   // one dot carried into the box on its right becomes ten there, clustered where it landed
@@ -997,6 +1022,7 @@
     }
     sparks(r, toK, dropLocal.x, dropLocal.y, 10); flash(r, toK, 'pour');
     noteHist(fromK, toK);
+    if (M.mode === 'add' && M.carry[fromK]) M.carry[fromK]--;
     refresh();
   }
   function cancelPair(a, b) {
@@ -1011,9 +1037,9 @@
     const n = Math.min(ds.length, as.length);
     for (let i = 0; i < n; i++) setTimeout(() => cancelPair(ds[i], as[i]), i * 70);
   }
-  function moveAll(r, k) {
+  function dropColumn(k) {
     const to = resultRow(); if (to < 0) return;
-    M.dots.filter(d => d.r === r && d.k === k).forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
+    M.dots.filter(d => M.rows[d.r].kind === 'src' && d.k === k).forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
   }
 
   /* ---- dragging (single dots, or a hand of ten) ---- */
@@ -1124,15 +1150,17 @@
         count.className = 'count';
         if (c.anti && c.dots) count.innerHTML = `<span>${c.dots}</span><small>dots</small><span>${c.anti}</span><small>anti</small>`;
         else if (c.anti) { count.innerHTML = `<span>−${c.anti}</span>`; count.classList.add('neg'); }
+        else if (!c.dots && row.digits && row.digits[k] != null) { count.innerHTML = `<span class="was">${row.digits[k]}</span>`; count.classList.add('ok'); }   // the number stays written even after its dots move down
         else { count.innerHTML = `<span>${c.dots}</span>`; count.classList.add(c.dots >= 10 && M.mode !== 'regroup' ? 'hot' : 'ok'); }
         box.classList.toggle('full', row.kind !== 'src' && M.mode !== 'regroup' && ((c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots)));
         const ca = $(`cancel-${r}-${k}`); if (ca) ca.hidden = !(c.dots && c.anti);
         const h = $(`hand-${r}-${k}`); if (h) { const tenD = c.dots >= 10 && !c.anti, tenA = c.anti >= 10 && !c.dots; h.hidden = !(tenD || tenA); h.classList.toggle('anti', tenA); }
-        const ab = box.querySelector('.allbtn'); if (ab) ab.hidden = !(c.dots || c.anti);
       }
     });
+    for (let k = 0; k < M.n; k++) { const b = $(`drop-${k}`); if (b) b.disabled = !M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); }
     renderReadout();
     if (M.mode === 'regroup') renderNotebook();
+    if (M.mode === 'add') renderNotebookAdd();
     renderCoach();
   }
   function describe(r) {
@@ -1177,6 +1205,22 @@
     const chk = nb.querySelector('.nb-check');
     if (win && !chk) nb.insertAdjacentHTML('beforeend', '<div class="nb-check">✓</div>');
     if (!win && chk) chk.remove();
+  }
+  function buildNotebookAdd() {
+    const nb = $('notebook'), p = M.prob, a = digitsOf(p.a), b = digitsOf(p.b);
+    const row = (ds) => Array.from({ length: M.n }, (_, i) => { const d = ds[M.n - 1 - i]; return `<span>${d == null ? '' : d}</span>`; }).join('');
+    const blank = Array.from({ length: M.n }, (_, i) => `<span data-k="${M.n - 1 - i}"></span>`).join('');
+    nb.innerHTML = `<div class="nb-row carry" id="nbCarry">${blank}</div><div class="nb-row">${row(a)}</div><div class="nb-row sub"><span class="op">+</span>${row(b)}</div><div class="nb-rule"></div><div class="nb-row ans" id="nbAnsAdd">${blank}</div>`;
+  }
+  function renderNotebookAdd() {
+    const st = status(), r = st.row, nb = $('notebook');
+    nb.querySelectorAll('#nbCarry span').forEach(sp => { const c = M.carry[+sp.dataset.k] || 0; sp.textContent = c ? String(c) : ''; });
+    // each answer cell shows exactly what sits in that box below the line — 15 stays 15 until the student carries
+    nb.querySelectorAll('#nbAnsAdd span').forEach(sp => { const k = +sp.dataset.k, c = counts(r, k); const show = c.dots > 0; sp.textContent = show ? String(c.dots) : ''; sp.className = (c.dots >= 10 ? 'two ' : '') + (show ? 'filled' : ''); });
+    $('nbAnsAdd').classList.toggle('ok', st.win);
+    const chk = nb.querySelector('.nb-check');
+    if (st.win && !chk) nb.insertAdjacentHTML('beforeend', '<div class="nb-check">✓</div>');
+    if (!st.win && chk) chk.remove();
   }
   function checkAnswer() {
     const inputs = [...$('notebook').querySelectorAll('input')];
