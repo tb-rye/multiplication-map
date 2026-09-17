@@ -281,9 +281,13 @@
   .mbox .allbtn { position: absolute; top: 2px; right: 6px; z-index: 3; border: 1px solid var(--line); background: #1c1336; border-radius: 999px; padding: 2px 8px; font-size: 10.5px; font-weight: 800; color: var(--muted); }
   .mbox .allbtn:hover { color: var(--text); border-color: var(--text); }
   .dotfield { position: relative; height: var(--fh, 120px); border-radius: 10px; touch-action: none; }
-  .dot { position: absolute; width: var(--ds, 22px); height: var(--ds, 22px); border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(46,242,207,.6); cursor: grab; touch-action: none; transition: transform .3s, opacity .3s; z-index: 2; }
+  .dot { --dc: var(--teal); position: absolute; width: var(--ds, 22px); height: var(--ds, 22px); border-radius: 50%; background: var(--dc); box-shadow: 0 0 8px var(--dc); cursor: grab; touch-action: none; transition: transform .3s, opacity .3s, background .35s, box-shadow .35s; z-index: 2; }
   .dot.anti { background: transparent; border: 3px solid var(--pink); box-shadow: 0 0 8px rgba(255,95,176,.6); }
+  .dot.pro { box-shadow: 0 0 0 2px rgba(255,255,255,.85), 0 0 12px var(--dc); }   /* ten that are ready to become one dot of the next place */
   .dot.ten { box-shadow: 0 0 0 2px #fff, 0 0 12px rgba(255,255,255,.7); }
+  .keyrow { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; margin: 10px auto 0; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .keyrow span { display: inline-flex; align-items: center; gap: 6px; }
+  .keyrow i { width: 12px; height: 12px; border-radius: 50%; background: var(--dc); box-shadow: 0 0 6px var(--dc); }
   .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; }
   .dot.spawn { animation: pop .3s ease-out; }
   .dot.gone { transform: scale(0); opacity: 0; }
@@ -311,13 +315,8 @@
   .tray .supply:hover { border-color: var(--line); color: var(--text); }
   .tray .supply b { font-family: "Fredoka", sans-serif; font-size: 20px; color: var(--text); }
   .pile { display: grid; grid-template-columns: repeat(5, 14px); gap: 4px; pointer-events: none; }
-  .pile i { width: 14px; height: 14px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 6px rgba(46,242,207,.6); }
+  .pile i { width: 14px; height: 14px; border-radius: 50%; background: #b8fff1; box-shadow: 0 0 6px rgba(184,255,241,.6); }
   .tray .trayhint { font-size: 12px; font-weight: 800; color: var(--dim); }
-  .mbox .hand { display: flex; align-items: center; gap: 8px; align-self: center; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.06); border-radius: 999px; padding: 4px 10px 4px 6px; font-size: 11px; font-weight: 800; color: var(--text); cursor: grab; touch-action: none; }
-  .mbox .hand .pile { grid-template-columns: repeat(5, 8px); gap: 2px; }
-  .mbox .hand .pile i { width: 8px; height: 8px; box-shadow: none; }
-  .mbox .hand.anti .pile i { background: transparent; border: 2px solid var(--pink); }
-  .mbox .hand:hover { border-color: #fff; }
 
   .stage { display: flex; flex-wrap: wrap; gap: 18px 12px; align-items: flex-start; }
   .stage .machine-wrap { flex: 1 1 auto; min-width: 0; }
@@ -510,6 +509,7 @@
         <div class="machine-wrap">
           <div class="machine" id="machine"></div>
           <div class="readout" id="readout"></div>
+        <div class="keyrow" id="keyrow"></div>
         </div>
         <div class="notebook" id="notebook" hidden></div>
       </div>
@@ -819,6 +819,7 @@
 
   /* ================= VIEW 4: EXPLODING DOTS ================= */
   const PLACE = ['ones', 'tens', 'hundreds', 'thousands', 'ten-thousands', 'hundred-thousands'];
+  const COL = ['#b8fff1', '#2ef2cf', '#12c4a6', '#0a8f7a', '#075f52', '#04403a'];   // one shade of teal per place, ones lightest
   const ADD_LIST = [
     { h: 'Two digits' }, { a: 47, b: 38 }, { a: 65, b: 29 }, { a: 58, b: 76 },
     { h: 'Three digits' }, { a: 358, b: 287 }, { a: 247, b: 185 }, { a: 368, b: 457 }, { a: 596, b: 247 }, { a: 709, b: 293 },
@@ -833,13 +834,13 @@
       title: 'Numbers', hint: 'Pick a number, then drag dots from the tray into the boxes until the machine holds exactly that number.',
       geo: { BW: 180, DS: 22, GX: 32, GY: 32, COLS: 5, FH: 200 },
       list: [{ h: 'Two digits' }, { t: 47 }, { t: 83 }, { h: 'Three digits' }, { t: 138 }, { t: 356 }, { t: 856 }, { t: 409 }, { h: 'Four digits' }, { t: 1204 }, { t: 2050 }, { t: 3417 }],
-      rules: [['1', 'Drag 1, 5 or 10 dots in from the tray. They land as single dots you can move one at a time.'], ['10', 'When a box holds ten or more, a <b>ten</b> handle appears. Drag it into the box on the left and the ten become one dot; one dot dragged to its <b>right</b> becomes ten.'], ['×', 'Drop a dot anywhere outside the boxes to throw it away.']],
+      rules: [['1', 'Drag 1, 5 or 10 dots in from the tray. They land as single dots you can move one at a time.'], ['10', 'Each place has its own shade — ones are lightest. When a box holds ten, those ten turn the <b>next</b> shade. Grab any one of them and all ten come along; drop them in the box on the left and they become one dot.'], ['×', 'Drop a dot anywhere outside the boxes to throw it away.']],
     },
     add: {
       title: 'Addition', hint: 'Both numbers sit in their own rows. Drag every dot straight down into the answer row, then tidy up any box that holds ten or more.',
       geo: { BW: 138, DS: 19, GX: 24, GY: 24, COLS: 5, FH: 140, FHS: 68 },
       list: ADD_LIST,
-      rules: [['↓', 'Drag dots <b>straight down</b> one at a time, or tap a column’s <b>↓ drop</b> button to send that whole column below the line. The notebook writes what lands there.'], ['10', 'When an answer box holds ten or more, drag its <b>ten</b> handle into the box on the left: the ten become one dot and a carry appears on the notebook.'], ['×', 'Drop a dot outside the boxes and it is gone — the answer will come out short.']],
+      rules: [['↓', 'Drag dots <b>straight down</b> one at a time, or tap a column’s <b>↓ drop</b> button to send that whole column below the line. The notebook writes what lands there.'], ['10', 'When an answer box holds ten, those ten turn the next shade. Grab one, carry all ten into the box on the left, and they become one dot — a carry appears on the notebook.'], ['×', 'Drop a dot outside the boxes and it is gone — the answer will come out short.']],
     },
     sub: {
       title: 'Subtraction', hint: 'The number being taken away is made of anti-dots. Drag everything down into the answer row and let dots and anti-dots cancel.',
@@ -851,10 +852,10 @@
       title: 'Regrouping', hint: 'The standard algorithm, one column at a time. Rearrange the dots so every column has enough to take away from, and watch the notebook rewrite the number as you go.',
       geo: { BW: 170, DS: 22, GX: 30, GY: 30, COLS: 5, FH: 150 },
       list: [{ h: 'Across zeros' }, { a: 500, b: 134 }, { a: 403, b: 178 }, { a: 700, b: 256 }, { a: 1000, b: 463 }, { h: 'One borrow' }, { a: 82, b: 37 }, { a: 645, b: 218 }, { a: 531, b: 274 }],
-      rules: [['1', 'Drag one dot into the box on its <b>right</b> and it becomes ten. The notebook crosses out the old digits and writes the new ones.'], ['✓', 'When every column has at least as many dots as the digit under it, a check mark appears and the answer line unlocks.'], ['10', 'Changed your mind? Drag the <b>ten</b> handle back to the box on the left and the ten become one again.']],
+      rules: [['1', 'Drag one dot into the box on its <b>right</b> and it becomes ten. The notebook crosses out the old digits and writes the new ones.'], ['✓', 'When every column has at least as many dots as the digit under it, a check mark appears and the answer line unlocks.'], ['10', 'Changed your mind? When a box holds ten again, grab one of the highlighted ten and carry them back to the <b>left</b>: they become one dot.']],
     },
   };
-  let M = { mode: 'make', n: 3, rows: [], dots: [], prob: null, seq: 0, done: new Set(), hist: [], geo: MODES.make.geo, unlocked: false, solved: false };
+  let M = { mode: 'make', n: 3, rows: [], dots: [], prob: null, seq: 0, done: new Set(), hist: [], geo: MODES.make.geo, unlocked: false, solved: false, pro: new Set() };
   let drag = null;
 
   const field = (r, k) => $(`field-${r}-${k}`);
@@ -928,6 +929,7 @@
       $('mTitle').innerHTML = `${p.a} − ${p.b}`;
     }
     buildMachine();
+    $('keyrow').innerHTML = Array.from({ length: M.n }, (_, k) => `<span><i style="--dc:${COL[k] || COL[5]}"></i>${PLACE[k] || '10^' + k}</span>`).reverse().join('');
     if (M.mode === 'add') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, false, gridSpot(1, k)); }); }
     if (M.mode === 'sub') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, true, gridSpot(1, k)); }); }
     if (M.mode === 'regroup') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); buildNotebook(); }
@@ -958,7 +960,6 @@
         box.innerHTML = `<div class="plabel"><span>${r === 0 ? (PLACE[k] || '10^' + k) : ''}</span><b>${r === 0 ? (k === 0 ? '1' : '1' + '0'.repeat(k)) : ''}</b></div>`;
         const f = el('div', 'dotfield'); f.id = `field-${r}-${k}`; f.dataset.r = r; f.dataset.k = k; f.style.setProperty('--fh', row.fh + 'px'); box.appendChild(f);
         const c = el('div', 'count'); c.id = `count-${r}-${k}`; box.appendChild(c);
-        if (row.kind !== 'src') { const h = el('div', 'hand'); h.id = `hand-${r}-${k}`; h.dataset.r = r; h.dataset.k = k; h.hidden = true; h.innerHTML = '<div class="pile">' + '<i></i>'.repeat(10) + '</div><span>ten</span>'; box.appendChild(h); }
         if (row.kind !== 'src') { const ca = document.createElement('button'); ca.type = 'button'; ca.className = 'cancelall'; ca.id = `cancel-${r}-${k}`; ca.textContent = 'Cancel all pairs'; ca.hidden = true; ca.addEventListener('click', () => cancelAll(r, k)); box.appendChild(ca); }
         boxes.appendChild(box);
       }
@@ -977,7 +978,7 @@
     const d = { id: ++M.seq, r, k, anti, x: clampX(pos.x), y: clampY(pos.y, r) };
     M.dots.push(d);
     const e = el('div', 'dot' + (anti ? ' anti' : '') + (pop ? ' spawn' : '')); e.dataset.id = d.id;
-    e.style.left = d.x + 'px'; e.style.top = d.y + 'px';
+    e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; e.style.setProperty('--dc', COL[k] || COL[5]);
     field(r, k).appendChild(e);
     return d;
   }
@@ -985,7 +986,7 @@
   function placeDot(d, r, k, pos) {
     d.r = r; d.k = k; d.x = clampX(pos.x); d.y = clampY(pos.y, r);
     const e = dotEl(d.id); if (!e) return;
-    e.style.left = d.x + 'px'; e.style.top = d.y + 'px';
+    e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; e.style.setProperty('--dc', COL[k] || COL[5]);
     if (e.parentElement !== field(r, k)) { field(r, k).appendChild(e); e.classList.remove('spawn'); void e.offsetWidth; e.classList.add('spawn'); }
   }
   function removeDot(id, animateTo) {
@@ -1042,29 +1043,28 @@
     M.dots.filter(d => M.rows[d.r].kind === 'src' && d.k === k).forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
   }
 
-  /* ---- dragging (single dots, or a hand of ten) ---- */
+  /* ---- dragging (single dots, or the highlighted ten) ---- */
   function onDown(e) {
     if (e.button > 0) return;
-    const sup = e.target.closest('.supply'), hand = e.target.closest('.hand'), t = e.target.closest('.dot');
-    if (!sup && !hand && !t) return;
+    const sup = e.target.closest('.supply'), t = e.target.closest('.dot');
+    if (!sup && !t) return;
     e.preventDefault();
     const supply = sup ? +sup.dataset.n : 0;   // 1, 5 or 10 fresh dots from the tray
     let group = [];
-    if (hand) {
-      // the ten handle: pick up ten of a kind from this box
-      const r = +hand.dataset.r, k = +hand.dataset.k, anti = hand.classList.contains('anti');
-      group = M.dots.filter(d => d.r === r && d.k === k && d.anti === anti).slice(0, 10);
-      if (group.length < 10) return;
-    } else if (t) {
+    if (t) {
       const dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('gone')) return;
-      group = [dot];   // dots always move one at a time; only the handle carries ten
+      if (M.pro.has(dot.id)) {
+        // grabbing one of the highlighted ten picks up all ten
+        group = M.dots.filter(d => d !== dot && M.pro.has(d.id) && d.r === dot.r && d.k === dot.k); group.unshift(dot);
+      } else group = [dot];
     }
     const anti = supply ? false : group[0].anti, { DS, COLS } = M.geo;
     const n = supply || group.length;
+    const gcol = supply ? COL[0] : COL[Math.min(5, group[0].k + (n === 10 ? 1 : 0))];
     // ghosts live on <body>: panels use backdrop-filter, which would trap position:fixed inside them
     const ghosts = Array.from({ length: n }, (_, i) => {
       const g = el('div', 'dot' + (anti ? ' anti' : '') + ' dragging');
-      g.style.width = g.style.height = DS + 'px';
+      g.style.width = g.style.height = DS + 'px'; g.style.setProperty('--dc', gcol);
       const col = i % COLS, row = Math.floor(i / COLS);
       g.dataset.ox = n > 1 ? (col - 2) * (DS + 4) : 0; g.dataset.oy = n > 1 ? (row - (n > COLS ? 0.5 : 0)) * (DS + 4) : 0;
       document.body.appendChild(g); return g;
@@ -1080,8 +1080,8 @@
     if (r === dg.fromR) {
       if (k === dg.fromK) return true;
       if (M.rows[r].kind === 'src') return false;
-      if (dg.group.length === 10) return k === dg.fromK + 1;   // the ten handle travels left
-      return k === dg.fromK - 1;                                // one dot travels right and unexplodes
+      if (dg.group.length === 10 && k === dg.fromK + 1) return true;   // the ten travel left and become one
+      return k === dg.fromK - 1;                                        // one dot travels right and unexplodes (the rest of a ten stay put)
     }
     return M.rows[dg.fromR].kind === 'src' && M.rows[r].kind === 'result' && k === dg.fromK;   // straight down into the answer row
   }
@@ -1124,6 +1124,7 @@
       group.forEach((d, i) => { const g = ghosts[i]; placeDot(d, r, k, { x: local.x + +g.dataset.ox, y: local.y + +g.dataset.oy }); });
       refresh(); return;
     }
+    if (legalTarget(r, k, dg) && !single && k === fromK - 1) { done(); restore(group.slice(1)); unexplode(dot, r, k, local); return; }
     if (legalTarget(r, k, dg) && !single) {
       // converge: the ten ghosts slide to the drop point, then one dot appears there
       ghosts.forEach(g => { g.style.transition = 'left .3s ease-in, top .3s ease-in, transform .3s'; g.style.left = (client.x - DS / 2) + 'px'; g.style.top = (client.y - DS / 2) + 'px'; g.style.transform = 'scale(.6)'; });
@@ -1135,8 +1136,8 @@
     done(); restore(group); flash(r, k, 'shake');
     if (r !== fromR) coachSay(M.rows[fromR].kind === 'src' ? `A dot moves <b>straight down</b> into the box right under it.` : `Dots in the answer row stay in the answer row.`, true);
     else if (M.rows[r].kind === 'src') coachSay(`The top rows stay as they are — the moving happens in the answer row.`, true);
-    else if (!single) coachSay(`The ten handle only goes into the box on its <b>left</b>.`, true);
-    else if (k > fromK) coachSay(`One dot on its own can't go left. It takes <b>ten</b> to make one dot there — use the ten handle.`, true);
+    else if (!single) coachSay(`Ten dots travel together only into the box on their <b>left</b>.`, true);
+    else if (k > fromK) coachSay(`One dot on its own can't go left. It takes <b>ten</b> to make one dot there.`, true);
     else coachSay(`A dot only unexplodes into the box <b>right next to it</b>.`, true);
   }
 
@@ -1144,6 +1145,7 @@
   function coachSay(html, oops) { const s = $('coach'); s.classList.remove('win', 'oops'); if (oops) s.classList.add('oops'); s.innerHTML = html; }
   const settled = c => c.anti === 0 && c.dots < 10;
   function refresh() {
+    M.pro = new Set();
     M.rows.forEach((row, r) => {
       for (let k = 0; k < M.n; k++) {
         const c = counts(r, k), count = $(`count-${r}-${k}`), box = $(`mbox-${r}-${k}`);
@@ -1154,7 +1156,11 @@
         else { count.innerHTML = `<span>${c.dots}</span>`; count.classList.add(c.dots >= 10 && M.mode !== 'regroup' ? 'hot' : 'ok'); }
         box.classList.toggle('full', row.kind !== 'src' && M.mode !== 'regroup' && ((c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots)));
         const ca = $(`cancel-${r}-${k}`); if (ca) ca.hidden = !(c.dots && c.anti);
-        const h = $(`hand-${r}-${k}`); if (h) { const tenD = c.dots >= 10 && !c.anti, tenA = c.anti >= 10 && !c.dots; h.hidden = !(tenD || tenA); h.classList.toggle('anti', tenA); }
+        // ten of a kind (no other kind present) light up in the next place's colour: grab any one and all ten come along
+        const tenD = c.dots >= 10 && !c.anti, tenA = c.anti >= 10 && !c.dots;
+        const here = M.dots.filter(d => d.r === r && d.k === k && (tenD ? !d.anti : tenA ? d.anti : false)).sort((p, q) => (p.y - q.y) || (p.x - q.x));
+        const pro = row.kind === 'src' ? [] : here.slice(0, 10);
+        M.dots.filter(d => d.r === r && d.k === k).forEach(d => { const e = dotEl(d.id); if (!e) return; const on = pro.includes(d); if (on) M.pro.add(d.id); else M.pro.delete(d.id); e.classList.toggle('pro', on); e.style.setProperty('--dc', on && !d.anti ? (COL[k + 1] || COL[5]) : (COL[k] || COL[5])); });
       }
     });
     for (let k = 0; k < M.n; k++) { const b = $(`drop-${k}`); if (b) b.disabled = !M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); }
