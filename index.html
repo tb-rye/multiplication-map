@@ -281,13 +281,13 @@
   .target { display: inline-flex; align-items: baseline; gap: 14px; margin-right: 14px; vertical-align: middle; }
   .target small { font-family: var(--hand); font-weight: 700; font-size: 13.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--teal-pale); }
   .target b { font-family: var(--hand); font-weight: 800; font-size: 46px; line-height: 1; color: var(--lime); letter-spacing: .02em; }
-  .qbar { position: absolute; top: 5px; left: 12px; z-index: 2; display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 8px; background: var(--lime-ink); color: var(--lime); font-family: var(--hand); font-weight: 800; font-size: 19px; letter-spacing: .03em; font-variant-numeric: tabular-nums; white-space: nowrap; box-shadow: 2px 2px 0 rgba(0,0,0,.35); }
+  .qbar { position: absolute; top: 5px; left: 12px; z-index: 2; display: inline-flex; align-items: center; height: 30px; padding: 0 18px; border-radius: 999px; background: var(--coral); border: 1.5px solid var(--ink); color: #5C1A0C; font-family: var(--hand); font-weight: 800; font-size: 18px; letter-spacing: .02em; font-variant-numeric: tabular-nums; white-space: nowrap; box-shadow: 2px 2px 0 var(--ink); }
   .qbar:empty { display: none; }
   #dotsPanel[data-title]::before { height: 40px; }
   #dotsPanel[data-title]::after { height: 40px; }
   .machine-head .title span.meta { display: none; }
   .mrow { position: relative; }
-  .opsign { position: absolute; left: calc(-1 * var(--opw, 54px)); top: 50%; translate: 0 -50%; width: var(--opw, 54px); text-align: center; font-family: var(--hand); font-weight: 800; font-size: 44px; line-height: 1; color: var(--lime); pointer-events: none; }
+  .opsign { position: absolute; left: calc(-1 * var(--opw, 54px)); top: 50%; translate: 0 -50%; width: var(--opw, 54px); text-align: center; font-family: var(--hand); font-weight: 800; font-size: 44px; line-height: 1; color: var(--coral); pointer-events: none; }
   .machine-wrap.hasop { padding-left: var(--opw, 54px); }
   .machine-wrap.tight .opsign { font-size: 30px; }
   .tools button.opt { padding: 7px 12px; font-size: 14px; }
@@ -325,7 +325,7 @@
   .machine-wrap { padding: 2px 2px 4px; --bw: 150px; --ds: 20px; }
   .machine { display: grid; gap: 8px; width: max-content; margin: 0 auto; }
   .mrow { display: grid; grid-template-columns: auto; align-items: center; gap: 10px; }
-  .mrow.result { margin-top: 4px; padding-top: 12px; border-top: 2.5px solid var(--raised-line); }
+  .mrow.result { margin-top: 4px; padding-top: 12px; border-top: 2.5px solid var(--coral); }
   .mrow .rlabel { display: none; }
   .mrow .boxes { display: flex; gap: 8px; }
   .mbox { position: relative; width: var(--bw); border: 1.5px solid var(--panel-line); border-radius: 12px; background: var(--inset); padding: 20px 8px 4px; display: flex; flex-direction: column; gap: 2px; transition: border-color .2s, box-shadow .2s, background .2s; }
@@ -353,15 +353,14 @@
   .dot.gone { transform: scale(0); opacity: 0; }
   .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); pointer-events: none; animation: spark .5s ease-out forwards; z-index: 5; }
   @keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
-  .mbox .count { display: flex; justify-content: center; align-items: baseline; gap: 5px; font-family: var(--hand); font-size: 20px; font-weight: 800; min-height: 24px; line-height: 24px; pointer-events: none; color: var(--pc, var(--text)); }
+  .mbox .count { align-self: center; display: inline-flex; justify-content: center; align-items: baseline; gap: 5px; min-width: 40px; height: 40px; padding: 0 12px; border-radius: 999px; background: rgba(0,0,0,.5); font-family: var(--hand); font-size: 20px; font-weight: 800; line-height: 40px; pointer-events: none; color: var(--text); }
+  .mbox .count:empty { visibility: hidden; }
   .mbox .count small { font-size: 11px; color: var(--teal-pale); font-family: var(--body); font-weight: 800; }
-  .mbox .count.ok { color: var(--pc, var(--text)); }
-  .mbox .count.hot { color: var(--teal); }
-  .mbox .count.neg { color: var(--coral-text); }
-  .mbox .count .was { color: var(--muted); opacity: .8; }
+  .mbox .count.ok, .mbox .count.hot, .mbox .count.neg, .mbox .count .was { color: var(--text); }
   .mbox .cancelall { border: 1.5px solid var(--raised-line); background: var(--raised); border-radius: 9px; padding: 3px 8px; font-family: var(--hand); font-size: 11px; font-weight: 700; color: var(--teal); align-self: center; }
   .mbox .cancelall:hover { color: var(--text); border-color: var(--teal); }
 
+  .readout, .keyrow { display: none !important; }
   .readout { position: relative; width: max-content; margin: 8px auto 0; display: grid; grid-template-columns: auto; align-items: center; }
   .readout .check { position: absolute; left: -54px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: var(--spring-ink); background: var(--spring); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); animation: pop .3s ease-out; }
   .readout .cells { display: flex; gap: 8px; }
@@ -1063,15 +1062,15 @@
     g.GX = g.GY = Math.max(g.DS + 6, Math.floor((bw - 20 - g.DS) / 4));
     // vertical budget
     const top = $('machine').getBoundingClientRect().top || 160;
-    const chrome = 52 + (bw < 130 ? 0 : 26) + 0 + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
+    const chrome = 12 + 0 + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
     const avail = Math.max(200, window.innerHeight - top - chrome - 24);
     if (M.mode === 'add' || M.mode === 'sub') {
-      const fixed = 52 + 38 + 32 + 24 + 38 + (M.mode === 'sub' ? 40 : 0);   // subtraction result boxes carry a cancel-all button                             // row chrome (labelled row, plain row, drop row, gaps, result row)
+      const fixed = 52 + 38 + 32 + 24 + 38 + 48 + (M.mode === 'sub' ? 40 : 0);   // +48: the three 40px count badges   // subtraction result boxes carry a cancel-all button                             // row chrome (labelled row, plain row, drop row, gaps, result row)
       let fhs = 60, fh = avail - 2 * fhs - fixed;
       if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
       g.FHS = fhs; g.FH = Math.max(76, Math.min(150, fh));
     } else {
-      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 90 : 52)));
+      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 106 : 68)));
     }
     M.rows.forEach(r => { r.fh = r.kind === 'src' ? g.FHS : g.FH; });
     document.querySelector('.stage').classList.toggle('stack', M.stack);
@@ -1320,6 +1319,7 @@
         if (c.anti && c.dots) count.innerHTML = `<span>${c.dots}</span><small>dots</small><span>${c.anti}</span><small>anti</small>`;
         else if (c.anti) { count.innerHTML = `<span>−${c.anti}</span>`; count.classList.add('neg'); }
         else if (!c.dots && row.digits && row.digits[k] != null) { count.innerHTML = `<span class="was">${row.digits[k]}</span>`; count.classList.add('ok'); }   // the number stays written even after its dots move down
+        else if (!c.dots && (row.digits ? row.digits[k] == null : !M.dots.some(d => d.r === r && d.k > k))) count.innerHTML = '';   // leading zero: a box outside the number stays blank
         else { count.innerHTML = `<span>${c.dots}</span>`; count.classList.add(c.dots >= 10 && M.mode !== 'regroup' ? 'hot' : 'ok'); }
         box.classList.toggle('full', row.kind !== 'src' && M.mode !== 'regroup' && ((c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots)));
         const ca = $(`cancel-${r}-${k}`); if (ca) ca.hidden = !(c.dots && c.anti);
