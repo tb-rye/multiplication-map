@@ -433,6 +433,7 @@
   .dropbtn { width: var(--bw); border: 1.5px solid var(--raised-line); background: var(--raised); border-radius: 999px; padding: 5px 0; font-family: var(--hand); font-size: 12.5px; font-weight: 700; color: var(--teal); transition: all .15s; }
   .dropbtn:hover { border-color: var(--ink); background: var(--coral); color: #5C1A0C; box-shadow: 2px 2px 0 var(--ink); }
   .dropbtn:disabled { opacity: .3; cursor: default; }
+  .dropbtn.waiting:disabled { opacity: .7; color: var(--coral-text); border-color: var(--coral-deep); border-style: dashed; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -559,7 +560,6 @@
     <button type="button" role="tab" data-mode="make" aria-selected="true"><span class="num">1</span>Make a number</button>
     <button type="button" role="tab" data-mode="add" aria-selected="false"><span class="num">2</span>Add</button>
     <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">3</span>Subtract</button>
-    <button type="button" role="tab" data-mode="regroup" aria-selected="false"><span class="num">4</span>Regroup</button>
   </div>
   <div class="dotsframe">
     <main class="panel" id="dotsPanel" data-title="">
@@ -567,6 +567,7 @@
       <div class="machine-head">
         <div class="title"><div class="target" id="target" hidden><small>Make this number</small><b id="targetNum"></b></div><span id="mTitle"></span><span class="meta" id="mMeta"></span></div>
         <div class="tools">
+          <button type="button" id="regroupAll" hidden>Regroup all</button>
           <button type="button" id="resetMachine">Start over</button>
           <button type="button" id="newBtn" class="go">＋ New problem</button>
           <button type="button" id="optBtn" class="opt" aria-expanded="false" aria-controls="pop" aria-label="problem options">▾</button>
@@ -918,10 +919,10 @@
       rules: [['↓', 'Drag dots <b>straight down</b> one at a time, or tap a column’s <b>↓ drop</b> button to send that whole column below the line. The notebook writes what lands there.'], ['10', 'When an answer box holds ten, those ten turn the next shade. Grab one, carry all ten into the box on the left, and they become one dot — a carry appears on the notebook.'], ['×', 'Drop a dot outside the boxes and it is gone — the answer will come out short.']],
     },
     sub: {
-      title: 'Subtraction', hint: 'The number being taken away is made of anti-dots. Drag everything down into the answer row and let dots and anti-dots cancel.',
+      title: 'Subtraction', hint: 'Regroup the top number until every column has enough, then drop each column — the anti-dots take away as they land.',
       geo: { BW: 150, DS: 17, GX: 28, GY: 28, COLS: 5, FH: 150, FHS: 74 },
       list: SUB_LIST,
-      rules: [['×', 'Drop a dot onto an anti-dot and they <b>cancel</b> — both disappear.'], ['1', 'Not enough dots in a box? Drag one dot from the box on the <b>left</b> into it and it unexplodes into ten.'], ['↓', 'Dots only move <b>straight down</b> into the answer row.']],
+      rules: [['×', 'When a column drops, each anti-dot takes away one dot.'], ['1', 'Not enough dots in a box? Drag one dot from the box on the <b>left</b> into it and it unexplodes into ten.'], ['↓', 'Dots only move <b>straight down</b> into the answer row.']],
     },
     regroup: {
       title: 'Regrouping', hint: 'The standard algorithm, one column at a time. Rearrange the dots so every column has enough to take away from, and watch the notebook rewrite the number as you go.',
@@ -948,7 +949,7 @@
     sub: [['borrow', 'Borrowing'], ['zeros', 'Across zeros'], ['noborrow', 'No borrowing']],
     regroup: [['borrow', 'Borrowing'], ['zeros', 'Across zeros']],
   };
-  const GEN = { digits: 'mix', kind: { make: null, add: 'mix', sub: 'mix', regroup: 'mix' } };
+  const GEN = { digits: 'mix', kind: { make: null, add: 'mix', sub: 'mix' } };
   const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const nDigit = n => rnd(10 ** (n - 1), 10 ** n - 1);
   // random problems that actually exercise the chosen skill
@@ -1018,6 +1019,7 @@
     } else if (M.mode === 'sub') {
       M.n = String(p.a).length;
       M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS, digits: digitsOf(p.a) }, { kind: 'src', anti: true, label: '− ' + p.b, fh: g.FHS, digits: digitsOf(p.b) }, { kind: 'result', label: '=', fh: g.FH }];
+      M.hist = digitsOf(p.a).map(d => [d]);
       $('mTitle').innerHTML = `${p.a} − ${p.b}`;
       $('dotsPanel').dataset.title = ''; $('qbar').textContent = `${p.a.toLocaleString()} − ${p.b.toLocaleString()}`;
     } else {
@@ -1029,8 +1031,9 @@
     }
     const kindLabel = (KINDS[M.mode].find(([k]) => k === GEN.kind[M.mode]) || [])[1];
     $('mMeta').textContent = ''; $('mMeta').hidden = true;
-    $('notebook').hidden = !(M.mode === 'regroup' || M.mode === 'add');
-    if (M.mode === 'regroup') buildNotebook();
+    $('notebook').hidden = !(M.mode === 'sub' || M.mode === 'add');
+    $('regroupAll').hidden = M.mode !== 'sub';
+    if (M.mode === 'sub') buildNotebookSub();
     if (M.mode === 'add') buildNotebookAdd();
     fitGeo();
     buildMachine();
@@ -1065,7 +1068,7 @@
     const chrome = 12 + 0 + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
     const avail = Math.max(200, window.innerHeight - top - chrome - 24);
     if (M.mode === 'add' || M.mode === 'sub') {
-      const fixed = 52 + 38 + 32 + 24 + 38 + 48 + (M.mode === 'sub' ? 40 : 0);   // +48: the three 40px count badges   // subtraction result boxes carry a cancel-all button                             // row chrome (labelled row, plain row, drop row, gaps, result row)
+      const fixed = 52 + 38 + 32 + 24 + 38 + 48 + 0;   // +48: the three 40px count badges   // subtraction result boxes carry a cancel-all button                             // row chrome (labelled row, plain row, drop row, gaps, result row)
       let fhs = 60, fh = avail - 2 * fhs - fixed;
       if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
       g.FHS = fhs; g.FH = Math.max(76, Math.min(150, fh));
@@ -1125,7 +1128,6 @@
           plus.addEventListener('click', () => { spawnDot(r, k, false, gridSpot(r, k), true); refresh(); });
           pm.append(minus, plus); box.appendChild(pm);
         }
-        if (row.kind !== 'src') { const ca = document.createElement('button'); ca.type = 'button'; ca.className = 'cancelall'; ca.id = `cancel-${r}-${k}`; ca.textContent = 'Cancel all pairs'; ca.hidden = true; ca.addEventListener('click', () => cancelAll(r, k)); box.appendChild(ca); }
         boxes.appendChild(box);
       }
       line.appendChild(boxes); host.appendChild(line);
@@ -1166,7 +1168,7 @@
     for (let i = 0; i < n; i++) { const s = el('div', 'spark'); const a = (i / n) * Math.PI * 2; s.style.left = (x + DS / 2 - 4) + 'px'; s.style.top = (y + DS / 2 - 4) + 'px'; s.style.setProperty('--dx', Math.cos(a) * (40 + Math.random() * 40) + 'px'); s.style.setProperty('--dy', Math.sin(a) * (40 + Math.random() * 40) + 'px'); f.appendChild(s); setTimeout(() => s.remove(), 520); }
   }
   function flash(r, k, cls) { const b = $(`mbox-${r}-${k}`); if (!b) return; b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); }
-  function noteHist(...ks) { if (M.mode !== 'regroup') return; ks.forEach(k => { if (M.hist[k]) M.hist[k].push(counts(0, k).dots); }); }
+  function noteHist(...ks) { if (M.mode !== 'sub') return; ks.forEach(k => { if (M.hist[k]) M.hist[k].push(counts(0, k).dots); }); }
 
   // ten dots carried into the next box become one dot there
   function explodeGroup(group, r, toK, dropLocal) {
@@ -1174,7 +1176,7 @@
     group.forEach(d => removeDot(d.id));
     sparks(r, toK, dropLocal.x, dropLocal.y, 14); flash(r, toK, 'pour');
     spawnDot(r, toK, group[0].anti, dropLocal, true);
-    noteHist(fromK, toK);
+    if (r === 0) noteHist(fromK, toK);
     if (M.mode === 'add') M.carry[toK] = (M.carry[toK] || 0) + 1;
     refresh();
   }
@@ -1187,7 +1189,7 @@
       spawnDot(r, toK, anti, { x: dropLocal.x + (col - 2) * (DS + 4), y: dropLocal.y + (row - 0.5) * (DS + 4) }, true);
     }
     sparks(r, toK, dropLocal.x, dropLocal.y, 10); flash(r, toK, 'pour');
-    noteHist(fromK, toK);
+    if (r === 0) noteHist(fromK, toK);
     if (M.mode === 'add' && M.carry[fromK]) M.carry[fromK]--;
     refresh();
   }
@@ -1203,9 +1205,21 @@
     const n = Math.min(ds.length, as.length);
     for (let i = 0; i < n; i++) setTimeout(() => cancelPair(ds[i], as[i]), i * 70);
   }
+  function regroupAll() {
+    if (M.mode !== 'sub') return;
+    const b = digitsOf(M.prob.b), g = M.geo; let delay = 0;
+    const centre = { x: 4 + 2 * g.GX, y: Math.max(20, M.rows[0].fh / 2 - g.DS / 2) };
+    const plan = [];   // list of source boxes to unexplode, in order
+    const sim = Array.from({ length: M.n }, (_, k) => counts(0, k).dots);
+    const borrow = j => { if (j >= M.n) return false; if (sim[j] === 0 && !borrow(j + 1)) return false; sim[j]--; sim[j - 1] += 10; plan.push(j); return true; };
+    for (let k = 0; k < M.n - 1; k++) while (sim[k] < (b[k] || 0)) if (!borrow(k + 1)) break;
+    plan.forEach(j => { setTimeout(() => { const d = M.dots.find(x => x.r === 0 && x.k === j); if (d) unexplode(d, 0, j - 1, centre); }, delay); delay += 380; });
+  }
   function dropColumn(k) {
     const to = resultRow(); if (to < 0) return;
-    M.dots.filter(d => M.rows[d.r].kind === 'src' && d.k === k).forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
+    const movers = M.dots.filter(d => M.rows[d.r].kind === 'src' && d.k === k);
+    movers.forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
+    if (M.mode === 'sub') setTimeout(() => cancelAll(to, k), movers.length * 60 + 250);   // taking away: each anti-dot cancels a dot as soon as the column lands
   }
 
   /* ---- dragging (single dots, or the highlighted ten) ---- */
@@ -1244,7 +1258,7 @@
     if (dg.supply) return M.rows[r].kind === 'free';
     if (r === dg.fromR) {
       if (k === dg.fromK) return true;
-      if (M.rows[r].kind === 'src') return false;
+      if (M.rows[r].kind === 'src') return M.mode === 'sub' && r === 0 && dg.group.length === 1 && k === dg.fromK - 1;   // subtraction: one dot from the top row unexplodes into the box on its right (regrouping)
       if (dg.group.length === 10 && k === dg.fromK + 1) return true;   // the ten travel left and become one
       return k === dg.fromK - 1;                                        // one dot travels right and unexplodes (the rest of a ten stay put)
     }
@@ -1330,9 +1344,9 @@
         M.dots.filter(d => d.r === r && d.k === k).forEach(d => { const e = dotEl(d.id); if (!e) return; const on = pro.includes(d); if (on) M.pro.add(d.id); else M.pro.delete(d.id); e.classList.toggle('pro', on); e.style.setProperty('--dc', on && !d.anti ? (COL[k + 1] || COL[5]) : (COL[k] || COL[5])); });
       }
     });
-    for (let k = 0; k < M.n; k++) { const b = $(`drop-${k}`); if (b) b.disabled = !M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); }
+    for (let k = 0; k < M.n; k++) { const b = $(`drop-${k}`); if (!b) continue; const hasSrc = M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); const ready = M.mode !== 'sub' || counts(0, k).dots >= (digitsOf(M.prob.b)[k] || 0); b.disabled = !hasSrc || !ready; b.classList.toggle('waiting', hasSrc && !ready); }
     renderReadout();
-    if (M.mode === 'regroup') renderNotebook();
+    if (M.mode === 'sub') renderNotebookSub();
     if (M.mode === 'add') renderNotebookAdd();
     renderCoach();
   }
@@ -1379,6 +1393,26 @@
     if (win && !chk) nb.insertAdjacentHTML('beforeend', '<div class="nb-check">✓</div>');
     if (!win && chk) chk.remove();
   }
+  function buildNotebookSub() {
+    const nb = $('notebook'), p = M.prob, b = digitsOf(p.b);
+    const cols = Array.from({ length: M.n }, (_, i) => `<div class="nb-col" data-k="${M.n - 1 - i}" style="--pc:${PCOL[M.n - 1 - i] || PCOL[5]}"></div>`).join('');
+    const sub = Array.from({ length: M.n }, (_, i) => { const d = b[M.n - 1 - i]; return `<span>${d == null ? '' : d}</span>`; }).join('');
+    const blank = Array.from({ length: M.n }, (_, i) => `<span data-k="${M.n - 1 - i}" style="--pc:${PCOL[M.n - 1 - i] || PCOL[5]}"></span>`).join('');
+    nb.innerHTML = `<div class="nb-cols" id="nbCols">${cols}</div><div class="nb-row sub"><span class="op">−</span>${sub}</div><div class="nb-rule"></div><div class="nb-row ans" id="nbAnsSub">${blank}</div>`;
+  }
+  function renderNotebookSub() {
+    const st = status(), r = st.row, nb = $('notebook');
+    M.hist.forEach((h, k) => {
+      const col = $('nbCols').querySelector(`.nb-col[data-k="${k}"]`); if (!col) return;
+      col.innerHTML = h.map((v, i) => `<span class="${i ? 'ink' : ''} ${i < h.length - 1 ? 'x' : ''}">${v}</span>`).join('');
+    });
+    // an answer digit appears once its column has been dropped and every pair in it has cancelled
+    nb.querySelectorAll('#nbAnsSub span').forEach(sp => { const k = +sp.dataset.k, c = counts(r, k); const dropped = !M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); const show = dropped && c.anti === 0; sp.textContent = show ? String(c.dots) : ''; sp.className = show ? 'filled' : ''; });
+    $('nbAnsSub').classList.toggle('ok', st.win);
+    const chk = nb.querySelector('.nb-check');
+    if (st.win && !chk) nb.insertAdjacentHTML('beforeend', '<div class="nb-check">✓</div>');
+    if (!st.win && chk) chk.remove();
+  }
   function buildNotebookAdd() {
     const nb = $('notebook'), p = M.prob, a = digitsOf(p.a), b = digitsOf(p.b);
     const row = (ds) => Array.from({ length: M.n }, (_, i) => { const d = ds[M.n - 1 - i]; return `<span>${d == null ? '' : d}</span>`; }).join('');
@@ -1417,6 +1451,12 @@
       if (v === p.t) { say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>, but a box has ten or more. Numbers are written with fewer than ten in every box.`; return; }
       say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>.`; return;
     }
+    if (M.mode === 'sub' && st.srcLeft) {
+      const b = digitsOf(p.b);
+      const short = Array.from({ length: M.n }, (_, k) => k).filter(k => M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k) && counts(0, k).dots < (b[k] || 0));
+      if (short.length) { const k = short[0]; say.innerHTML = `<b>${PLACE[k]}</b>: ${counts(0, k).dots} on top, ${b[k]} to take away — not enough yet. Drag one dot from the <b>${PLACE[k + 1]}</b> box into the ${PLACE[k]} box and it becomes ten, or tap <b>Regroup all</b>.`; return; }
+      say.innerHTML = `Every column has enough on top. Tap <b>↓ drop</b> on a column and the anti-dots take away that many dots.`; return;
+    }
     if (M.mode === 'regroup') {
       const b = digitsOf(p.b);
       if (st.lost) { say.classList.add('oops'); say.innerHTML = `The row holds <b>${rowValue(0).toLocaleString()}</b>, not ${p.a} — a dot went missing. Tap <b>Start over</b>.`; return; }
@@ -1437,6 +1477,7 @@
     $('popClose').addEventListener('click', () => openPop(false));
     document.addEventListener('pointerdown', e => { if (!$('pop').hidden && !e.target.closest('#pop') && !e.target.closest('#optBtn')) openPop(false); });
     $('resetMachine').addEventListener('click', restart);
+    $('regroupAll').addEventListener('click', regroupAll);
     $('machine').addEventListener('pointerdown', onDown);
   }
 
