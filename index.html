@@ -278,6 +278,17 @@
   .machine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px; margin-bottom: 8px; }
   .machine-head .title { font-family: var(--hand); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); }
   .machine-head .title #mTitle { display: none; }
+  .target { display: inline-flex; align-items: baseline; gap: 14px; margin-right: 14px; vertical-align: middle; }
+  .target small { font-family: var(--hand); font-weight: 700; font-size: 13.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--teal-pale); }
+  .target b { font-family: var(--hand); font-weight: 800; font-size: 46px; line-height: 1; color: var(--lime); letter-spacing: .02em; }
+  .pm { display: flex; justify-content: center; gap: 8px; padding: 4px 0 2px; }
+  .pm button { width: 46px; height: 32px; border-radius: 999px; border: 1.5px solid var(--raised-line); background: var(--raised); color: var(--teal); font-family: var(--hand); font-weight: 800; font-size: 20px; line-height: 1; display: grid; place-items: center; transition: all .12s; }
+  .pm button.plus { background: var(--spring); border-color: var(--ink); color: var(--spring-ink); box-shadow: 2px 2px 0 var(--ink); }
+  .pm button:hover { border-color: var(--teal); color: var(--text); }
+  .pm button.plus:hover { background: #5CF096; color: var(--spring-ink); border-color: var(--ink); }
+  .pm button:active { translate: 1px 1px; box-shadow: none; }
+  .pm button:disabled { opacity: .3; cursor: default; }
+  .machine-wrap.tight .pm button { height: 28px; width: 40px; font-size: 18px; }
   .machine-head .title span.meta { display: inline-block; padding: 6px 12px; border-radius: 10px; background: var(--chip); color: var(--teal-pale); font-family: var(--body); font-size: 12.5px; font-weight: 800; margin: 0; }
   .tools { display: flex; flex-wrap: wrap; gap: 8px; position: relative; }
   .tools button { border: 1.5px solid var(--raised-line); background: var(--raised); border-radius: 999px; padding: 7px 16px; font-family: var(--hand); font-size: 13.5px; font-weight: 700; color: var(--teal); }
@@ -544,7 +555,7 @@
   <div class="dotsframe">
     <main class="panel" id="dotsPanel" data-title="Exploding dots">
       <div class="machine-head">
-        <div class="title"><span id="mTitle"></span><span class="meta" id="mMeta"></span></div>
+        <div class="title"><div class="target" id="target" hidden><small>Make this number</small><b id="targetNum"></b></div><span id="mTitle"></span><span class="meta" id="mMeta"></span></div>
         <div class="tools">
           <button type="button" id="resetMachine">Start over</button>
           <button type="button" id="newBtn" class="go" aria-expanded="false" aria-controls="pop">＋ New problem</button>
@@ -567,12 +578,6 @@
         <div class="keyrow" id="keyrow"></div>
         </div>
         <div class="notebook" id="notebook" hidden></div>
-      </div>
-      <div class="tray" id="tray" hidden>
-        <div class="supply" data-n="1"><div class="pile"><i></i></div><b>1</b></div>
-        <div class="supply" data-n="5"><div class="pile"><i></i><i></i><i></i><i></i><i></i></div><b>5</b></div>
-        <div class="supply" data-n="10"><div class="pile"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>10</b></div>
-        <span class="trayhint">drag into a box · drop anywhere else to throw away</span>
       </div>
       <div class="coach">
         <div class="say" id="coach"></div>
@@ -890,10 +895,10 @@
   ];
   const MODES = {
     make: {
-      title: 'Numbers', hint: 'Drag dots from the tray into the boxes until the machine holds exactly the target number.',
+      title: 'Numbers', hint: 'Use + and − in each box until the machine holds exactly the target number.',
       geo: { BW: 176, DS: 22, GX: 32, GY: 32, COLS: 5, FH: 200 },
       list: [{ h: 'Two digits' }, { t: 47 }, { t: 83 }, { h: 'Three digits' }, { t: 138 }, { t: 356 }, { t: 856 }, { t: 409 }, { h: 'Four digits' }, { t: 1204 }, { t: 2050 }, { t: 3417 }],
-      rules: [['1', 'Drag 1, 5 or 10 dots in from the tray. They land as single dots you can move one at a time.'], ['10', 'Each place has its own shade — ones are lightest. When a box holds ten, those ten turn the <b>next</b> shade. Grab any one of them and all ten come along; drop them in the box on the left and they become one dot.'], ['×', 'Drop a dot anywhere outside the boxes to throw it away.']],
+      rules: [['+', 'Tap + to put a dot in a box and − to take one out. Dots can also be dragged between boxes.'], ['10', 'Each place has its own shade — ones are lightest. When a box holds ten, those ten turn the <b>next</b> shade. Grab any one of them and all ten come along; drop them in the box on the left and they become one dot.'], ['×', 'Drop a dot anywhere outside the boxes to throw it away.']],
     },
     add: {
       title: 'Addition', hint: 'Both numbers sit in their own rows. Drag every dot straight down into the answer row, then tidy up any box that holds ten or more.',
@@ -961,7 +966,6 @@
     M.mode = mode;
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
     buildChips(); buildCustom();
-    $('tray').hidden = mode !== 'make';
     loadProblem(null, generate());
   }
   function buildChips() {
@@ -985,12 +989,13 @@
   }
   function loadProblem(i, custom) {
     const p = custom || M.prob;
-    M.prob = { ...p, idx: null }; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {};
+    M.prob = { ...p, idx: null }; $('target').hidden = M.mode !== 'make'; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {};
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
       const len = String(p.t).length; M.n = Math.min(6, len >= 4 ? len : len + 1);
       M.rows = [{ kind: 'free', label: '', fh: g.FH }];
       $('mTitle').innerHTML = `<span>Make</span>${p.t.toLocaleString()}`;
+      $('targetNum').textContent = p.t.toLocaleString();
       $('dotsPanel').dataset.title = `Make a number · ${p.t.toLocaleString()}`;
     } else if (M.mode === 'add') {
       M.n = Math.max(String(p.a).length, String(p.b).length) + 1;
@@ -1041,7 +1046,7 @@
     g.GX = g.GY = Math.max(g.DS + 3, Math.floor((bw - 16 - g.DS - 4) / 4));
     // vertical budget
     const top = $('machine').getBoundingClientRect().top || 160;
-    const chrome = 52 + (bw < 130 ? 0 : 26) + (M.mode === 'make' ? 58 : 0) + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
+    const chrome = 52 + (bw < 130 ? 0 : 26) + 0 + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
     const avail = Math.max(200, window.innerHeight - top - chrome - 24);
     if (M.mode === 'add' || M.mode === 'sub') {
       const fixed = 52 + 38 + 32 + 24 + 38 + (M.mode === 'sub' ? 40 : 0);   // subtraction result boxes carry a cancel-all button                             // row chrome (labelled row, plain row, drop row, gaps, result row)
@@ -1049,7 +1054,7 @@
       if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
       g.FHS = fhs; g.FH = Math.max(76, Math.min(150, fh));
     } else {
-      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - 52));
+      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 90 : 52)));
     }
     M.rows.forEach(r => { r.fh = r.kind === 'src' ? g.FHS : g.FH; });
     document.querySelector('.stage').classList.toggle('stack', M.stack);
@@ -1094,6 +1099,14 @@
         box.innerHTML = `<div class="plabel"><span>${r === 0 ? (PLACE[k] || '10^' + k) : ''}</span><b>${r === 0 && k < 4 ? (k === 0 ? '1' : '1' + '0'.repeat(k)) : ''}</b></div>`;
         const f = el('div', 'dotfield'); f.id = `field-${r}-${k}`; f.dataset.r = r; f.dataset.k = k; f.style.setProperty('--fh', row.fh + 'px'); box.appendChild(f);
         const c = el('div', 'count'); c.id = `count-${r}-${k}`; box.appendChild(c);
+        if (M.mode === 'make' && row.kind === 'free') {
+          const pm = el('div', 'pm');
+          const minus = document.createElement('button'); minus.type = 'button'; minus.className = 'minus'; minus.id = `minus-${r}-${k}`; minus.textContent = '−'; minus.setAttribute('aria-label', `take one dot out of ${PLACE[k] || 'this box'}`);
+          minus.addEventListener('click', () => { const mine = M.dots.filter(d => d.r === r && d.k === k); const d = mine[mine.length - 1]; if (!d) return; sparks(r, k, d.x, d.y, 6); removeDot(d.id); refresh(); });
+          const plus = document.createElement('button'); plus.type = 'button'; plus.className = 'plus'; plus.id = `plus-${r}-${k}`; plus.textContent = '+'; plus.setAttribute('aria-label', `put one dot into ${PLACE[k] || 'this box'}`);
+          plus.addEventListener('click', () => { spawnDot(r, k, false, gridSpot(r, k), true); refresh(); });
+          pm.append(minus, plus); box.appendChild(pm);
+        }
         if (row.kind !== 'src') { const ca = document.createElement('button'); ca.type = 'button'; ca.className = 'cancelall'; ca.id = `cancel-${r}-${k}`; ca.textContent = 'Cancel all pairs'; ca.hidden = true; ca.addEventListener('click', () => cancelAll(r, k)); box.appendChild(ca); }
         boxes.appendChild(box);
       }
@@ -1284,6 +1297,7 @@
       for (let k = 0; k < M.n; k++) {
         const c = counts(r, k), count = $(`count-${r}-${k}`), box = $(`mbox-${r}-${k}`);
         count.className = 'count'; count.style.setProperty('--pc', COL[k] || COL[5]);
+        const mb = $(`minus-${r}-${k}`); if (mb) mb.disabled = c.dots === 0;
         if (c.anti && c.dots) count.innerHTML = `<span>${c.dots}</span><small>dots</small><span>${c.anti}</span><small>anti</small>`;
         else if (c.anti) { count.innerHTML = `<span>−${c.anti}</span>`; count.classList.add('neg'); }
         else if (!c.dots && row.digits && row.digits[k] != null) { count.innerHTML = `<span class="was">${row.digits[k]}</span>`; count.classList.add('ok'); }   // the number stays written even after its dots move down
@@ -1380,7 +1394,7 @@
     if (M.mode === 'make') {
       const v = rowValue(0);
       if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${p.t.toLocaleString()}</b> — every box holds fewer than ten and the boxes read the number straight across.`; markDone(); return; }
-      if (!M.dots.length) { say.innerHTML = `Drag dots from the tray into the boxes. Each box is worth ten times the one on its right.`; return; }
+      if (!M.dots.length) { say.innerHTML = `Tap <b>+</b> in a box to put a dot there. Each box is worth ten times the one on its right.`; return; }
       if (v === p.t) { say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>, but a box has ten or more. Numbers are written with fewer than ten in every box.`; return; }
       say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>.`; return;
     }
@@ -1404,7 +1418,6 @@
     document.addEventListener('pointerdown', e => { if (!$('pop').hidden && !e.target.closest('#pop') && !e.target.closest('#newBtn')) openPop(false); });
     $('resetMachine').addEventListener('click', restart);
     $('machine').addEventListener('pointerdown', onDown);
-    $('tray').addEventListener('pointerdown', onDown);
   }
 
   /* ================= tabs + boot ================= */
