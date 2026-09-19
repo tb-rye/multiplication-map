@@ -150,8 +150,6 @@
   .cell, .hd { height: calc(var(--cell) - 4px); border-radius: 10px; display: grid; place-items: center; font-family: var(--body); font-size: 14px; font-weight: 800; }
   .hd { width: var(--cell); border-radius: 99px; background: var(--raised); border: 1.5px solid var(--raised-line); color: var(--teal); }
   .hd.corner { background: transparent; border: 0; font-size: 16px; color: var(--teal-pale); }
-  .hd.lit-learning { background: var(--coral); border-color: var(--ink); color: var(--coral-ink); }
-  .hd.lit-mastered { background: var(--spring); border-color: var(--ink); color: var(--spring-ink); }
   .grid .hd.col-hd { margin-bottom: 4px; }
   .grid .hd.row-hd { margin-right: 4px; }
   .cell { border: 1.5px solid transparent; background: var(--ghost); color: var(--ghost-text); padding: 0; position: relative; transition: transform .12s, background .15s; }
@@ -705,10 +703,6 @@
       row.classList.toggle('is-mastered', s === 'mastered');
       $(`t${t}-learning`).classList.toggle('on-learning', s === 'learning');
       $(`t${t}-mastered`).classList.toggle('on-mastered', s === 'mastered');
-      if (t > N) continue;
-      let allM = true, anyL = false;
-      for (let k = 1; k <= N; k++) { const f = factStatus(t, k); if (f !== 'mastered') allM = false; if (f !== 'none') anyL = true; }
-      for (const h of [$(`hr-${t}`), $(`hc-${t}`)]) { h.classList.toggle('lit-mastered', allM); h.classList.toggle('lit-learning', !allM && anyL); }
     }
     const total = nM + nL + nT;
     $('nMast').textContent = nM; $('nLearn').textContent = nL; $('nTodo').textContent = nT;
