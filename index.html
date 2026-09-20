@@ -358,15 +358,30 @@
   .keyrow { width: 0; min-width: 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; margin: 6px auto 0; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
   .keyrow span { display: inline-flex; align-items: center; gap: 6px; }
   .keyrow i { width: 12px; height: 12px; border-radius: 50%; background: var(--dc); }
-  .valueline { display: flex; justify-content: center; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 18px; font-family: var(--hand); font-weight: 800; font-size: 24px; color: var(--text); min-height: 44px; }
-  .valueline .term { color: var(--pc); }
-  .valueline .op { color: var(--muted); font-size: 20px; }
-  .valueline .tot { padding: 4px 18px; border-radius: 999px; background: rgba(0,0,0,.35); font-size: 30px; }
-  .valueline.ok .tot { background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
-  .valueline .same { font-family: var(--body); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--spring-ink); background: var(--mint); border: 1.5px solid var(--ink); border-radius: 999px; padding: 4px 10px; animation: pop .25s ease-out; }
+  /* make a number: the amount line lives in the lime title bar — the total stands still while the boxes change */
+  .valueline { position: absolute; top: 0; left: 14px; height: 40px; z-index: 2; display: flex; align-items: center; gap: 9px; font-family: var(--hand); font-weight: 800; font-size: 19px; color: var(--lime-ink); white-space: nowrap; }
+  .valueline:empty, body:not(.mode-make) .valueline { display: none; }
+  .valueline .term { color: var(--lime-ink); }
+  .valueline .op { opacity: .55; font-size: 16px; }
+  .valueline .tot { display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--lime); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
+  .valueline.ok .tot { background: var(--spring); color: var(--spring-ink); }
+  .valueline .same { font-family: var(--body); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--spring-ink); background: var(--mint); border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px 9px; animation: pop .25s ease-out; }
+  body.mode-make .qbar { left: auto; right: 40px; font-size: 15px; height: 30px; max-width: 48%; overflow: hidden; text-overflow: ellipsis; }
+  /* what each box is worth, built out of ones: a hundred is ten rows of ten, a ten is a row of ten */
+  .worth { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 8px; min-height: var(--wh, 150px); }
+  .worth .cap { font-family: var(--body); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); min-height: 14px; }
+  .worth .ten { display: flex; gap: var(--wg); }
+  .worth .o1 { width: var(--ws); height: var(--ws); border-radius: 50%; background: var(--mint); flex: none; }
+  .worth .hund { display: flex; flex-direction: column; gap: var(--wg); }
+  .worth .hs { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--ws) + 2px); }
+  .worth .ts { display: flex; flex-direction: column; align-items: center; gap: var(--ws); }   /* a row of ten stands apart from its neighbour by a whole dot, so tens never read as a square */
+  .worth .ts.two { flex-wrap: wrap; align-content: center; column-gap: calc(var(--ws) * 2 + 6px); }
+  .worth .loose { display: flex; gap: var(--wg); margin-top: 3px; }
+  .worth .ts.two .ten, .worth .ts .ten { flex: none; }
+  .worthrow { display: grid; grid-template-columns: repeat(var(--n), var(--bw)); gap: 8px; justify-content: center; margin-top: 0; }
+  .worthrow .worth { width: var(--bw); }
   .coach .say .ask { display: inline-flex; gap: 8px; margin-left: 10px; vertical-align: middle; }
   .coach .say .ask button { border: 1.5px solid var(--ink); background: var(--lime); color: var(--lime-ink); border-radius: 999px; padding: 3px 12px; font-family: var(--hand); font-weight: 800; font-size: 13px; box-shadow: 2px 2px 0 var(--ink); }
-  .antikey { font-family: var(--body); font-size: 11px; font-weight: 800; color: var(--coral-text); letter-spacing: .02em; }
   .dragtip { position: fixed; z-index: 1001; transform: translate(-50%, -100%); pointer-events: none; padding: 5px 12px; border-radius: 999px; background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-family: var(--hand); font-size: 15px; font-weight: 800; white-space: nowrap; animation: pop .15s ease-out; }
   .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; box-shadow: 2px 2px 0 var(--ink); }
   .dot.spawn { animation: pop .3s ease-out; }
@@ -1002,10 +1017,10 @@
     if (M.mode === 'make') {
       // a challenge is a pile of dots that is not yet a number: dist[k] = how many dots start in box k
       const d = GEN.digits === 'mix' ? rnd(2, 3) : Math.min(3, GEN.digits);
-      if (kind === 'ones') { const t = d === 2 ? rnd(20, 99) : rnd(100, 199); return { t, kind, dist: [t] }; }
-      if (kind === 'tens') { const n = d === 2 ? rnd(11, 19) : rnd(12, 39); return { t: n * 10, kind, dist: [0, n] }; }
+      if (kind === 'ones') { const t = d === 2 ? rnd(20, 59) : rnd(60, 99); return { t, kind, dist: [t] }; }
+      if (kind === 'tens') { const n = d === 2 ? rnd(11, 15) : rnd(16, 19); return { t: n * 10, kind, dist: [0, n] }; }
       if (kind === 'puzzle') { M.pz = ((M.pz || 0) + 1) % PUZZLES.length; const pz = PUZZLES[M.pz]; return { ...pz.make(), kind: 'puzzle', puzzle: pz.id }; }
-      const ones = rnd(11, 29), tens = d === 2 ? 0 : rnd(11, 19), hund = d === 2 ? 0 : rnd(0, 2);   // jumbled: more than ten in two boxes at once
+      const ones = rnd(11, 29), tens = d === 2 ? 0 : rnd(11, 16), hund = d === 2 ? 0 : rnd(0, 2);   // jumbled: more than ten in two boxes at once
       return { t: ones + 10 * tens + 100 * hund, kind: 'jumble', dist: [ones, tens, hund] };
     }
     for (let tries = 0; tries < 400; tries++) {
@@ -1040,11 +1055,11 @@
   }
   function buildCustom() {
     const host = $('custom');
-    if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="47" max="199" aria-label="number of dots"><button type="button" id="cgo">Go</button>`;
+    if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="1" max="99" placeholder="47" aria-label="number of dots"><button type="button" id="cgo">Go</button>`;
     else host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     $('cgo').addEventListener('click', () => {
       const a = +$('ca').value;
-      if (M.mode === 'make') { if (!$('ca').value || a < 1 || a > 199) { coachSay('Type a number from 1 to 199.'); return; } openPop(false); loadProblem(null, { t: a, kind: 'ones', dist: [a], own: true }); return; }
+      if (M.mode === 'make') { if (!$('ca').value || a < 1 || a > 99) { coachSay('Type a number from 1 to 99.'); return; } openPop(false); loadProblem(null, { t: a, kind: 'ones', dist: [a], own: true }); return; }
       const b = +$('cb').value;
       if (!$('ca').value || !$('cb').value || a < 0 || b < 0) { coachSay('Type two numbers first.'); return; }
       if (M.mode !== 'add' && b > a) { coachSay('Put the bigger number first when subtracting.'); return; }
@@ -1056,7 +1071,7 @@
     M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; M.undo = []; M.redo = []; M.hint = 0; M.answered = false; M.valueLast = undefined; M.valueSame = false; clearTimeout(M.hintT); document.querySelectorAll('.dot.flier').forEach(g => g.remove());
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
-      const len = String(p.t).length; M.n = Math.min(6, Math.max(3, len + 1));
+      M.n = 3;   // hundreds, tens, ones — the whole point of this tab
       M.rows = [{ kind: 'free', label: '', fh: g.FH }];
       const parts = p.dist.map((n, k) => n ? ONE(k, n) : null).filter(Boolean).reverse().join(' + ');
       $('mTitle').innerHTML = parts;
@@ -1136,8 +1151,12 @@
       if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
       g.FHS = fhs; g.FH = Math.max(76, Math.min(150, fh));
     } else {
-      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 70 + 60 + 16 + 62 : 68)));
-      if (M.mode === 'make' && M.prob) { const rows = Math.max(...M.prob.dist.map(n => Math.ceil(n / 10))) + 1; const pitch = Math.floor((g.FH - 8) / rows); if (pitch < g.GY) { g.GY = g.GX = Math.max(7, pitch); g.DS = Math.max(5, Math.min(g.DS, g.GY - 3)); } g.FH = Math.max(Math.min(g.FH, 300), Math.min(g.FH, rows * g.GY + 12)); }   // tall boxes, taller still when the rows need it
+      if (M.mode === 'make') {
+        const room = avail - 70 - 16;                                   // headroom for the big numbers, and the gap
+        g.WH = Math.max(110, Math.min(170, Math.floor(room * 0.46)));   // the worth strip under each box
+        g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, room - g.WH - 8));
+        if (M.prob) { const rows = Math.max(...M.prob.dist.map(n => Math.ceil(n / 10))) + 1; const pitch = Math.floor((g.FH - 8) / rows); if (pitch < g.GY) { g.GY = g.GX = Math.max(7, pitch); g.DS = Math.max(5, Math.min(g.DS, g.GY - 3)); } }
+      } else g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - 68));
     }
     M.rows.forEach(r => { r.fh = r.kind === 'src' ? g.FHS : g.FH; });
     document.querySelector('.stage').classList.toggle('stack', M.stack);
@@ -1188,8 +1207,12 @@
         boxes.appendChild(box);
       }
       line.appendChild(boxes); host.appendChild(line);
-      if (M.mode === 'make' && row.kind === 'free') { const vl = el('div', 'valueline'); vl.id = 'valueline'; host.appendChild(vl); }
-      if (M.mode === 'sub' && row.anti) { const key = el('div', 'antikey', 'Hollow dots take away. When one lands on a solid dot, both are gone.'); key.style.gridColumn = '1 / -1'; line.appendChild(key); }
+      if (M.mode === 'make' && row.kind === 'free') {
+        const wr = el('div', 'worthrow'); wr.style.setProperty('--n', M.n); wr.style.setProperty('--bw', M.geo.BW + 'px');
+        for (let k = M.n - 1; k >= 0; k--) { const w = el('div', 'worth'); w.id = `worth-${k}`; wr.appendChild(w); }
+        host.appendChild(wr);
+        let vl = $('valueline'); if (!vl) { vl = el('div', 'valueline'); vl.id = 'valueline'; $('dotsPanel').appendChild(vl); }
+      }
     });
   }
   // make a number: each box lays its dots out in rows of ten. The leftovers (fewer than ten) sit still in the first row;
@@ -1219,12 +1242,38 @@
     vl.classList.toggle('ok', status().win);
     vl.innerHTML = terms.length ? `${terms.join('<span class="op">+</span>')}<span class="op">=</span><span class="tot">${total}</span>${same ? '<span class="same">same amount</span>' : ''}` : '<span class="op">empty</span>';
     M.valueLast = total;
+    renderWorth();
+  }
+  // under each box, its worth spelled out in ones: 1 hundred = a ten-by-ten square, 2 tens = two rows of ten, 7 ones = seven dots
+  function renderWorth() {
+    const wr = document.querySelector('.worthrow'); if (!wr) return;
+    const bw = M.geo.BW, wh = M.geo.WH || 150, cap = 16;
+    const ns = Array.from({ length: M.n }, (_, k) => counts(0, k).dots);
+    // pick the biggest ones-dot that lets every strip fit under its box
+    let ws = 11, gap = 3;
+    const need = (k, n, ws, gap) => {
+      const pitch = ws + gap; if (!n) return 0;
+      if (k === 2) { const per = Math.max(1, Math.floor((bw + ws + 2) / (10 * pitch + ws + 2))); return Math.ceil(n / per) * 10 * pitch + (Math.ceil(n / per) - 1) * (ws + 2); }
+      if (k === 1) { const rows = n > 10 ? Math.ceil(n / 2) : n; return rows * 2 * ws; }
+      return Math.ceil(n / 10) * 2 * ws + (n % 10 ? pitch : 0);
+    };
+    while (ws > 4 && Math.max(...ns.map((n, k) => need(k, n, ws, gap))) > wh - cap) { ws -= 1; gap = ws > 6 ? 3 : 2; }
+    wr.querySelectorAll('.worth').forEach(w => { w.style.setProperty('--ws', ws + 'px'); w.style.setProperty('--wg', gap + 'px'); w.style.setProperty('--wh', wh + 'px'); });
+    const ten = () => `<div class="ten">${'<span class="o1"></span>'.repeat(10)}</div>`;
+    for (let k = 0; k < M.n; k++) {
+      const w = $(`worth-${k}`); if (!w) continue; const n = ns[k];
+      let body = '';
+      if (n && k === 2) body = `<div class="hs">${`<div class="hund">${ten().repeat(10)}</div>`.repeat(n)}</div>`;
+      else if (n && k === 1) body = `<div class="ts${n > 10 ? ' two' : ''}" style="${n > 10 ? `max-height:${Math.ceil(n / 2) * 2 * ws - ws + 1}px` : ''}">${ten().repeat(n)}</div>`;
+      else if (n) body = `${Math.floor(n / 10) ? `<div class="ts">${ten().repeat(Math.floor(n / 10))}</div>` : ''}${n % 10 ? `<div class="loose">${'<span class="o1"></span>'.repeat(n % 10)}</div>` : ''}`;
+      w.innerHTML = `<div class="cap">${n ? `${ONE(k, n)} = ${n * 10 ** k}` : ''}</div>${body}`;
+    }
   }
   // puzzles: challenges whose answer needs a reason, not just a tidy-up
   const PUZZLES = [
     { id: 'noHundreds', make: () => { const h = rnd(1, 2), t = rnd(2, 6); return { t: h * 100 + t * 10, dist: [0, t, h], ask: v => `Show ${v} without using the hundreds box.` }; }, win: () => counts(0, 2).dots === 0 && rowValue(0) === M.prob.t, done: v => `${v} = ${counts(0, 1).dots} tens. Same amount, shown another way.`, hint: ['A hundred is ten tens. What happens if one hundreds dot goes into the tens box?', 'Drag one dot from the hundreds box into the tens box — it becomes ten dots there.'] },
     { id: 'moreOnes', make: () => { const t = rnd(2, 5), o = rnd(1, 4); return { t: t * 10 + o, dist: [o, t], ask: v => `Can ${v} have more than nine ones? Show me.` }; }, win: () => counts(0, 0).dots >= 10 && rowValue(0) === M.prob.t, done: v => `Yes — ${counts(0, 1).dots} tens and ${counts(0, 0).dots} ones is still ${v}.`, hint: ['A ten is ten ones. Which dot could turn into ten?', 'Drag one dot from the tens box into the ones box.'] },
-    { id: 'still', make: () => { const h = rnd(1, 3), t = rnd(0, 6), o = rnd(2, 8); const v = h * 100 + t * 10 + o; return { t: v, dist: [o + 10, t + 9, h - 1], ask: () => `Someone changed ${v} into ${h - 1 ? ONE(2, h - 1) + ', ' : ''}${ONE(1, t + 9)} and ${ONE(0, o + 10)}. Is it still ${v}?`, yesno: true, answer: 'yes' }; }, win: () => M.answered && status().win, done: v => `Yes — it never stopped being ${v}. Tidied up, it reads ${v} again.`, hint: ['Look at the amount line under the boxes. Did the amount change?', 'Answer Yes, then tidy the shaking tens to see the number read across.'] },
+    { id: 'still', make: () => { const h = rnd(1, 3), t = rnd(0, 6), o = rnd(2, 8); const v = h * 100 + t * 10 + o; return { t: v, dist: [o + 10, t + 9, h - 1], ask: () => `Someone shuffled ${v} around. Is it still ${v}?`, yesno: true, answer: 'yes' }; }, win: () => M.answered && status().win, done: v => `Yes — it never stopped being ${v}. Tidied up, it reads ${v} again.`, hint: ['Look at the amount in the yellow bar. Did it change?', 'Answer Yes, then tidy the shaking tens to see the number read across.'] },
   ];
   // next free slot in a tidy grid, so tens are easy to see at a glance
   function gridSpot(r, k) {
@@ -1598,7 +1647,7 @@
       clearTimeout(M.hintT); if (!st.win && M.hint < 1) M.hintT = setTimeout(() => { M.hint = 1; refresh(); }, 15000);   // a quiet spell earns the first hint on its own
       if (st.win) { say.classList.add('win'); say.innerHTML = pz ? pz.done(p.t) : `<b>${p.t}</b> — every box holds fewer than ten, so the boxes read the number straight across.`; markDone(); return; }
       if (v !== p.t) { say.classList.add('oops'); say.innerHTML = `The amount should still be <b>${p.t}</b> — a dot went missing. Tap <b>Undo</b>.`; return; }
-      if (pz && pz.id === 'still' && !M.answered) { say.innerHTML = `Is it still <b>${p.t}</b>? <span class="ask"><button type="button" data-ans="yes">Yes</button><button type="button" data-ans="no">No</button></span>`; say.querySelectorAll('[data-ans]').forEach(b => b.addEventListener('click', () => { if (b.dataset.ans === 'yes') { M.answered = true; refresh(); } else { coachSay(`Look at the amount line under the boxes — has the amount changed? Try again.`, true); } })); return; }
+      if (pz && pz.id === 'still' && !M.answered) { say.innerHTML = `Is it still <b>${p.t}</b>? <span class="ask"><button type="button" data-ans="yes">Yes</button><button type="button" data-ans="no">No</button></span>`; say.querySelectorAll('[data-ans]').forEach(b => b.addEventListener('click', () => { if (b.dataset.ans === 'yes') { M.answered = true; refresh(); } else { coachSay(`Look at the amount in the yellow bar — has it changed? Try again.`, true); } })); return; }
       if (pz) { say.innerHTML = M.hint >= 2 ? pz.hint[1] : M.hint === 1 ? pz.hint[0] : pz.make === PUZZLES[2].make ? `Tidy it up so it reads across.` : `Can you show this amount another way?`; return; }
       const full = Array.from({ length: M.n }, (_, k) => k).find(k => counts(0, k).dots >= 10);
       if (M.hint >= 2) say.innerHTML = `Grab any shaking dot in the <b>${PLACE[full]}</b> box — all ten come along — and drop them in the <b>${PLACE[full + 1]}</b> box. They become one dot there.`;
