@@ -310,6 +310,9 @@
   .tools { display: flex; flex-wrap: wrap; gap: 8px; position: relative; }
   .tools button { border: 1.5px solid var(--raised-line); background: var(--raised); border-radius: 999px; padding: 7px 16px; font-family: var(--hand); font-size: 13.5px; font-weight: 700; color: var(--teal); }
   .tools button:hover { color: var(--text); border-color: var(--teal); }
+  .tools button.quiet { background: transparent; border-color: transparent; color: var(--muted); }
+  .tools button.quiet:hover:not(:disabled) { color: var(--text); border-color: var(--raised-line); }
+  .tools button:disabled { opacity: .35; cursor: default; }
   .tools button.go, .pop .actions button.go, .pop .own button { background: var(--coral); border: 1.5px solid var(--ink); color: #5C1A0C; font-family: var(--hand); font-weight: 800; box-shadow: 2px 2px 0 var(--ink); }
   .tools button.go:hover, .pop .actions button.go:hover { color: #5C1A0C; border-color: var(--ink); background: #FFD0C5; }
   .tools button:active { translate: 1px 1px; box-shadow: none; }
@@ -355,6 +358,15 @@
   .keyrow { width: 0; min-width: 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; margin: 6px auto 0; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
   .keyrow span { display: inline-flex; align-items: center; gap: 6px; }
   .keyrow i { width: 12px; height: 12px; border-radius: 50%; background: var(--dc); }
+  .valueline { display: flex; justify-content: center; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 18px; font-family: var(--hand); font-weight: 800; font-size: 24px; color: var(--text); min-height: 44px; }
+  .valueline .term { color: var(--pc); }
+  .valueline .op { color: var(--muted); font-size: 20px; }
+  .valueline .tot { padding: 4px 18px; border-radius: 999px; background: rgba(0,0,0,.35); font-size: 30px; }
+  .valueline.ok .tot { background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .valueline .same { font-family: var(--body); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--spring-ink); background: var(--mint); border: 1.5px solid var(--ink); border-radius: 999px; padding: 4px 10px; animation: pop .25s ease-out; }
+  .coach .say .ask { display: inline-flex; gap: 8px; margin-left: 10px; vertical-align: middle; }
+  .coach .say .ask button { border: 1.5px solid var(--ink); background: var(--lime); color: var(--lime-ink); border-radius: 999px; padding: 3px 12px; font-family: var(--hand); font-weight: 800; font-size: 13px; box-shadow: 2px 2px 0 var(--ink); }
+  .antikey { font-family: var(--body); font-size: 11px; font-weight: 800; color: var(--coral-text); letter-spacing: .02em; }
   .dragtip { position: fixed; z-index: 1001; transform: translate(-50%, -100%); pointer-events: none; padding: 5px 12px; border-radius: 999px; background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-family: var(--hand); font-size: 15px; font-weight: 800; white-space: nowrap; animation: pop .15s ease-out; }
   .dot.dragging { transition: none !important; animation: none !important; position: fixed; left: 0; top: 0; z-index: 1000; cursor: grabbing; transform: scale(1.25); pointer-events: none; box-shadow: 2px 2px 0 var(--ink); }
   .dot.spawn { animation: pop .3s ease-out; }
@@ -596,7 +608,10 @@
       <div class="machine-head">
         <div class="title"><div class="target" id="target" hidden><small>Make this number</small><b id="targetNum"></b></div><span id="mTitle"></span><span class="meta" id="mMeta"></span></div>
         <div class="tools">
-          <button type="button" id="regroupAll" hidden>Regroup all</button>
+          <button type="button" id="undoBtn" class="quiet" aria-label="undo" disabled>↶ Undo</button>
+          <button type="button" id="redoBtn" class="quiet" aria-label="redo" disabled>↷ Redo</button>
+          <button type="button" id="hintBtn" hidden>Hint</button>
+          <button type="button" id="regroupAll" class="quiet" hidden>Show me</button>
           <button type="button" id="resetMachine">Start over</button>
           <button type="button" id="newBtn" class="go">＋ New problem</button>
           <button type="button" id="optBtn" class="opt" aria-expanded="false" aria-controls="pop" aria-label="problem options">▾</button>
@@ -958,7 +973,7 @@
       rules: [['1', 'Drag one dot into the box on its <b>right</b> and it becomes ten. The notebook crosses out the old digits and writes the new ones.'], ['✓', 'When every column has at least as many dots as the digit under it, a check mark appears and the answer line unlocks.'], ['10', 'Changed your mind? When a box holds ten again, grab one of the highlighted ten and carry them back to the <b>left</b>: they become one dot.']],
     },
   };
-  let M = { mode: 'make', n: 3, rows: [], dots: [], prob: null, seq: 0, done: new Set(), hist: [], geo: MODES.make.geo, unlocked: false, solved: false, pro: new Set() };
+  let M = { mode: 'make', n: 3, rows: [], dots: [], prob: null, seq: 0, done: new Set(), hist: [], geo: MODES.make.geo, unlocked: false, solved: false, pro: new Set(), undo: [], redo: [], hint: 0 };
   let drag = null;
 
   const field = (r, k) => $(`field-${r}-${k}`);
@@ -972,7 +987,7 @@
 
   /* ---- sections + problem lists ---- */
   const KINDS = {
-    make: [['ones', 'All in the ones box'], ['tens', 'All in the tens box'], ['jumble', 'Jumbled']], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
+    make: [['ones', 'All in the ones box'], ['tens', 'All in the tens box'], ['jumble', 'Jumbled'], ['puzzle', 'Puzzles']], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
     sub: [['borrow', 'Borrowing'], ['zeros', 'Across zeros'], ['noborrow', 'No borrowing']],
     regroup: [['borrow', 'Borrowing'], ['zeros', 'Across zeros']],
   };
@@ -989,6 +1004,7 @@
       const d = GEN.digits === 'mix' ? rnd(2, 3) : Math.min(3, GEN.digits);
       if (kind === 'ones') { const t = d === 2 ? rnd(20, 99) : rnd(100, 199); return { t, kind, dist: [t] }; }
       if (kind === 'tens') { const n = d === 2 ? rnd(11, 19) : rnd(12, 39); return { t: n * 10, kind, dist: [0, n] }; }
+      if (kind === 'puzzle') { M.pz = ((M.pz || 0) + 1) % PUZZLES.length; const pz = PUZZLES[M.pz]; return { ...pz.make(), kind: 'puzzle', puzzle: pz.id }; }
       const ones = rnd(11, 29), tens = d === 2 ? 0 : rnd(11, 19), hund = d === 2 ? 0 : rnd(0, 2);   // jumbled: more than ten in two boxes at once
       return { t: ones + 10 * tens + 100 * hund, kind: 'jumble', dist: [ones, tens, hund] };
     }
@@ -1037,14 +1053,14 @@
   }
   function loadProblem(i, custom) {
     const p = custom || M.prob;
-    M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; document.querySelectorAll('.dot.flier').forEach(g => g.remove());
+    M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; M.undo = []; M.redo = []; M.hint = 0; M.answered = false; M.valueLast = undefined; M.valueSame = false; clearTimeout(M.hintT); document.querySelectorAll('.dot.flier').forEach(g => g.remove());
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
       const len = String(p.t).length; M.n = Math.min(6, Math.max(3, len + 1));
       M.rows = [{ kind: 'free', label: '', fh: g.FH }];
-      const parts = p.dist.map((n, k) => n ? `${n} ${n === 1 ? PLACE[k].replace(/s$/, '') : PLACE[k]}` : null).filter(Boolean).reverse().join(' + ');
+      const parts = p.dist.map((n, k) => n ? ONE(k, n) : null).filter(Boolean).reverse().join(' + ');
       $('mTitle').innerHTML = parts;
-      $('dotsPanel').dataset.title = ''; $('qbar').textContent = `${parts} — what number is that?`;
+      $('dotsPanel').dataset.title = ''; $('qbar').textContent = p.puzzle ? p.ask(p.t) : `${parts} — what number is that?`;
     } else if (M.mode === 'add') {
       M.n = Math.max(String(p.a).length, String(p.b).length) + 1;
       M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS, digits: digitsOf(p.a) }, { kind: 'src', label: '+ ' + p.b, fh: g.FHS, digits: digitsOf(p.b) }, { kind: 'result', label: '=', fh: g.FH }];
@@ -1066,7 +1082,7 @@
     const kindLabel = (KINDS[M.mode].find(([k]) => k === GEN.kind[M.mode]) || [])[1];
     $('mMeta').textContent = ''; $('mMeta').hidden = true;
     $('notebook').hidden = !(M.mode === 'sub' || M.mode === 'add');
-    $('regroupAll').hidden = M.mode !== 'sub';
+    $('regroupAll').hidden = M.mode !== 'sub'; $('hintBtn').hidden = M.mode !== 'make';
     if (M.mode === 'sub') buildNotebookSub();
     if (M.mode === 'add') buildNotebookAdd();
     fitGeo();
@@ -1078,6 +1094,18 @@
     refresh();
   }
   function restart() { if (M.prob) loadProblem(null, M.prob); }
+  // every move is cheap to take back: a snapshot before each change, restored by Undo
+  const snapshot = () => JSON.stringify({ dots: M.dots.map(d => ({ r: d.r, k: d.k, anti: d.anti, x: d.x, y: d.y })), hist: M.hist, carry: M.carry, digits: M.rows.map(r => r.digits || null), answered: M.answered || false });
+  function snap() { M.undo.push(snapshot()); if (M.undo.length > 60) M.undo.shift(); M.redo = []; }
+  function restore(json) {
+    const st = JSON.parse(json); if (M.busy) return;
+    M.dots.slice().forEach(d => { const e = dotEl(d.id); if (e) e.remove(); }); M.dots = []; M.pro = new Set();
+    st.dots.forEach(d => spawnDot(d.r, d.k, d.anti, { x: d.x, y: d.y }));
+    M.hist = st.hist; M.carry = st.carry; M.rows.forEach((r, i) => { if (st.digits[i]) r.digits = st.digits[i]; }); M.answered = st.answered;
+    refresh();
+  }
+  function undo() { if (!M.undo.length) return; M.redo.push(snapshot()); restore(M.undo.pop()); }
+  function redo() { if (!M.redo.length) return; M.undo.push(snapshot()); restore(M.redo.pop()); }
 
   /* ---- fit: size the boxes so the whole problem, notebook included, sits on one screen ---- */
   function fitGeo() {
@@ -1108,7 +1136,7 @@
       if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
       g.FHS = fhs; g.FH = Math.max(76, Math.min(150, fh));
     } else {
-      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 70 + 60 + 16 : 68)));
+      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 70 + 60 + 16 + 62 : 68)));
       if (M.mode === 'make' && M.prob) { const rows = Math.max(...M.prob.dist.map(n => Math.ceil(n / 10))) + 1; const pitch = Math.floor((g.FH - 8) / rows); if (pitch < g.GY) { g.GY = g.GX = Math.max(7, pitch); g.DS = Math.max(5, Math.min(g.DS, g.GY - 3)); } g.FH = Math.max(Math.min(g.FH, 300), Math.min(g.FH, rows * g.GY + 12)); }   // tall boxes, taller still when the rows need it
     }
     M.rows.forEach(r => { r.fh = r.kind === 'src' ? g.FHS : g.FH; });
@@ -1160,12 +1188,14 @@
         boxes.appendChild(box);
       }
       line.appendChild(boxes); host.appendChild(line);
+      if (M.mode === 'make' && row.kind === 'free') { const vl = el('div', 'valueline'); vl.id = 'valueline'; host.appendChild(vl); }
+      if (M.mode === 'sub' && row.anti) { const key = el('div', 'antikey', 'Hollow dots take away. When one lands on a solid dot, both are gone.'); key.style.gridColumn = '1 / -1'; line.appendChild(key); }
     });
   }
   // make a number: each box lays its dots out in rows of ten. The leftovers (fewer than ten) sit still in the first row;
   // every complete ten below them shakes, and grabbing any shaking dot picks up its whole ten.
   function tidyMake() {
-    const { GX, GY } = M.geo;
+    const { GX, GY } = M.geo, shake = M.hint >= 1;   // the shaking is a hint: it starts after the first hint (or a quiet spell)
     for (let k = 0; k < M.n; k++) {
       const ds = M.dots.filter(d => d.r === 0 && d.k === k).sort((a, b) => a.id - b.id), rest = ds.length % 10;
       ds.forEach((d, i) => {
@@ -1175,10 +1205,27 @@
         const e = dotEl(d.id); if (!e) return;
         e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; e.style.setProperty('--dc', COL[k] || COL[5]);
         if (!e.style.getPropertyValue('--vd')) e.style.setProperty('--vd', (-Math.random() * 0.7).toFixed(2) + 's');
-        e.classList.toggle('vib', !plain); e.classList.remove('pro');
+        e.classList.toggle('vib', !plain && shake); e.classList.remove('pro');
       });
     }
   }
+  const ONE = (k, n) => `${n} ${n === 1 ? PLACE[k].replace(/s$/, '') : PLACE[k]}`;
+  const decomposition = () => Array.from({ length: M.n }, (_, k) => [k, counts(0, k).dots]).filter(([, c]) => c).reverse();
+  // the amount never changes while its representation does: "15 tens = 150" becomes "1 hundred + 5 tens = 150" with the 150 standing still
+  function renderValue() {
+    const vl = $('valueline'); if (!vl) return;
+    const total = rowValue(0), terms = decomposition().map(([k, c]) => `<span class="term" style="--pc:${COL[k] || COL[5]}">${ONE(k, c)}</span>`);
+    const same = M.valueSame && M.valueLast === total; M.valueSame = false;
+    vl.classList.toggle('ok', status().win);
+    vl.innerHTML = terms.length ? `${terms.join('<span class="op">+</span>')}<span class="op">=</span><span class="tot">${total}</span>${same ? '<span class="same">same amount</span>' : ''}` : '<span class="op">empty</span>';
+    M.valueLast = total;
+  }
+  // puzzles: challenges whose answer needs a reason, not just a tidy-up
+  const PUZZLES = [
+    { id: 'noHundreds', make: () => { const h = rnd(1, 2), t = rnd(2, 6); return { t: h * 100 + t * 10, dist: [0, t, h], ask: v => `Show ${v} without using the hundreds box.` }; }, win: () => counts(0, 2).dots === 0 && rowValue(0) === M.prob.t, done: v => `${v} = ${counts(0, 1).dots} tens. Same amount, shown another way.`, hint: ['A hundred is ten tens. What happens if one hundreds dot goes into the tens box?', 'Drag one dot from the hundreds box into the tens box — it becomes ten dots there.'] },
+    { id: 'moreOnes', make: () => { const t = rnd(2, 5), o = rnd(1, 4); return { t: t * 10 + o, dist: [o, t], ask: v => `Can ${v} have more than nine ones? Show me.` }; }, win: () => counts(0, 0).dots >= 10 && rowValue(0) === M.prob.t, done: v => `Yes — ${counts(0, 1).dots} tens and ${counts(0, 0).dots} ones is still ${v}.`, hint: ['A ten is ten ones. Which dot could turn into ten?', 'Drag one dot from the tens box into the ones box.'] },
+    { id: 'still', make: () => { const h = rnd(1, 3), t = rnd(0, 6), o = rnd(2, 8); const v = h * 100 + t * 10 + o; return { t: v, dist: [o + 10, t + 9, h - 1], ask: () => `Someone changed ${v} into ${h - 1 ? ONE(2, h - 1) + ', ' : ''}${ONE(1, t + 9)} and ${ONE(0, o + 10)}. Is it still ${v}?`, yesno: true, answer: 'yes' }; }, win: () => M.answered && status().win, done: v => `Yes — it never stopped being ${v}. Tidied up, it reads ${v} again.`, hint: ['Look at the amount line under the boxes. Did the amount change?', 'Answer Yes, then tidy the shaking tens to see the number read across.'] },
+  ];
   // next free slot in a tidy grid, so tens are easy to see at a glance
   function gridSpot(r, k) {
     const { GX, GY, COLS } = M.geo;
@@ -1218,6 +1265,7 @@
 
   // ten dots carried into the next box become one dot there
   function explodeGroup(group, r, toK, dropLocal) {
+    snap(); M.valueSame = true;
     const fromK = group[0].k;
     group.forEach(d => removeDot(d.id));
     sparks(r, toK, dropLocal.x, dropLocal.y, 14); flash(r, toK, 'pour');
@@ -1228,6 +1276,7 @@
   }
   // one dot carried into the box on its right becomes ten there, clustered where it landed
   function unexplode(dot, r, toK, dropLocal) {
+    snap(); M.valueSame = true;
     const anti = dot.anti, fromK = dot.k, { DS, COLS } = M.geo;
     removeDot(dot.id);
     for (let j = 0; j < 10; j++) {
@@ -1252,7 +1301,7 @@
     for (let i = 0; i < n; i++) setTimeout(() => cancelPair(ds[i], as[i]), i * 70);
   }
   function regroupAll() {
-    if (M.mode !== 'sub') return;
+    if (M.mode !== 'sub') return; snap();
     const b = digitsOf(M.prob.b), g = M.geo; let delay = 0;
     const centre = { x: 4 + 2 * g.GX, y: Math.max(20, M.rows[0].fh / 2 - g.DS / 2) };
     const plan = [];   // list of source boxes to unexplode, in order
@@ -1263,6 +1312,7 @@
   }
   function dropColumn(k) {
     const to = resultRow(); if (to < 0 || M.busy) return;
+    if (M.mode !== 'sub' || counts(0, k).dots >= (digitsOf(M.prob.b)[k] || 0)) snap();
     if (M.mode === 'sub') return dropSub(k, to);
     const movers = M.dots.filter(d => M.rows[d.r].kind === 'src' && d.k === k);
     movers.forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
@@ -1367,7 +1417,7 @@
     const f = under && under.closest('.dotfield');
     if (f) { const box = f.closest('.mbox'); box.classList.add('over'); if (!legalTarget(+f.dataset.r, +f.dataset.k)) box.classList.add('bad'); }
   }
-  function restore(group) { group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.remove('ten'); e.style.visibility = ''; } }); }
+  function restoreGroup(group) { group.forEach(d => { const e = dotEl(d.id); if (e) { e.classList.remove('ten'); e.style.visibility = ''; } }); }
   function onUp(e) {
     window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp);
     if (!drag) return;
@@ -1383,23 +1433,23 @@
       if (f && M.rows[+f.dataset.r].kind === 'free') { const r = +f.dataset.r, k = +f.dataset.k, local = localPoint(r, k, client); ghosts.forEach(g => spawnDot(r, k, false, { x: local.x + +g.dataset.ox, y: local.y + +g.dataset.oy }, true)); refresh(); }
       return;
     }
-    if (!group.every(d => M.dots.includes(d))) { done(); restore(group); return; }
+    if (!group.every(d => M.dots.includes(d))) { done(); restoreGroup(group); return; }
     const single = group.length === 1, dot = group[0];
-    if (!f) { done(); group.forEach(d => { sparks(d.r, d.k, d.x, d.y, 6); removeDot(d.id); }); refresh(); return; }   // outside every box: thrown away
+    if (!f) { done(); snap(); group.forEach(d => { sparks(d.r, d.k, d.x, d.y, 6); removeDot(d.id); }); refresh(); return; }   // outside every box: thrown away
     const r = +f.dataset.r, k = +f.dataset.k, local = localPoint(r, k, client);
     if (r === fromR && k === fromK) {
-      done(); restore(group);
-      if (single && overDot && overDot.anti !== dot.anti && overDot.r === r && overDot.k === k) { cancelPair(dot, overDot); return; }
+      done(); restoreGroup(group);
+      if (single && overDot && overDot.anti !== dot.anti && overDot.r === r && overDot.k === k) { snap(); cancelPair(dot, overDot); return; }
       group.forEach((d, i) => { const g = ghosts[i]; placeDot(d, r, k, { x: local.x + +g.dataset.ox, y: local.y + +g.dataset.oy }); });
       refresh(); return;
     }
     if (legalTarget(r, k, dg) && r !== fromR) {
-      done(); restore(group);
+      done(); restoreGroup(group); snap();
       if (single && overDot && overDot.anti !== dot.anti && overDot.r === r && overDot.k === k) { placeDot(dot, r, k, local); cancelPair(dot, overDot); return; }
       group.forEach((d, i) => { const g = ghosts[i]; placeDot(d, r, k, { x: local.x + +g.dataset.ox, y: local.y + +g.dataset.oy }); });
       refresh(); return;
     }
-    if (legalTarget(r, k, dg) && !single && k === fromK - 1) { done(); restore(group.slice(1)); unexplode(dot, r, k, local); return; }
+    if (legalTarget(r, k, dg) && !single && k === fromK - 1) { done(); restoreGroup(group.slice(1)); unexplode(dot, r, k, local); return; }
     if (legalTarget(r, k, dg) && !single) {
       // converge: the ten ghosts slide to the drop point, then one dot appears there
       ghosts.forEach(g => { g.style.transition = 'left .3s ease-in, top .3s ease-in, transform .3s'; g.style.left = (client.x - DS / 2) + 'px'; g.style.top = (client.y - DS / 2) + 'px'; g.style.transform = 'scale(.6)'; });
@@ -1408,7 +1458,7 @@
     }
     if (legalTarget(r, k, dg) && single) { done(); unexplode(dot, r, k, local); return; }
     // not a legal move: shake the box and put everything back
-    done(); restore(group); flash(r, k, 'shake');
+    done(); restoreGroup(group); flash(r, k, 'shake');
     if (r !== fromR) coachSay(M.rows[fromR].kind === 'src' ? `A dot moves <b>straight down</b> into the box right under it.` : `Dots in the answer row stay in the answer row.`, true);
     else if (M.rows[r].kind === 'src') coachSay(`The top rows stay as they are — the moving happens in the answer row.`, true);
     else if (!single) coachSay(`Ten dots travel together only into the box on their <b>left</b>.`, true);
@@ -1442,7 +1492,8 @@
       }
     });
     for (let k = 0; k < M.n; k++) { const b = $(`drop-${k}`); if (!b) continue; const hasSrc = M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); const ready = M.mode !== 'sub' || counts(0, k).dots >= (digitsOf(M.prob.b)[k] || 0); b.disabled = !hasSrc || M.busy; b.classList.toggle('waiting', hasSrc && !ready); }
-    renderReadout(); if (M.mode === 'make') tidyMake();
+    renderReadout(); if (M.mode === 'make') { tidyMake(); renderValue(); }
+    const ub = $('undoBtn'), rb = $('redoBtn'); if (ub) { ub.disabled = !M.undo.length; rb.disabled = !M.redo.length; }
     if (M.mode === 'sub') renderNotebookSub();
     if (M.mode === 'add') renderNotebookAdd();
     renderCoach();
@@ -1452,7 +1503,7 @@
   }
   function status() {
     const p = M.prob;
-    if (M.mode === 'make') { const r = 0; const cs = Array.from({ length: M.n }, (_, k) => counts(r, k)); return { row: r, cs, win: rowValue(r) === p.t && cs.every(settled) }; }
+    if (M.mode === 'make') { const r = 0; const cs = Array.from({ length: M.n }, (_, k) => counts(r, k)); const tidy = rowValue(r) === p.t && cs.every(settled); const pz = p.puzzle && PUZZLES.find(z => z.id === p.puzzle); return { row: r, cs, win: pz ? (pz.id === 'still' ? (M.answered && tidy) : pz.win()) : tidy }; }
     if (M.mode === 'regroup') { const cs = Array.from({ length: M.n }, (_, k) => counts(0, k)); const b = digitsOf(p.b); const intact = rowValue(0) === p.a; return { row: 0, cs, lost: !intact, win: intact && cs.every((c, k) => c.dots >= (b[k] || 0)) }; }
     const r = resultRow(); const cs = Array.from({ length: M.n }, (_, k) => counts(r, k));
     const srcLeft = M.dots.filter(d => M.rows[d.r].kind === 'src').length;
@@ -1543,10 +1594,17 @@
     const p = M.prob, st = status();
     if (M.mode === 'make') {
       const v = rowValue(0);
-      if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${p.t}</b> — every box holds fewer than ten, so the boxes read the number straight across.`; markDone(); return; }
-      if (v !== p.t) { say.classList.add('oops'); say.innerHTML = `There should be <b>${p.t}</b> dots' worth here — a dot went missing. Tap <b>Start over</b>.`; return; }
+      const pz = p.puzzle && PUZZLES.find(z => z.id === p.puzzle);
+      clearTimeout(M.hintT); if (!st.win && M.hint < 1) M.hintT = setTimeout(() => { M.hint = 1; refresh(); }, 15000);   // a quiet spell earns the first hint on its own
+      if (st.win) { say.classList.add('win'); say.innerHTML = pz ? pz.done(p.t) : `<b>${p.t}</b> — every box holds fewer than ten, so the boxes read the number straight across.`; markDone(); return; }
+      if (v !== p.t) { say.classList.add('oops'); say.innerHTML = `The amount should still be <b>${p.t}</b> — a dot went missing. Tap <b>Undo</b>.`; return; }
+      if (pz && pz.id === 'still' && !M.answered) { say.innerHTML = `Is it still <b>${p.t}</b>? <span class="ask"><button type="button" data-ans="yes">Yes</button><button type="button" data-ans="no">No</button></span>`; say.querySelectorAll('[data-ans]').forEach(b => b.addEventListener('click', () => { if (b.dataset.ans === 'yes') { M.answered = true; refresh(); } else { coachSay(`Look at the amount line under the boxes — has the amount changed? Try again.`, true); } })); return; }
+      if (pz) { say.innerHTML = M.hint >= 2 ? pz.hint[1] : M.hint === 1 ? pz.hint[0] : pz.make === PUZZLES[2].make ? `Tidy it up so it reads across.` : `Can you show this amount another way?`; return; }
       const full = Array.from({ length: M.n }, (_, k) => k).find(k => counts(0, k).dots >= 10);
-      say.innerHTML = `The shaking dots in the <b>${PLACE[full]}</b> box are a full ten. Grab any one and all ten come along — drop them in the <b>${PLACE[full + 1]}</b> box and they become one dot there.`; return;
+      if (M.hint >= 2) say.innerHTML = `Grab any shaking dot in the <b>${PLACE[full]}</b> box — all ten come along — and drop them in the <b>${PLACE[full + 1]}</b> box. They become one dot there.`;
+      else if (M.hint === 1) say.innerHTML = `Ten dots together are a full ten. The dots that shake make one — where could a whole ten go?`;
+      else say.innerHTML = `Can you show this amount another way, so every box holds fewer than ten?`;
+      return;
     }
     if (M.mode === 'sub' && st.srcLeft) {
       const b = digitsOf(p.b);
@@ -1563,7 +1621,7 @@
     }
     if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${rowValue(st.row).toLocaleString()}</b> — every box in the answer row is settled and the number reads straight across.`; markDone(); return; }
     if (st.lost) { say.classList.add('oops'); say.innerHTML = `Every box is settled and they read <b>${rowValue(st.row).toLocaleString()}</b> — but that isn't ${p.a} ${M.mode === 'add' ? '+' : '−'} ${p.b}. A dot was thrown away somewhere. Tap <b>Start over</b>.`; return; }
-    const left = st.srcLeft ? `<b>${st.srcLeft}</b> still up top` : `the top rows are empty`;
+    const left = st.srcLeft ? `<b>${st.srcLeft} dots</b> still up top (${M.rows.filter(r => r.kind === 'src').map((r, i) => Array.from({ length: M.n }, (_, k) => [k, counts(i, k).dots]).filter(([, c]) => c).reverse().map(([k, c]) => ONE(k, c)).join(' and ') || 'none').join(', plus ')})` : `the top rows are empty`;
     say.innerHTML = (M.dots.some(d => d.r === st.row) ? `Answer row: ${describe(st.row)}` : `The answer row is empty`) + ` — ${left}.`;
   }
   function setupDots() {
@@ -1574,6 +1632,8 @@
     $('popClose').addEventListener('click', () => openPop(false));
     document.addEventListener('pointerdown', e => { if (!$('pop').hidden && !e.target.closest('#pop') && !e.target.closest('#optBtn')) openPop(false); });
     $('resetMachine').addEventListener('click', restart);
+    $('undoBtn').addEventListener('click', undo); $('redoBtn').addEventListener('click', redo);
+    $('hintBtn').addEventListener('click', () => { M.hint = Math.min(2, (M.hint || 0) + 1); refresh(); });
     $('regroupAll').addEventListener('click', regroupAll);
     $('machine').addEventListener('pointerdown', onDown);
   }
