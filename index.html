@@ -231,6 +231,7 @@
 
   /* ---------- view 3: factor shapes ---------- */
   #sgrid .cell { border-color: transparent; background: var(--ghost); color: var(--ghost-text); }
+  #sgrid .hd.factor { background: var(--c); border-color: var(--ink); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); transform: scale(1.06); }
   .rect { pointer-events: none; border-radius: 12px; border: 2.5px solid var(--c); background: color-mix(in srgb, var(--c) 22%, transparent); z-index: 2; transition: opacity .2s; margin: -2px; }
   .rect.sq { border-style: dashed; }
   .rect.faded { opacity: .12; }
@@ -334,20 +335,6 @@
   .mrow.result { margin-top: 4px; padding-top: 12px; border-top: 2.5px solid var(--coral); }
   .mrow .rlabel { display: none; }
   .mrow .boxes { display: flex; gap: 8px; }
-  /* make a number: every box unpacked into ones, so 3 hundreds is visibly 300 dots */
-  .mrow.worth { margin-top: 10px; }
-  .mrow.worth .wblob { width: 100%; }
-  .mrow.worth canvas { display: block; width: 100%; height: var(--wh, 104px); border-radius: 14px; background: rgba(0,0,0,.18); }
-  .worthsum { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-family: var(--hand); font-size: 22px; font-weight: 800; color: var(--text); min-height: 40px; }
-  .worthsum .term { color: var(--pc); display: inline-flex; flex-direction: column; align-items: center; line-height: 1; }
-  .worthsum .term small { font-family: var(--body); font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 2px; }
-  .worthsum .term.hot small { color: var(--coral-text); }
-  .worthsum .op { color: var(--muted); font-size: 18px; }
-  .worthsum .tot { padding: 2px 14px; border-radius: 999px; background: rgba(0,0,0,.35); font-size: 26px; }
-  .worthsum.ok .tot { background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
-  .worthsum .tot.tick { animation: pop .25s ease-out; }
-  .worthsum .same { font-family: var(--body); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--spring-ink); background: var(--mint); border: 1.5px solid var(--ink); border-radius: 999px; padding: 4px 10px; animation: pop .25s ease-out; }
-  .worthsum .empty { color: var(--muted); font-size: 16px; font-weight: 600; }
   .mbox { position: relative; width: var(--bw); border: 1.5px solid var(--panel-line); border-radius: 12px; background: var(--inset); padding: 20px 8px 4px; display: flex; flex-direction: column; gap: 2px; transition: border-color .2s, box-shadow .2s, background .2s; }
   .mrow.src .mbox { background: color-mix(in srgb, var(--inset) 70%, var(--panel)); }
   .mrow:not(:first-child) .mbox { padding-top: 6px; }
@@ -362,11 +349,6 @@
   .mbox .plabel { position: absolute; top: 6px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: baseline; white-space: nowrap; overflow: hidden; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--teal); font-weight: 800; pointer-events: none; }
   .mbox .plabel b { font-family: var(--body); font-size: 10.5px; letter-spacing: 0; color: var(--teal); }
   .dotfield { position: relative; height: var(--fh, 120px); border-radius: 10px; touch-action: none; }
-  /* make a number: each box has room for ten — a ten-frame of empty slots; anything past ten lands in the overflow strip beneath */
-  .tenframe { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
-  .tenframe i { position: absolute; width: var(--ds); height: var(--ds); border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.22); box-sizing: border-box; }
-  .tenframe .edge { position: absolute; left: 0; right: 0; border-top: 1.5px dashed rgba(255,255,255,.35); }
-  .mbox.spill { border-color: var(--coral-deep); }
   .dot { --dc: var(--teal); position: absolute; width: var(--ds, 22px); height: var(--ds, 22px); border-radius: 50%; background: var(--dc); cursor: grab; touch-action: none; transition: transform .3s, opacity .3s, background .35s, box-shadow .35s; z-index: 2; }
   .dot.anti { background: transparent; border: 3px solid var(--coral); }
   .dot.pro { box-shadow: 0 0 0 2px var(--ink); }   /* ten that are ready to become one dot of the next place */
@@ -385,6 +367,11 @@
   @keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
   .mbox .count { align-self: center; display: inline-flex; justify-content: center; align-items: baseline; gap: 5px; min-width: 40px; height: 40px; padding: 0 12px; border-radius: 999px; background: rgba(0,0,0,.5); font-family: var(--hand); font-size: 20px; font-weight: 800; line-height: 40px; pointer-events: none; color: var(--text); }
   .mbox .count:empty { visibility: hidden; }
+  .mbox .count.big { background: none; height: auto; line-height: 1; font-size: 46px; padding: 2px 0 4px; color: var(--pc); }
+  .mbox .count.big.hot { color: var(--pc); }   /* the shaking dots say a box is over ten; the number stays in its place colour */
+  .dot.vib { animation: vib .55s ease-in-out infinite; animation-delay: var(--vd, 0s); box-shadow: 0 0 0 2px rgba(255,255,255,.28); }
+  @keyframes vib { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(1.6px, -1.2px); } 50% { transform: translate(-1.2px, 1.4px); } 75% { transform: translate(1.2px, 1.2px); } }
+  body.mode-make .dot { transition: left .35s ease, top .35s ease, transform .3s, opacity .3s, background .35s, box-shadow .35s; }
   .mbox .count small { font-size: 11px; color: var(--teal-pale); font-family: var(--body); font-weight: 800; }
   .mbox .count.ok, .mbox .count.hot, .mbox .count.neg, .mbox .count .was { color: var(--text); }
   .mbox .cancelall { border: 1.5px solid var(--raised-line); background: var(--raised); border-radius: 9px; padding: 3px 8px; font-family: var(--hand); font-size: 11px; font-weight: 700; color: var(--teal); align-self: center; }
@@ -866,9 +853,9 @@
   function buildSGrid() {
     const g = $('sgrid'); g.innerHTML = ''; g.className = 'grid n' + N;
     const corner = el('div', 'hd corner', '×'); corner.style.gridArea = '1 / 1'; g.appendChild(corner);
-    for (let c = 1; c <= N; c++) { const h = el('div', 'hd col-hd', c); h.style.gridArea = `1 / ${c + 1}`; g.appendChild(h); }
+    for (let c = 1; c <= N; c++) { const h = el('div', 'hd col-hd', c); h.id = `shc-${c}`; h.style.gridArea = `1 / ${c + 1}`; g.appendChild(h); }
     for (let r = 1; r <= N; r++) {
-      const h = el('div', 'hd row-hd', r); h.style.gridArea = `${r + 1} / 1`; g.appendChild(h);
+      const h = el('div', 'hd row-hd', r); h.id = `shr-${r}`; h.style.gridArea = `${r + 1} / 1`; g.appendChild(h);
       for (let c = 1; c <= N; c++) {
         const cell = document.createElement('button');
         cell.type = 'button'; cell.className = 'cell'; cell.id = `s-${r}-${c}`;
@@ -886,6 +873,7 @@
     g.querySelectorAll('.rect').forEach(r => r.remove());
     const pairs = []; // [a,b] with a<=b
     for (let a = 1; a <= N; a++) { if (product % a) continue; const b = product / a; if (b >= a && b <= N) pairs.push([a, b]); }
+    g.querySelectorAll('.hd').forEach(h => { h.classList.remove('factor'); h.style.removeProperty('--c'); });
     for (const cell of g.querySelectorAll('.cell')) {
       const hit = +cell.dataset.p === product;
       cell.classList.toggle('hit', hit);
@@ -900,6 +888,7 @@
         d.style.gridArea = `2 / 2 / span ${r} / span ${c}`;
         g.appendChild(d);
         const cell = $(`s-${r}-${c}`); cell.classList.add('picked'); cell.style.setProperty('--c', col);
+        for (const h of [$(`shr-${r}`), $(`shc-${c}`)]) if (h && !(solo !== null && solo !== i)) { h.classList.add('factor'); h.style.setProperty('--c', col); }
       }
     });
     $('bigNum').textContent = product;
@@ -942,7 +931,7 @@
   const MODES = {
     make: {
       title: 'Numbers', hint: 'Use + and − in each box until the machine holds exactly the target number.',
-      geo: { BW: 176, DS: 17, GX: 30, GY: 30, COLS: 5, FH: 200 },
+      geo: { BW: 300, DS: 17, GX: 28, GY: 28, COLS: 10, FH: 330 },
       list: [{ h: 'Two digits' }, { t: 47 }, { t: 83 }, { h: 'Three digits' }, { t: 138 }, { t: 356 }, { t: 856 }, { t: 409 }, { h: 'Four digits' }, { t: 1204 }, { t: 2050 }, { t: 3417 }],
       rules: [['+', 'Tap + to put a dot in a box and − to take one out. Dots can also be dragged between boxes.'], ['10', 'Each place has its own shade — ones are lightest. When a box holds ten, those ten turn the <b>next</b> shade. Grab any one of them and all ten come along; drop them in the box on the left and they become one dot.'], ['×', 'Drop a dot anywhere outside the boxes to throw it away.']],
     },
@@ -979,11 +968,11 @@
 
   /* ---- sections + problem lists ---- */
   const KINDS = {
-    make: [], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
+    make: [['ones', 'All in the ones box'], ['tens', 'All in the tens box'], ['jumble', 'Jumbled']], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
     sub: [['borrow', 'Borrowing'], ['zeros', 'Across zeros'], ['noborrow', 'No borrowing']],
     regroup: [['borrow', 'Borrowing'], ['zeros', 'Across zeros']],
   };
-  const GEN = { digits: 'mix', kind: { make: null, add: 'mix', sub: 'mix' } };
+  const GEN = { digits: 'mix', kind: { make: 'mix', add: 'mix', sub: 'mix' } };
   const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const nDigit = n => rnd(10 ** (n - 1), 10 ** n - 1);
   // random problems that actually exercise the chosen skill
@@ -991,7 +980,14 @@
     const n = GEN.digits === 'mix' ? rnd(2, 4) : GEN.digits;
     const kinds = KINDS[M.mode];
     const kind = GEN.kind[M.mode] === 'mix' && kinds.length ? kinds[rnd(0, kinds.length - 1)][0] : GEN.kind[M.mode];
-    if (M.mode === 'make') return { t: nDigit(n) };
+    if (M.mode === 'make') {
+      // a challenge is a pile of dots that is not yet a number: dist[k] = how many dots start in box k
+      const d = GEN.digits === 'mix' ? rnd(2, 3) : Math.min(3, GEN.digits);
+      if (kind === 'ones') { const t = d === 2 ? rnd(20, 99) : rnd(100, 199); return { t, kind, dist: [t] }; }
+      if (kind === 'tens') { const n = d === 2 ? rnd(11, 19) : rnd(12, 39); return { t: n * 10, kind, dist: [0, n] }; }
+      const ones = rnd(11, 29), tens = d === 2 ? 0 : rnd(11, 19), hund = d === 2 ? 0 : rnd(0, 2);   // jumbled: more than ten in two boxes at once
+      return { t: ones + 10 * tens + 100 * hund, kind: 'jumble', dist: [ones, tens, hund] };
+    }
     for (let tries = 0; tries < 400; tries++) {
       if (M.mode === 'add') {
         const a = nDigit(n), b = nDigit(n), da = digitsOf(a), db = digitsOf(b);
@@ -1011,7 +1007,7 @@
     return M.mode === 'add' ? { a: 358, b: 287 } : { a: 500, b: 134 };
   }
   function setMode(mode) {
-    M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub');
+    M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make');
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
     buildChips(); buildCustom();
     loadProblem(null, generate());
@@ -1024,11 +1020,11 @@
   }
   function buildCustom() {
     const host = $('custom');
-    if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="856" aria-label="number to make"><button type="button" id="cgo">Go</button>`;
+    if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="47" max="199" aria-label="number of dots"><button type="button" id="cgo">Go</button>`;
     else host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     $('cgo').addEventListener('click', () => {
       const a = +$('ca').value;
-      if (M.mode === 'make') { if (!$('ca').value || a < 0) { coachSay('Type a number first.'); return; } openPop(false); loadProblem(null, { t: a, own: true }); return; }
+      if (M.mode === 'make') { if (!$('ca').value || a < 1 || a > 199) { coachSay('Type a number from 1 to 199.'); return; } openPop(false); loadProblem(null, { t: a, kind: 'ones', dist: [a], own: true }); return; }
       const b = +$('cb').value;
       if (!$('ca').value || !$('cb').value || a < 0 || b < 0) { coachSay('Type two numbers first.'); return; }
       if (M.mode !== 'add' && b > a) { coachSay('Put the bigger number first when subtracting.'); return; }
@@ -1037,14 +1033,14 @@
   }
   function loadProblem(i, custom) {
     const p = custom || M.prob;
-    M.prob = { ...p, idx: null }; $('target').hidden = M.mode !== 'make'; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.worthLast = undefined; M.worthSame = false; M.pile = null; document.querySelectorAll('.dot.flier').forEach(g => g.remove());
+    M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; document.querySelectorAll('.dot.flier').forEach(g => g.remove());
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
-      const len = String(p.t).length; M.n = Math.min(6, len >= 4 ? len : len + 1);
+      const len = String(p.t).length; M.n = Math.min(6, Math.max(3, len + 1));
       M.rows = [{ kind: 'free', label: '', fh: g.FH }];
-      $('mTitle').innerHTML = `<span>Make</span>${p.t.toLocaleString()}`;
-      $('targetNum').textContent = p.t.toLocaleString();
-      $('dotsPanel').dataset.title = ''; $('qbar').textContent = `Make ${p.t.toLocaleString()}`;
+      const parts = p.dist.map((n, k) => n ? `${n} ${n === 1 ? PLACE[k].replace(/s$/, '') : PLACE[k]}` : null).filter(Boolean).reverse().join(' + ');
+      $('mTitle').innerHTML = parts;
+      $('dotsPanel').dataset.title = ''; $('qbar').textContent = `${parts} — what number is that?`;
     } else if (M.mode === 'add') {
       M.n = Math.max(String(p.a).length, String(p.b).length) + 1;
       M.rows = [{ kind: 'src', label: String(p.a), fh: g.FHS, digits: digitsOf(p.a) }, { kind: 'src', label: '+ ' + p.b, fh: g.FHS, digits: digitsOf(p.b) }, { kind: 'result', label: '=', fh: g.FH }];
@@ -1074,7 +1070,7 @@
     $('keyrow').innerHTML = Array.from({ length: M.n }, (_, k) => `<span><i style="--dc:${COL[k] || COL[5]}"></i>${PLACE[k] || '10^' + k}</span>`).reverse().join('');
     if (M.mode === 'add') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, false, gridSpot(1, k)); }); }
     if (M.mode === 'sub') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); digitsOf(p.b).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(1, k, true, gridSpot(1, k)); }); }
-    if (M.mode === 'regroup') { digitsOf(p.a).forEach((d, k) => { for (let j = 0; j < d; j++) spawnDot(0, k, false, gridSpot(0, k)); }); }
+    if (M.mode === 'make') p.dist.forEach((n, k) => { for (let j = 0; j < n; j++) spawnDot(0, k, false, { x: 4, y: 4 }); });   // the pile starts wherever the challenge puts it
     refresh();
   }
   function restart() { if (M.prob) loadProblem(null, M.prob); }
@@ -1097,6 +1093,7 @@
     g.BW = bw;
     g.DS = bw >= 150 ? 17 : bw >= 120 ? 15 : 13;
     g.GX = g.GY = Math.max(g.DS + 6, Math.floor((bw - 20 - g.DS) / 4));
+    if (M.mode === 'make') { g.COLS = 10; g.GX = g.GY = Math.floor((bw - 16) / 10); g.DS = Math.min(17, g.GX - 4); }
     // vertical budget
     const top = $('machine').getBoundingClientRect().top || 160;
     const chrome = 12 + 0 + 48 + 44 + (M.stack && nbW ? nb.offsetHeight + 8 : 0);   // readout, key, tray, coach, paddings, stacked notebook
@@ -1107,8 +1104,8 @@
       if (fh < 96) { fhs = 44; fh = avail - 2 * fhs - fixed; }
       g.FHS = fhs; g.FH = Math.max(76, Math.min(150, fh));
     } else {
-      if (M.mode === 'make') { g.WH = Math.max(96, Math.min(150, avail - 106 - 62 - 130)); main.style.setProperty('--wh', g.WH + 'px'); }
-      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 106 + g.WH + 10 + 52 : 68)));
+      g.FH = Math.max(110, Math.min(MODES[M.mode].geo.FH, avail - (M.mode === 'make' ? 70 : 68)));
+      if (M.mode === 'make' && M.prob) { const rows = Math.max(...M.prob.dist.map(n => Math.ceil(n / 10))) + 1; const pitch = Math.floor((g.FH - 8) / rows); if (pitch < g.GY) { g.GY = g.GX = Math.max(7, pitch); g.DS = Math.max(5, Math.min(g.DS, g.GY - 3)); } g.FH = Math.max(150, Math.min(g.FH, rows * g.GY + 12)); }   // the box is just tall enough for every row of ten
     }
     M.rows.forEach(r => { r.fh = r.kind === 'src' ? g.FHS : g.FH; });
     document.querySelector('.stage').classList.toggle('stack', M.stack);
@@ -1122,7 +1119,6 @@
     const wrap = $('machine').parentElement; wrap.style.setProperty('--bw', M.geo.BW + 'px'); wrap.style.setProperty('--ds', M.geo.DS + 'px');
     M.rows.forEach((row, r) => { for (let k = 0; k < M.n; k++) { const f = field(r, k); if (f) f.style.setProperty('--fh', row.fh + 'px'); } });
     const sx = (M.geo.BW - 16 - M.geo.DS) / Math.max(1, old.BW - 16 - old.DS);
-    renderWorth(); layoutFrames();
     M.dots.forEach(d => { const sy = (M.rows[d.r].fh - M.geo.DS) / Math.max(1, oldFh[d.r] - old.DS); d.x = clampX(d.x * sx); d.y = clampY(d.y * sy, d.r); const e = dotEl(d.id); if (e) { e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; } });
   }
   let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(relayout, 120); });
@@ -1155,133 +1151,34 @@
         const box = el('div', 'mbox'); box.id = `mbox-${r}-${k}`;
         box.innerHTML = `<div class="plabel"><span>${r === 0 ? (PLACE[k] || '10^' + k) : ''}</span><b>${r === 0 && k < 4 ? (k === 0 ? '1' : '1' + '0'.repeat(k)) : ''}</b></div>`;
         const f = el('div', 'dotfield'); f.id = `field-${r}-${k}`; f.dataset.r = r; f.dataset.k = k; f.style.setProperty('--fh', row.fh + 'px'); box.appendChild(f);
-        if (M.mode === 'make') { const tf = el('div', 'tenframe'); tf.innerHTML = Array.from({ length: 10 }, () => '<i></i>').join('') + '<div class="edge"></div>'; f.appendChild(tf); }
         const c = el('div', 'count'); c.id = `count-${r}-${k}`; box.appendChild(c);
-        if (M.mode === 'make' && row.kind === 'free') {
-          const pm = el('div', 'pm');
-          const minus = document.createElement('button'); minus.type = 'button'; minus.className = 'minus'; minus.id = `minus-${r}-${k}`; minus.textContent = '−'; minus.setAttribute('aria-label', `take one dot out of ${PLACE[k] || 'this box'}`);
-          minus.addEventListener('click', () => { const mine = M.dots.filter(d => d.r === r && d.k === k); const d = mine[mine.length - 1]; if (!d) return; sparks(r, k, d.x, d.y, 6); removeDot(d.id); refresh(); });
-          const plus = document.createElement('button'); plus.type = 'button'; plus.className = 'plus'; plus.id = `plus-${r}-${k}`; plus.textContent = '+'; plus.setAttribute('aria-label', `put one dot into ${PLACE[k] || 'this box'}`);
-          plus.addEventListener('click', () => { spawnDot(r, k, false, gridSpot(r, k), true); refresh(); });
-          pm.append(minus, c, plus); box.appendChild(pm);   // − [count] + in one row
-        }
+        if (M.mode === 'make') c.classList.add('big');
         boxes.appendChild(box);
       }
       line.appendChild(boxes); host.appendChild(line);
-      if (M.mode === 'make' && row.kind === 'free') {
-        layoutFrames();
-        const wl = el('div', 'mrow worth'); wl.appendChild(el('div', 'rlabel'));
-        const sh = el('div', 'boxes'); const bl = el('div', 'wblob'); bl.innerHTML = '<canvas id="worthBlob"></canvas>'; sh.appendChild(bl);
-        wl.appendChild(sh); host.appendChild(wl);
-        const sum = el('div', 'worthsum'); sum.id = 'worthSum'; host.appendChild(sum);
-      }
     });
   }
-  /* ---- what the dots are really worth: each box unpacked into ones ---- */
-  // one pile of dots: as many dots as the number is worth. Loose ones lie about; a tens dot is a clump of ten, a hundreds dot a clump of a hundred
-  function rng(seed) { let a = 0; for (const ch of seed) a = (a * 31 + ch.charCodeAt(0)) >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-  function pilePitch(W, H) {
-    const goal = Math.max(120, Math.round(M.prob.t * 1.25 + 60));
-    let p = Math.sqrt(W * H / (2.2 * goal));            // every dot needs about 2p² of pile, clumps and gaps included
-    p = Math.min(p, (H / 2 - 4) / (0.52 * 10));         // a clump of a hundred must fit the height
-    return Math.max(1.5, Math.min(11, p));
-  }
-  function placeClumps(W, H, p) {
-    // one heap: every clump packs as close to the middle as it can, so the pile is a single mass that grows outward
-    const out = [], R = n => Math.max(p / 2, 0.52 * p * Math.sqrt(n) + p * .3), cx = W / 2, cy = H / 2;
-    const fits = (x, y, r, pad) => x >= r && x <= W - r && y >= r && y <= H - r && out.every(o => Math.hypot(o.x - x, o.y - y) >= o.r + r + pad);
-    const put = (key, n, k) => {
-      const r = R(n), rand = rng(key), pad = p * .15, a0 = rand() * Math.PI * 2;
-      for (let d = 0; d < Math.max(W, H); d += p * .6) {
-        const steps = Math.max(1, Math.round(d / (p * .8)));
-        for (let i = 0; i < steps; i++) { const a = a0 + i / steps * Math.PI * 2, x = cx + Math.cos(a) * d * 1.15, y = cy + Math.sin(a) * d * .75; if (fits(x, y, r, pad)) { const c = { x, y, r, n, k, key }; out.push(c); return c; } }
-      }
-      const c = { x: cx, y: cy, r, n, k, key }; out.push(c); return c;
-    };
-    for (let k = M.n - 1; k >= 0; k--) {
-      const c = counts(0, k).dots;
-      for (let i = 0; i < c; i++) {
-        if (k >= 2) for (let q = 0; q < 10 ** (k - 2); q++) put(`h${k}-${i}-${q}`, 100, k);
-        else put(`u${k}-${i}`, k === 1 ? 10 : 1, k);
-      }
-    }
-    return out;
-  }
-  function pileDots() {
-    const cv = $('worthBlob'); if (!cv) return null;
-    const cssW = cv.clientWidth || (M.n * M.geo.BW + (M.n - 1) * 8), pad = 6, W = cssW - 2 * pad, H = M.geo.WH - 2 * pad, p = pilePitch(W, H);
-    const dots = [];
-    for (const c of placeClumps(W, H, p)) {
-      const rand = rng(`j${c.key}`), col = COL[c.k] || COL[5];
-      for (let j = 0; j < c.n; j++) {
-        const a = j * 2.39996 + rand() * .3, r = 0.52 * p * Math.sqrt(j + .5) + (rand() - .5) * p * .2;
-        dots.push({ key: `${c.key}#${j}`, x: pad + c.x + Math.cos(a) * r, y: pad + c.y + Math.sin(a) * r, col });
-      }
-    }
-    return { dots, rd: p * .4, cssW };
-  }
-  const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-  function paintPile(dots, rd, cssW, mix) {
-    const cv = $('worthBlob'); if (!cv) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (cv.width !== Math.round(cssW * dpr)) { cv.width = Math.round(cssW * dpr); cv.height = Math.round(M.geo.WH * dpr); }
-    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cssW, M.geo.WH);
-    for (const d of dots) { ctx.fillStyle = d.col; ctx.globalAlpha = d.a == null ? 1 : d.a; ctx.beginPath(); ctx.arc(d.x, d.y, rd, 0, Math.PI * 2); ctx.fill(); }
-    ctx.globalAlpha = 1;
-  }
-  function drawBlob(animate) {
-    const L = pileDots(); if (!L) return;
-    const prev = M.pile; M.pile = L; if (M.pileAnim) cancelAnimationFrame(M.pileAnim);
-    if (!animate || !prev) { paintPile(L.dots, L.rd, L.cssW); return; }
-    // a regroup: the dots that vanish from one group slide into the dots that appear in another, so ten specks gather into a clump (or a clump bursts apart)
-    const oldBy = new Map(prev.dots.map(d => [d.key, d])), newBy = new Map(L.dots.map(d => [d.key, d]));
-    const removed = prev.dots.filter(d => !newBy.has(d.key)), added = L.dots.filter(d => !oldBy.has(d.key));
-    const pairs = [];
-    L.dots.forEach(d => { const o = oldBy.get(d.key); if (o) pairs.push({ from: o, to: d }); });
-    added.forEach((d, i) => pairs.push(removed[i] ? { from: removed[i], to: d } : { from: { ...d, a: 0 }, to: d }));
-    removed.slice(added.length).forEach(o => pairs.push({ from: o, to: { ...o, a: 0 } }));
-    const t0 = performance.now(), dur = 550;
-    const step = now => {
-      const t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-      const frame = pairs.map(({ from, to }) => { const c0 = hexRgb(from.col), c1 = hexRgb(to.col); const c = c0.map((v, i) => Math.round(v + (c1[i] - v) * e)); const a0 = from.a == null ? 1 : from.a, a1 = to.a == null ? 1 : to.a; return { x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e, col: `rgb(${c.join(',')})`, a: a0 + (a1 - a0) * e }; });
-      paintPile(frame, L.rd, L.cssW);
-      if (t < 1) M.pileAnim = requestAnimationFrame(step); else { M.pileAnim = null; paintPile(L.dots, L.rd, L.cssW); }
-    };
-    M.pileAnim = requestAnimationFrame(step);
-  }
-  function renderWorth() {
-    if (M.mode !== 'make' || !$('worthSum')) return;
-    const terms = []; drawBlob(M.worthSame && M.worthLast === rowValue(0));
-    for (let k = M.n - 1; k >= 0; k--) {
-      const c = counts(0, k).dots;
-      if (c) terms.push(`<span class="term${c >= 10 ? ' hot' : ''}" style="--pc:${COL[k] || COL[5]}"><small>${c} × ${(10 ** k).toLocaleString()}</small>${(c * 10 ** k).toLocaleString()}</span>`);
-    }
-    const total = rowValue(0), sum = $('worthSum'), same = M.worthSame && M.worthLast === total; M.worthSame = false;
-    sum.classList.toggle('ok', total === M.prob.t && M.dots.length && Array.from({ length: M.n }, (_, k) => counts(0, k)).every(settled));
-    sum.innerHTML = terms.length ? `${terms.join('<span class="op">+</span>')}<span class="op">=</span><span class="tot${total !== M.worthLast ? ' tick' : ''}">${total.toLocaleString()}</span>${same ? '<span class="same">same number</span>' : ''}` : `<span class="empty">The machine is empty — tap + in a box.</span>`;
-    M.worthLast = total;
-  }
-  const frameBase = r => Math.round(M.rows[r].fh / 2) + 8;   // the ten-frame sits under a dashed line across the middle; overflow lands above it
-  function layoutFrames() {
+  // make a number: each box lays its dots out in rows of ten. The leftovers (fewer than ten) sit still in the first row;
+  // every complete ten below them shakes, and grabbing any shaking dot picks up its whole ten.
+  function tidyMake() {
     const { GX, GY } = M.geo;
-    document.querySelectorAll('.tenframe').forEach(tf => {
-      const r = +tf.parentElement.dataset.r, base = frameBase(r), mid = Math.round(M.rows[r].fh / 2);
-      tf.querySelectorAll('i').forEach((sl, i) => { sl.style.left = (4 + (i % 5) * GX) + 'px'; sl.style.top = (base + Math.floor(i / 5) * GY) + 'px'; });
-      tf.querySelector('.edge').style.top = mid + 'px';
-    });
+    for (let k = 0; k < M.n; k++) {
+      const ds = M.dots.filter(d => d.r === 0 && d.k === k).sort((a, b) => a.id - b.id), rest = ds.length % 10;
+      ds.forEach((d, i) => {
+        const plain = i < rest; d.grp = plain ? -1 : Math.floor((i - rest) / 10);
+        const row = plain ? 0 : d.grp + (rest ? 1 : 0), col = plain ? i : (i - rest) % 10;
+        d.x = 4 + col * GX; d.y = 4 + row * GY;
+        const e = dotEl(d.id); if (!e) return;
+        e.style.left = d.x + 'px'; e.style.top = d.y + 'px'; e.style.setProperty('--dc', COL[k] || COL[5]);
+        if (!e.style.getPropertyValue('--vd')) e.style.setProperty('--vd', (-Math.random() * 0.7).toFixed(2) + 's');
+        e.classList.toggle('vib', !plain); e.classList.remove('pro');
+      });
+    }
   }
   // next free slot in a tidy grid, so tens are easy to see at a glance
   function gridSpot(r, k) {
     const { GX, GY, COLS } = M.geo;
-    if (M.mode === 'make') {
-      const base = frameBase(r), mid = Math.round(M.rows[r].fh / 2);
-      const top0 = mid - 6 - M.geo.DS;   // first overflow row sits right above the line, more rows stack upward
-      const idx = d => d.y >= mid ? Math.round((d.y - base) / GY) * COLS + Math.round((d.x - 4) / GX) : 10 + Math.round((top0 - d.y) / GY) * COLS + Math.round((d.x - 4) / GX);
-      const taken = new Set(M.dots.filter(d => d.r === r && d.k === k).map(idx));
-      for (let i = 0; i < 60; i++) if (!taken.has(i)) return i < 10 ? { x: 4 + (i % COLS) * GX, y: base + Math.floor(i / COLS) * GY } : { x: 4 + ((i - 10) % COLS) * GX, y: Math.max(2, top0 - Math.floor((i - 10) / COLS) * GY) };
-      return { x: 4, y: 4 };
-    }
-    const taken = new Set(M.dots.filter(d => d.r === r && d.k === k).map(d => Math.round((d.y - 4) / GY) * COLS + Math.round((d.x - 4) / GX)));
+    const taken = new Set(M.dots.filter(d => d.r === r && d.k === k).concat(M.reserved || []).map(d => Math.round((d.y - 4) / GY) * COLS + Math.round((d.x - 4) / GX)));
     for (let i = 0; i < 60; i++) if (!taken.has(i)) return { x: 4 + (i % COLS) * GX, y: 4 + Math.floor(i / COLS) * GY };
     return { x: 4, y: 4 };
   }
@@ -1306,7 +1203,7 @@
     M.dots.splice(i, 1);
     const e = dotEl(id); if (!e) return;
     if (animateTo) { e.style.transition = 'left .25s, top .25s, transform .3s, opacity .3s'; e.style.left = animateTo.x + 'px'; e.style.top = animateTo.y + 'px'; }
-    e.classList.add('gone'); setTimeout(() => e.remove(), 350);
+    e.classList.remove('vib'); e.classList.add('gone'); setTimeout(() => e.remove(), 350);
   }
   function sparks(r, k, x, y, n = 10) {
     const f = field(r, k); if (!f) return; const DS = M.geo.DS;
@@ -1323,7 +1220,7 @@
     spawnDot(r, toK, group[0].anti, dropLocal, true);
     if (r === 0) noteHist(fromK, toK);
     if (M.mode === 'add') M.carry[toK] = (M.carry[toK] || 0) + 1;
-    M.worthSame = true; refresh();
+    refresh();
   }
   // one dot carried into the box on its right becomes ten there, clustered where it landed
   function unexplode(dot, r, toK, dropLocal) {
@@ -1336,7 +1233,7 @@
     sparks(r, toK, dropLocal.x, dropLocal.y, 10); flash(r, toK, 'pour');
     if (r === 0) noteHist(fromK, toK);
     if (M.mode === 'add' && M.carry[fromK]) M.carry[fromK]--;
-    M.worthSame = true; refresh();
+    refresh();
   }
   function cancelPair(a, b) {
     if (!M.dots.includes(a) || !M.dots.includes(b)) return;
@@ -1367,12 +1264,12 @@
     movers.forEach((d, i) => setTimeout(() => { if (M.dots.includes(d)) { placeDot(d, to, k, gridSpot(to, k)); refresh(); } }, i * 60));
   }
   // a dot that visibly travels from one box to another (the real dots only ever pop in place)
-  function flyDot(fromEl, toField, toPos, anti, k, ms = 340) {
-    const a = fromEl.getBoundingClientRect(), t = toField.getBoundingClientRect(), DS = M.geo.DS;
+  function flyDot(fromRect, toField, toPos, anti, k, ms = 340) {
+    const t = toField.getBoundingClientRect(), DS = M.geo.DS;
     const g = el('div', 'dot flier' + (anti ? ' anti' : '')); g.style.width = g.style.height = DS + 'px'; g.style.setProperty('--dc', COL[k] || COL[5]);
-    g.style.left = a.left + 'px'; g.style.top = a.top + 'px'; document.body.appendChild(g); void g.offsetWidth;
-    g.style.left = (t.left + toPos.x) + 'px'; g.style.top = (t.top + toPos.y) + 'px';
-    return new Promise(res => setTimeout(() => { g.remove(); res(); }, ms));
+    g.style.left = fromRect.left + 'px'; g.style.top = fromRect.top + 'px'; document.body.appendChild(g);
+    const anim = g.animate([{ left: fromRect.left + 'px', top: fromRect.top + 'px' }, { left: (t.left + toPos.x) + 'px', top: (t.top + toPos.y) + 'px' }], { duration: ms, easing: 'ease-in-out', fill: 'forwards' });
+    return new Promise(res => { const done = () => { g.remove(); res(); }; anim.onfinish = done; setTimeout(done, ms + 80); });
   }
   function xmark(r, k, x, y) { const f = field(r, k); if (!f) return; const m = el('div', 'xmark', '×'); m.style.left = (x + M.geo.DS / 2) + 'px'; m.style.top = (y + M.geo.DS / 2) + 'px'; f.appendChild(m); setTimeout(() => m.remove(), 600); }
   function dropNote(k, html) {
@@ -1385,7 +1282,7 @@
     const w = n.offsetWidth; let left = Math.max(0, Math.min(br.width - w, cx - w / 2)); n.style.left = left + 'px'; n.style.setProperty('--ax', (cx - left) + 'px');
     setTimeout(() => n.classList.add('fade'), 2600); setTimeout(() => n.remove(), 3000);
   }
-  // taking away: the top dots come down one at a time; each anti-dot swallows one, the rest land in the answer row
+  // taking away: the top dots drop into the answer box first; then each anti-dot drops onto one of them and both vanish
   async function dropSub(k, to) {
     const need = digitsOf(M.prob.b)[k] || 0, have = counts(0, k).dots;
     if (have < need) {
@@ -1393,32 +1290,25 @@
       coachSay(`<b>${PLACE[k]}</b>: ${have} on top, ${need} to take away — not enough yet. Drag one dot from the <b>${PLACE[k + 1]}</b> box into the ${PLACE[k]} box and it becomes ten, or tap <b>Regroup all</b>.`, true);
       return;
     }
-    const tops = M.dots.filter(d => d.r === 0 && d.k === k && !d.anti).sort((p, q) => (q.y - p.y) || (q.x - p.x));
+    const tops = M.dots.filter(d => d.r === 0 && d.k === k && !d.anti).sort((p, q) => (p.y - q.y) || (p.x - q.x));
     const antis = M.dots.filter(d => d.r === 1 && d.k === k && d.anti).sort((p, q) => (p.y - q.y) || (p.x - q.x));
     if (!tops.length && !antis.length) return;
     M.busy = true; M.rows[0].digits[k] = have;   // the box keeps the number it was holding when it dropped (16, not 6)
     const wait = ms => new Promise(res => setTimeout(res, ms));
-    // 1. each anti-dot takes one dot away as it comes down
-    for (let i = 0; i < antis.length; i++) {
-      const d = tops[i], a = antis[i]; if (!d || !a) break;
-      const e = dotEl(d.id), ae = dotEl(a.id);
-      M.dots.splice(M.dots.indexOf(d), 1); if (e) e.remove(); refresh();
-      if (e) await flyDot(e, field(1, k), { x: a.x, y: a.y }, false, k, 300);
-      M.dots.splice(M.dots.indexOf(a), 1);
-      if (ae) { ae.classList.add('zap'); setTimeout(() => ae.remove(), 340); }
-      xmark(1, k, a.x, a.y); refresh();
-      await wait(150);
-    }
-    await wait(200);
-    // 2. what is left goes all the way down into the answer row
-    for (let i = antis.length; i < tops.length; i++) {
-      const d = tops[i]; const e = dotEl(d.id);
-      const spot = gridSpot(to, k);
-      M.dots.splice(M.dots.indexOf(d), 1); if (e) e.remove(); refresh();
-      if (e) await flyDot(e, field(to, k), spot, false, k, 320);
-      spawnDot(to, k, false, spot, true); refresh();
-      await wait(40);
-    }
+    // 1. the whole top group drops into the answer box together
+    const spots = tops.map(() => { const sp = gridSpot(to, k); (M.reserved = M.reserved || []).push(sp); return sp; }); M.reserved = null;
+    const rects = tops.map(d => { const e = dotEl(d.id); return e ? e.getBoundingClientRect() : null; });
+    tops.forEach(d => { M.dots.splice(M.dots.indexOf(d), 1); const e = dotEl(d.id); if (e) e.remove(); }); refresh();
+    await Promise.all(tops.map((d, i) => rects[i] ? flyDot(rects[i], field(to, k), spots[i], false, k, 420) : Promise.resolve()));
+    const landed = tops.map((d, i) => spawnDot(to, k, false, spots[i], true)); refresh();
+    await wait(350);
+    // 2. the anti-dots drop as a group onto the dots that landed; each one takes its dot away as it lands
+    const targets = landed.slice().reverse().slice(0, antis.length);
+    const arects = antis.map(a => { const e = dotEl(a.id); return e ? e.getBoundingClientRect() : null; });
+    antis.forEach(a => { M.dots.splice(M.dots.indexOf(a), 1); const e = dotEl(a.id); if (e) e.remove(); }); refresh();
+    await Promise.all(antis.map((a, i) => arects[i] && targets[i] ? flyDot(arects[i], field(to, k), { x: targets[i].x, y: targets[i].y }, true, k, 420) : Promise.resolve()));
+    targets.forEach(tgt => { const te = dotEl(tgt.id); M.dots.splice(M.dots.indexOf(tgt), 1); if (te) { te.classList.add('zap'); setTimeout(() => te.remove(), 340); } xmark(to, k, tgt.x, tgt.y); });
+    refresh(); await wait(300);
     M.busy = false; refresh();
   }
 
@@ -1432,7 +1322,8 @@
     let group = [];
     if (t) {
       const dot = M.dots.find(d => d.id === +t.dataset.id); if (!dot || t.classList.contains('gone')) return;
-      if (M.pro.has(dot.id)) {
+      if (M.mode === 'make' && dot.grp >= 0) { group = M.dots.filter(d => d.r === dot.r && d.k === dot.k && d.grp === dot.grp); }
+      else if (M.pro.has(dot.id)) {
         // grabbing one of the highlighted ten picks up all ten
         group = M.dots.filter(d => d !== dot && M.pro.has(d.id) && d.r === dot.r && d.k === dot.k); group.unshift(dot);
       } else group = [dot];
@@ -1528,25 +1419,25 @@
     M.rows.forEach((row, r) => {
       for (let k = 0; k < M.n; k++) {
         const c = counts(r, k), count = $(`count-${r}-${k}`), box = $(`mbox-${r}-${k}`);
-        count.className = 'count'; count.style.setProperty('--pc', COL[k] || COL[5]);
+        count.className = 'count' + (M.mode === 'make' ? ' big' : ''); count.style.setProperty('--pc', COL[k] || COL[5]);
         const mb = $(`minus-${r}-${k}`); if (mb) mb.disabled = c.dots === 0;
         if (c.anti && c.dots) count.innerHTML = `<span>${c.dots}</span><small>dots</small><span>${c.anti}</span><small>anti</small>`;
         else if (c.anti) { count.innerHTML = `<span>−${c.anti}</span>`; count.classList.add('neg'); }
         else if (!c.dots && row.digits && row.digits[k] != null) { count.innerHTML = `<span class="was">${row.digits[k]}</span>`; count.classList.add('ok'); }   // the number stays written even after its dots move down
+        else if (M.mode === 'make' && !c.dots) count.innerHTML = '<span>0</span>';
         else if (!c.dots && (row.digits ? row.digits[k] == null : !M.dots.some(d => d.r === r && d.k > k))) count.innerHTML = '';   // leading zero: a box outside the number stays blank
         else { count.innerHTML = `<span>${c.dots}</span>`; count.classList.add(c.dots >= 10 && M.mode !== 'regroup' ? 'hot' : 'ok'); }
-        box.classList.toggle('spill', M.mode === 'make' && c.dots > 10);
-        box.classList.toggle('full', row.kind !== 'src' && M.mode !== 'regroup' && ((c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots)));
+        box.classList.toggle('full', row.kind !== 'src' && M.mode !== 'regroup' && M.mode !== 'sub' && ((c.dots >= 10 && !c.anti) || (c.anti >= 10 && !c.dots)));
         const ca = $(`cancel-${r}-${k}`); if (ca) ca.hidden = !(c.dots && c.anti);
         // ten of a kind (no other kind present) light up in the next place's colour: grab any one and all ten come along
         const tenD = c.dots >= 10 && !c.anti, tenA = c.anti >= 10 && !c.dots;
         const here = M.dots.filter(d => d.r === r && d.k === k && (tenD ? !d.anti : tenA ? d.anti : false)).sort((p, q) => (M.mode === 'make' ? (q.y - p.y) : (p.y - q.y)) || (p.x - q.x));
-        const pro = row.kind === 'src' ? [] : here.slice(0, 10);
+        const pro = row.kind === 'src' || M.mode === 'sub' || M.mode === 'make' ? [] : here.slice(0, 10);   // subtraction never carries out of the answer row
         M.dots.filter(d => d.r === r && d.k === k).forEach(d => { const e = dotEl(d.id); if (!e) return; const on = pro.includes(d); if (on) M.pro.add(d.id); else M.pro.delete(d.id); e.classList.toggle('pro', on); e.style.setProperty('--dc', on && !d.anti ? (COL[k + 1] || COL[5]) : (COL[k] || COL[5])); });
       }
     });
     for (let k = 0; k < M.n; k++) { const b = $(`drop-${k}`); if (!b) continue; const hasSrc = M.dots.some(d => M.rows[d.r].kind === 'src' && d.k === k); const ready = M.mode !== 'sub' || counts(0, k).dots >= (digitsOf(M.prob.b)[k] || 0); b.disabled = !hasSrc || M.busy; b.classList.toggle('waiting', hasSrc && !ready); }
-    renderReadout(); renderWorth();
+    renderReadout(); if (M.mode === 'make') tidyMake();
     if (M.mode === 'sub') renderNotebookSub();
     if (M.mode === 'add') renderNotebookAdd();
     renderCoach();
@@ -1647,10 +1538,10 @@
     const p = M.prob, st = status();
     if (M.mode === 'make') {
       const v = rowValue(0);
-      if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${p.t.toLocaleString()}</b> — every box holds fewer than ten and the boxes read the number straight across.`; markDone(); return; }
-      if (!M.dots.length) { say.innerHTML = `Tap <b>+</b> in a box to put a dot there. Each box is worth ten times the one on its right.`; return; }
-      if (v === p.t) { say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>, but a box has ten or more. Numbers are written with fewer than ten in every box.`; return; }
-      say.innerHTML = `${describe(0)} — the machine is holding <b>${v.toLocaleString()}</b>.`; return;
+      if (st.win) { say.classList.add('win'); say.innerHTML = `<b>${p.t}</b> — every box holds fewer than ten, so the boxes read the number straight across.`; markDone(); return; }
+      if (v !== p.t) { say.classList.add('oops'); say.innerHTML = `There should be <b>${p.t}</b> dots' worth here — a dot went missing. Tap <b>Start over</b>.`; return; }
+      const full = Array.from({ length: M.n }, (_, k) => k).find(k => counts(0, k).dots >= 10);
+      say.innerHTML = `The shaking dots in the <b>${PLACE[full]}</b> box are a full ten. Grab any one and all ten come along — drop them in the <b>${PLACE[full + 1]}</b> box and they become one dot there.`; return;
     }
     if (M.mode === 'sub' && st.srcLeft) {
       const b = digitsOf(p.b);
