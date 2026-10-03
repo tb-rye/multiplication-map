@@ -361,7 +361,42 @@
   .keyrow i { width: 12px; height: 12px; border-radius: 50%; background: var(--dc); }
   /* make a number: the amount line lives in the lime title bar — the total stands still while the boxes change */
   .valueline { position: absolute; top: 0; left: 14px; height: 40px; z-index: 2; display: flex; align-items: center; gap: 9px; font-family: var(--hand); font-weight: 800; font-size: 19px; color: var(--lime-ink); white-space: nowrap; }
-  .valueline:empty, body:not(.mode-make) .valueline { display: none; }
+  .valueline:empty, body:not(.mode-make):not(.mode-cross) .valueline { display: none; }
+  /* cross ten: two rows of ten, a group of dots chosen by tapping, and a number-bond tree that grows with each move */
+  body.mode-cross .machine-wrap, body.mode-cross .readout, body.mode-cross .keyrow { display: none; }
+  body.mode-cross .coach .say:empty { visibility: hidden; }
+  body.mode-cross #resetMachine { display: none; }
+  body.mode-cross .stage { justify-content: center; }
+  .cross { display: flex; align-items: center; justify-content: center; gap: 56px; width: 100%; --cs: 46px; }
+  .cross.stacked { flex-direction: column; gap: 22px; }
+  .cframes { display: flex; flex-direction: column; gap: 22px; }
+  .cfr { display: flex; align-items: center; gap: 20px; position: relative; }
+  .cnum { font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.15); line-height: 1; width: calc(var(--cs) * 1.5); text-align: center; color: var(--c); user-select: none; }
+  .cframe { position: relative; display: grid; grid-template-columns: repeat(10, var(--cs)); grid-template-rows: var(--cs); gap: 4px; padding: 6px; background: var(--inset); border: 1.5px solid var(--panel-line); border-radius: 12px; transition: border-color .25s, box-shadow .25s; }
+  .cframe.full { border-color: var(--spring); box-shadow: 0 0 0 2px rgba(46,232,122,.35); }
+  .cframe.over { border-color: var(--lime); }
+  .cframe.buzz { animation: buzz .45s ease-in-out; border-color: var(--coral-deep); }
+  .ccell { position: relative; border: 1.5px dashed rgba(184,172,232,.28); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+  .ccell:nth-child(5) { margin-right: 10px; }
+  .ccell.ask { border-color: rgba(216,242,38,.7); animation: askpulse 1.4s ease-in-out infinite; }
+  @keyframes askpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(216,242,38,0); } 50% { box-shadow: 0 0 0 4px rgba(216,242,38,.25); } }
+  .cdot { width: calc(var(--cs) * .66); height: calc(var(--cs) * .66); border-radius: 50%; background: var(--c); box-shadow: 0 2px 0 rgba(0,0,0,.35); cursor: grab; touch-action: none; transition: transform .15s; }
+  .cdot.sel { outline: 2.5px solid var(--lime); outline-offset: 3px; transform: translateY(-3px); }
+  .cdot.gone { visibility: hidden; }
+  .cdrag { position: fixed; z-index: 1000; display: flex; gap: 10px; padding: 7px 11px; border-radius: 999px; background: rgba(0,0,0,.3); border: 1.5px dashed var(--lime); pointer-events: none; transform: translate(-50%, -50%); }
+  .cdrag .cdot { box-shadow: 0 8px 14px rgba(0,0,0,.45); }
+  .ctag { position: absolute; left: 50%; top: -34px; translate: -50% 0; background: var(--lime); color: var(--lime-ink); font-family: var(--hand); font-weight: 800; font-size: 15px; padding: 2px 12px; border-radius: 999px; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; pointer-events: none; animation: pop .15s ease-out; z-index: 5; }
+  .ctree { width: 300px; flex: none; }
+  .cross.stacked .ctree { width: 240px; }
+  .ctree svg { width: 100%; height: auto; overflow: visible; }
+  .ctree line { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
+  .ctree .node rect { fill: rgba(0,0,0,.28); rx: 12; }
+  .ctree .node text { font-family: var(--hand); font-weight: 800; font-size: 30px; text-anchor: middle; dominant-baseline: central; fill: var(--text); }
+  .ctree .a text { fill: var(--teal); } .ctree .b text { fill: var(--mint); } .ctree .t text { fill: var(--spring); }
+  .ctree .lit rect { fill: var(--lime); } .ctree .lit text { fill: var(--lime-ink); }
+  .ctree .plan rect { fill: none; stroke: var(--lime); stroke-dasharray: 5 4; stroke-width: 2; } .ctree .plan text { fill: var(--lime); }
+  .ctree .op { font-family: var(--hand); font-weight: 800; font-size: 24px; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+  .ctree .pop { animation: pop .3s ease-out; transform-box: fill-box; transform-origin: center; }
   .valueline .term { color: var(--lime-ink); }
   .valueline .op { opacity: .55; font-size: 16px; }
   .valueline .tot { display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--lime); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
@@ -369,7 +404,7 @@
   .valueline .same { font-family: var(--body); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--spring-ink); background: var(--mint); border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px 9px; animation: pop .25s ease-out; }
   body.mode-make .qbar { left: auto; right: 40px; font-size: 15px; height: 30px; max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
   body.mode-make .mbox .plabel b { display: none; }                 /* the strip under the box says what a place is worth */
-  body.mode-make .coach:empty { visibility: hidden; }               /* nothing to read until a hint is asked for */
+  body.mode-make .coach .say:empty { visibility: hidden; }               /* nothing to read until a hint is asked for */
   body.mode-make #resetMachine { display: none; }                   /* lives in the ▾ menu on this tab */
   #redoBtn:disabled { display: none; }
   /* what each box is worth, built out of ones: a hundred is ten rows of ten, a ten is a row of ten */
@@ -618,8 +653,9 @@
 <section id="view-dots" role="tabpanel" aria-labelledby="tab-dots" hidden>
   <div class="subnav" id="subnav" role="tablist" aria-label="Exploding dots sections">
     <button type="button" role="tab" data-mode="make" aria-selected="true"><span class="num">1</span>Make a number</button>
-    <button type="button" role="tab" data-mode="add" aria-selected="false"><span class="num">2</span>Add</button>
-    <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">3</span>Subtract</button>
+    <button type="button" role="tab" data-mode="cross" aria-selected="false"><span class="num">2</span>Cross ten</button>
+    <button type="button" role="tab" data-mode="add" aria-selected="false"><span class="num">3</span>Add</button>
+    <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">4</span>Subtract</button>
   </div>
   <div class="dotsframe">
     <main class="panel" id="dotsPanel" data-title="">
@@ -654,6 +690,10 @@
         <div class="keyrow" id="keyrow"></div>
         </div>
         <div class="notebook" id="notebook" hidden></div>
+        <div class="cross" id="cross" hidden>
+          <div class="cframes" id="cframes"></div>
+          <div class="ctree" id="ctree"></div>
+        </div>
       </div>
       <div class="coach">
         <div class="say" id="coach"></div>
@@ -1009,9 +1049,10 @@
   const KINDS = {
     make: [['ones', 'All in the ones box'], ['tens', 'All in the tens box'], ['jumble', 'Jumbled'], ['puzzle', 'Puzzles']], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
     sub: [['borrow', 'Borrowing'], ['zeros', 'Across zeros'], ['noborrow', 'No borrowing']],
+    cross: [['big', 'Bigger number on top'], ['written', 'As written']],
     regroup: [['borrow', 'Borrowing'], ['zeros', 'Across zeros']],
   };
-  const GEN = { digits: 'mix', kind: { make: 'mix', add: 'mix', sub: 'mix' } };
+  const GEN = { digits: 'mix', kind: { make: 'mix', add: 'mix', sub: 'mix', cross: 'mix' } };
   const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const nDigit = n => rnd(10 ** (n - 1), 10 ** n - 1);
   // random problems that actually exercise the chosen skill
@@ -1019,6 +1060,13 @@
     const n = GEN.digits === 'mix' ? rnd(2, 4) : GEN.digits;
     const kinds = KINDS[M.mode];
     const kind = GEN.kind[M.mode] === 'mix' && kinds.length ? kinds[rnd(0, kinds.length - 1)][0] : GEN.kind[M.mode];
+    if (M.mode === 'cross') {
+      // the 36 single-digit facts that cross ten: both parts 2–9, sum over ten
+      const pairs = []; for (let x = 2; x <= 9; x++) for (let y = 2; y <= 9; y++) if (x + y > 10) pairs.push([x, y]);
+      let [a, b] = pairs[rnd(0, pairs.length - 1)];
+      if (kind === 'big' && b > a) [a, b] = [b, a];
+      return { a, b, kind };
+    }
     if (M.mode === 'make') {
       // a challenge is a pile of dots that is not yet a number: dist[k] = how many dots start in box k
       const d = GEN.digits === 'mix' ? rnd(2, 3) : Math.min(3, GEN.digits);
@@ -1047,13 +1095,13 @@
     return M.mode === 'add' ? { a: 358, b: 287 } : { a: 500, b: 134 };
   }
   function setMode(mode) {
-    M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make');
+    M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make'); document.body.classList.toggle('mode-cross', mode === 'cross');
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
     buildChips(); buildCustom();
     loadProblem(null, generate());
   }
   function buildChips() {
-    const dc = $('digitChips'); dc.innerHTML = '';
+    const dc = $('digitChips'); dc.innerHTML = ''; dc.hidden = M.mode === 'cross'; dc.previousElementSibling.hidden = M.mode === 'cross';
     ['mix', 2, 3, 4, 5].filter(n => M.mode !== 'make' || n === 'mix' || n <= 3).forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n === 'mix' ? 'Mix' : n + ' digits'; b.setAttribute('aria-pressed', GEN.digits === n); b.addEventListener('click', () => { GEN.digits = n; buildChips(); }); dc.appendChild(b); });
     const kc = $('kindChips'); kc.innerHTML = ''; $('kindLbl').hidden = !KINDS[M.mode].length;
     (KINDS[M.mode].length ? [['mix', 'Mix']].concat(KINDS[M.mode]) : []).forEach(([k, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', GEN.kind[M.mode] === k); b.addEventListener('click', () => { GEN.kind[M.mode] = k; buildChips(); }); kc.appendChild(b); });
@@ -1061,12 +1109,14 @@
   function buildCustom() {
     const host = $('custom');
     if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="1" max="99" placeholder="47" aria-label="number of dots"><button type="button" id="cgo">Go</button>`;
+    else if (M.mode === 'cross') host.innerHTML = `<input type="number" id="ca" min="1" max="9" placeholder="8" aria-label="first number"><span class="opx">+</span><input type="number" id="cb" min="1" max="9" placeholder="5" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     else host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     $('cgo').addEventListener('click', () => {
       const a = +$('ca').value;
       if (M.mode === 'make') { if (!$('ca').value || a < 1 || a > 99) { coachSay('Type a number from 1 to 99.'); return; } openPop(false); loadProblem(null, { t: a, kind: 'ones', dist: [a], own: true }); return; }
       const b = +$('cb').value;
       if (!$('ca').value || !$('cb').value || a < 0 || b < 0) { coachSay('Type two numbers first.'); return; }
+      if (M.mode === 'cross') { if (a > 9 || b > 9 || a + b <= 10) { coachSay('Two numbers under ten that add to more than ten.'); return; } openPop(false); loadProblem(null, { a, b, own: true }); return; }
       if (M.mode !== 'add' && b > a) { coachSay('Put the bigger number first when subtracting.'); return; }
       openPop(false); loadProblem(null, { a, b, own: true });
     });
@@ -1074,6 +1124,8 @@
   function loadProblem(i, custom) {
     const p = custom || M.prob;
     M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; M.undo = []; M.redo = []; M.hint = 0; M.answered = false; M.valueLast = undefined; M.valueSame = false; clearTimeout(M.hintT); document.querySelectorAll('.dot.flier').forEach(g => g.remove());
+    if (M.mode === 'cross') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = ''; loadCross(p); return; }
+    $('cross').hidden = true;
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
       M.n = 3;   // hundreds, tens, ones — the whole point of this tab
@@ -1124,8 +1176,8 @@
     M.hist = st.hist; M.carry = st.carry; M.rows.forEach((r, i) => { if (st.digits[i]) r.digits = st.digits[i]; }); M.answered = st.answered;
     refresh();
   }
-  function undo() { if (!M.undo.length) return; M.redo.push(snapshot()); restore(M.undo.pop()); }
-  function redo() { if (!M.redo.length) return; M.undo.push(snapshot()); restore(M.redo.pop()); }
+  function undo() { if (M.mode === 'cross') return crossUndo(); if (!M.undo.length) return; M.redo.push(snapshot()); restore(M.undo.pop()); }
+  function redo() { if (M.mode === 'cross') return crossRedo(); if (!M.redo.length) return; M.undo.push(snapshot()); restore(M.redo.pop()); }
 
   /* ---- fit: size the boxes so the whole problem, notebook included, sits on one screen ---- */
   function fitGeo() {
@@ -1170,6 +1222,7 @@
   // window resized or rotated: keep every dot where it is, proportionally, in the new box size
   function relayout() {
     if (!M.prob) return;
+    if (M.mode === 'cross') { layoutCross(); return; }
     const old = { ...M.geo }, oldFh = M.rows.map(r => r.fh);
     fitGeo();
     const wrap = $('machine').parentElement; wrap.style.setProperty('--bw', M.geo.BW + 'px'); wrap.style.setProperty('--ds', M.geo.DS + 'px');
@@ -1525,6 +1578,7 @@
   function coachSay(html, oops) { const s = $('coach'); s.classList.remove('win', 'oops'); if (oops) s.classList.add('oops'); s.innerHTML = html; }
   const settled = c => c.anti === 0 && c.dots < 10;
   function refresh() {
+    if (M.mode === 'cross') { renderCross(); return; }
     M.pro = new Set();
     M.rows.forEach((row, r) => {
       for (let k = 0; k < M.n; k++) {
@@ -1679,7 +1733,142 @@
     const left = st.srcLeft ? `<b>${st.srcLeft} dots</b> still up top (${M.rows.filter(r => r.kind === 'src').map((r, i) => Array.from({ length: M.n }, (_, k) => [k, counts(i, k).dots]).filter(([, c]) => c).reverse().map(([k, c]) => ONE(k, c)).join(' and ') || 'none').join(', plus ')})` : `the top rows are empty`;
     say.innerHTML = (M.dots.some(d => d.r === st.row) ? `Answer row: ${describe(st.row)}` : `The answer row is empty`) + ` — ${left}.`;
   }
+  /* ---- cross ten: 8 + 5 as two rows of ten. Tap dots to choose a group, drag the group into the other row,
+          and a number-bond tree writes down what the hands did: 8 + 5 → 8 + 2 + 3 → 10 + 3 → 13 ---- */
+  const C = { a: 0, b: 0, dots: [], sel: new Set(), undo: [], redo: [], hint: 0, hintT: null };
+  const crossRow = r => C.dots.filter(d => d.row === r).sort((p, q) => (p.home === r ? 0 : 1) - (q.home === r ? 0 : 1) || p.id - q.id);   // home dots first, moved-in dots at the end
+  const crossMoved = r => C.dots.filter(d => d.row === r && d.home !== r).length;
+  const crossTarget = () => crossMoved('a') ? 'a' : crossMoved('b') ? 'b' : null;
+  const crossFull = () => { const t = crossTarget(); return t ? crossRow(t).length === 10 : false; };
+  function loadCross(p) {
+    C.a = p.a; C.b = p.b; C.dots = []; C.sel = new Set(); C.undo = []; C.redo = []; C.hint = 0; clearTimeout(C.hintT); M.hint = 0;
+    let id = 0; for (let i = 0; i < p.a; i++) C.dots.push({ id: ++id, home: 'a', row: 'a' }); for (let i = 0; i < p.b; i++) C.dots.push({ id: ++id, home: 'b', row: 'b' });
+    const host = $('cframes'); host.innerHTML = '';
+    ['a', 'b'].forEach(r => { const fr = el('div', 'cfr'); fr.innerHTML = `<div class="cnum" id="cnum-${r}" style="--c:${r === 'a' ? 'var(--teal)' : 'var(--mint)'}"></div><div class="cframe" id="cframe-${r}" data-row="${r}"></div>`; host.appendChild(fr); });
+    let vl = $('valueline'); if (!vl) { vl = el('div', 'valueline'); vl.id = 'valueline'; $('dotsPanel').appendChild(vl); }
+    layoutCross(); renderCross();
+  }
+  function layoutCross() {
+    const main = document.querySelector('#view-dots main.panel'), cs = getComputedStyle(main);
+    const W = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 8;
+    const stacked = W < 880; $('cross').classList.toggle('stacked', stacked);
+    const room = stacked ? W - 40 : W - 300 - 56 - 40;                       // frames share the row with the tree
+    const cell = Math.max(30, Math.min(48, Math.floor((room - 10 - 6 * 4 - 12 - 20) / 11.5)));
+    $('cross').style.setProperty('--cs', cell + 'px');
+    const top = $('cross').getBoundingClientRect().top || 150;                 // fill the screen so the panel keeps its shape
+    $('cross').style.minHeight = Math.max(300, window.innerHeight - top - 96) + 'px';
+  }
+  const crossSnap = () => JSON.stringify(C.dots.map(d => d.row));
+  function crossRestore(json) { JSON.parse(json).forEach((r, i) => { C.dots[i].row = r; }); C.sel = new Set(); renderCross(); }
+  function crossUndo() { if (!C.undo.length) return; C.redo.push(crossSnap()); crossRestore(C.undo.pop()); }
+  function crossRedo() { if (!C.redo.length) return; C.undo.push(crossSnap()); crossRestore(C.redo.pop()); }
+  function renderCross() {
+    const full = crossFull(), target = crossTarget(), hint = M.hint || 0;
+    ['a', 'b'].forEach(r => {
+      const dots = crossRow(r), frame = $(`cframe-${r}`); frame.innerHTML = '';
+      const other = r === 'a' ? 'b' : 'a';
+      const asking = !full && hint >= 1 && (target ? target === r : crossRow(r).length >= crossRow(other).length);   // the fuller row is the one to fill
+      for (let i = 0; i < 10; i++) {
+        const c = el('div', 'ccell');
+        if (i < dots.length) { const d = dots[i]; const e = el('div', 'cdot' + (C.sel.has(d.id) ? ' sel' : '')); e.dataset.id = d.id; e.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); c.appendChild(e); }
+        else if (asking) c.classList.add('ask');
+        frame.appendChild(c);
+      }
+      frame.classList.toggle('full', dots.length === 10);
+      $(`cnum-${r}`).textContent = dots.length;
+      if (C.sel.size && dots.some(d => C.sel.has(d.id))) { const last = dots.filter(d => C.sel.has(d.id)).pop(); const cell = frame.children[dots.indexOf(last)]; const t = el('div', 'ctag', `${C.sel.size} of the ${r === 'a' ? C.a : C.b}`); cell.appendChild(t); }
+    });
+    renderCrossTree();
+    const vl = $('valueline'); if (vl) { vl.classList.toggle('ok', full); vl.innerHTML = `<span class="tot">${full ? C.a + C.b : '?'}</span>`; }
+    const ub = $('undoBtn'), rb = $('redoBtn'); ub.disabled = !C.undo.length; rb.disabled = !C.redo.length;
+    renderCrossCoach();
+  }
+  function renderCrossTree() {
+    const a = C.a, b = C.b, target = crossTarget(), full = crossFull();
+    const N = (x, y, v, cls) => `<g class="node ${cls}" transform="translate(${x},${y})"><rect x="-30" y="-24" width="60" height="48"/><text>${v}</text></g>`;
+    const L = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1 + 26}" x2="${x2}" y2="${y2 - 26}"/>`;
+    const P = (x, y) => `<text class="op" x="${x}" y="${y}">+</text>`;
+    const y0 = 40, y1 = 140, y2 = 240, y3 = 340;
+    let svg = N(90, y0, a, 'a') + P(150, y0) + N(210, y0, b, 'b');
+    // which number splits: the one whose dots are leaving. Before any move, a tapped group is a plan (dashed)
+    const selRow = C.sel.size ? C.dots.find(d => C.sel.has(d.id)).row : null;
+    const src = target ? (target === 'a' ? 'b' : 'a') : selRow;
+    const m = target ? crossMoved(target) : C.sel.size;
+    if (src && m > 0) {
+      const plan = !target;
+      if (src === 'b') {   // 8 + 5 → 8 + 2 + 3
+        svg += L(90, y0, 90, y1) + L(210, y0, 180, y1) + L(210, y0, 270, y1);
+        svg += N(90, y1, a, 'a') + P(135, y1) + N(180, y1, m, plan ? 'b plan' : 'b lit') + P(225, y1) + N(270, y1, b - m, 'b');
+        if (full) { svg += L(90, y1, 135, y2) + L(180, y1, 135, y2) + L(270, y1, 270, y2); svg += N(135, y2, 10, 't pop') + P(200, y2) + N(270, y2, b - m, 'b'); svg += L(135, y2, 200, y3) + L(270, y2, 200, y3) + N(200, y3, a + b, 't lit pop'); }
+      } else {             // 5 + 8 → 3 + 2 + 8
+        svg += L(90, y0, 30, y1) + L(90, y0, 120, y1) + L(210, y0, 210, y1);
+        svg += N(30, y1, a - m, 'a') + P(75, y1) + N(120, y1, m, plan ? 'a plan' : 'a lit') + P(165, y1) + N(210, y1, b, 'b');
+        if (full) { svg += L(30, y1, 30, y2) + L(120, y1, 165, y2) + L(210, y1, 165, y2); svg += N(30, y2, a - m, 'a') + P(100, y2) + N(165, y2, 10, 't pop'); svg += L(30, y2, 100, y3) + L(165, y2, 100, y3) + N(100, y3, a + b, 't lit pop'); }
+      }
+    }
+    $('ctree').innerHTML = `<svg viewBox="-10 0 320 ${src && m > 0 ? (full ? 380 : 180) : 80}">${svg}</svg>`;
+  }
+  function renderCrossCoach() {
+    const say = $('coach'); say.classList.remove('win', 'oops'); clearTimeout(C.hintT);
+    const full = crossFull(), target = crossTarget();
+    if (full) { say.classList.add('win'); const t = target, m = crossMoved(t), rest = (t === 'a' ? C.b : C.a) - m, big = t === 'a' ? C.a : C.b; say.innerHTML = `<b>${C.a} + ${C.b} = ${C.a + C.b}</b> — ${big} and ${m} make ten, and ${rest} more.`; return; }
+    const hint = M.hint || 0;
+    if (hint < 1) { C.hintT = setTimeout(() => { M.hint = 1; renderCross(); }, 15000); say.innerHTML = ''; return; }
+    const r = target || (crossRow('a').length >= crossRow('b').length ? 'a' : 'b'), other = r === 'a' ? 'b' : 'a';
+    const gap = 10 - crossRow(r).length, src = other === 'a' ? C.a : C.b;
+    if (hint === 1) say.innerHTML = `The ${r === 'a' ? 'top' : 'bottom'} row has <b>${gap}</b> empty ${gap === 1 ? 'space' : 'spaces'}. How many of the <b>${src}</b> could fill ${gap === 1 ? 'it' : 'them'}?`;
+    else say.innerHTML = `Tap <b>${gap}</b> ${gap === 1 ? 'dot' : 'dots'} in the ${other === 'a' ? 'top' : 'bottom'} row, then drag them ${r === 'a' ? 'up' : 'down'} together.`;
+  }
+  function crossNote(frame, html) {
+    frame.classList.remove('buzz'); void frame.offsetWidth; frame.classList.add('buzz'); setTimeout(() => frame.classList.remove('buzz'), 500);
+    try { navigator.vibrate && navigator.vibrate(60); } catch (e) {}
+    frame.parentElement.querySelectorAll('.dropnote').forEach(n => n.remove());
+    const n = el('div', 'dropnote', html); n.style.left = '50%'; n.style.transform = 'translateX(-50%)'; frame.parentElement.appendChild(n);
+    setTimeout(() => n.classList.add('fade'), 2200); setTimeout(() => n.remove(), 2600);
+  }
+  function setupCross() {
+    const host = $('cframes'); let down = null;
+    host.addEventListener('pointerdown', e => {
+      const de = e.target.closest('.cdot'); if (!de || crossFull()) return;
+      const d = C.dots.find(x => x.id === +de.dataset.id);
+      down = { d, x: e.clientX, y: e.clientY, drag: null, pid: e.pointerId }; e.preventDefault();
+    });
+    window.addEventListener('pointermove', e => {
+      if (!down) return;
+      if (!down.drag) {
+        if (Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) return;
+        // start dragging the group: the tapped dot joins the selection (selection must live in one row)
+        if (![...C.sel].every(id => C.dots.find(x => x.id === id).row === down.d.row)) C.sel = new Set();
+        C.sel.add(down.d.id);
+        const ids = [...C.sel]; const g = el('div', 'cdrag'); ids.forEach(id => { const d = C.dots.find(x => x.id === id); const e2 = el('div', 'cdot'); e2.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); g.appendChild(e2); document.querySelector(`.cdot[data-id="${id}"]`)?.classList.add('gone'); });
+        const tag = el('div', 'ctag', `${ids.length} ${ids.length === 1 ? 'one' : 'ones'}`); g.appendChild(tag); document.body.appendChild(g);
+        down.drag = { g, ids };
+      }
+      down.drag.g.style.left = e.clientX + 'px'; down.drag.g.style.top = e.clientY + 'px';
+      const other = down.d.row === 'a' ? 'b' : 'a', f = $(`cframe-${other}`), r = f.getBoundingClientRect();
+      f.classList.toggle('over', e.clientX >= r.left - 20 && e.clientX <= r.right + 20 && e.clientY >= r.top - 20 && e.clientY <= r.bottom + 20);
+    });
+    const finish = e => {
+      if (!down) return; const dn = down; down = null;
+      if (!dn.drag) {   // a tap: toggle this dot in the selection (one row at a time)
+        if (![...C.sel].every(id => C.dots.find(x => x.id === id).row === dn.d.row)) C.sel = new Set();
+        if (C.sel.has(dn.d.id)) C.sel.delete(dn.d.id); else C.sel.add(dn.d.id);
+        renderCross(); return;
+      }
+      dn.drag.g.remove(); document.querySelectorAll('.cdot.gone').forEach(x => x.classList.remove('gone'));
+      const other = dn.d.row === 'a' ? 'b' : 'a', f = $(`cframe-${other}`); f.classList.remove('over');
+      const r = f.getBoundingClientRect(), inside = e.clientX >= r.left - 20 && e.clientX <= r.right + 20 && e.clientY >= r.top - 20 && e.clientY <= r.bottom + 20;
+      if (!inside) { renderCross(); return; }
+      const space = 10 - crossRow(other).length, n = dn.drag.ids.length;
+      if (n > space) { crossNote(f, space ? `Only ${space} ${space === 1 ? 'space' : 'spaces'} here — ${n} won't fit.` : 'This row is already full.'); renderCross(); return; }
+      C.undo.push(crossSnap()); C.redo = [];
+      dn.drag.ids.forEach(id => { C.dots.find(x => x.id === id).row = other; });
+      C.sel = new Set(); renderCross();
+    };
+    window.addEventListener('pointerup', finish); window.addEventListener('pointercancel', finish);
+  }
   function setupDots() {
+    setupCross();
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     $('genBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
     $('newBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
