@@ -1980,6 +1980,7 @@
           The bar holds exactly as many beads as the whole. When the whole is the unknown, the two parts start as
           separate groups at either end of the line and are dragged together; where they meet the slider appears. ---- */
   const B = { W: 0, a: 0, b: 0, ask: 'b', d: 0, joined: true, gx: [0, 0], typed: '', solved: false, wrongT: null, geo: null };
+  const BCOL = { W: 'var(--lime)', a: 'var(--teal)', b: 'var(--coral)' };   // whole, left part, right part: each bubble, its beads and its bracket share one colour
   const bAnswer = () => B.ask === 'W' ? B.W : B.ask === 'a' ? B.a : B.b;
   function loadBond(p) {
     B.W = p.W; B.a = p.a; B.b = p.b; B.ask = p.ask; B.typed = ''; B.solved = false; clearTimeout(B.wrongT);
@@ -2010,9 +2011,9 @@
     const fs = Math.round(cr * .9);
     const circ = (p, role, val) => {
       const asked = B.ask === role;
-      let stroke = role === 'W' ? 'var(--lime)' : 'var(--teal)', fill = '#fff', txt = String(val), col = '#2A2458';
-      if (asked) { stroke = B.solved ? 'var(--spring)' : 'var(--coral-deep)'; txt = B.solved ? String(bAnswer()) : B.typed; }
-      const caret = asked && !B.solved ? `<rect class="caret" x="${p.x + (txt ? fs * .32 * txt.length + 3 : -2)}" y="${p.y - fs * .45}" width="4" height="${fs * .9}" rx="2" fill="var(--coral-deep)"/>` : '';
+      let stroke = BCOL[role], fill = '#fff', txt = String(val), col = '#2A2458';
+      if (asked) { txt = B.solved ? String(bAnswer()) : B.typed; }
+      const caret = asked && !B.solved ? `<rect class="caret" x="${p.x + (txt ? fs * .32 * txt.length + 3 : -2)}" y="${p.y - fs * .45}" width="4" height="${fs * .9}" rx="2" fill="${BCOL[role]}"/>` : '';
       return `<g class="${asked ? 'bq' : ''}" data-role="${role}"><circle cx="${p.x}" cy="${p.y}" r="${cr}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/><text x="${p.x}" y="${p.y + fs * .36}" text-anchor="middle" font-size="${fs}" fill="${col}">${txt}</text>${caret}</g>`;
     };
     $('btree').innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${seg(T, L)}${seg(T, Rr)}${circ(T, 'W', B.W)}${circ(L, 'a', B.a)}${circ(Rr, 'b', B.b)}</svg>`;
@@ -2022,7 +2023,15 @@
     side.appendChild(nx); $('btree').appendChild(side);
   }
   // bar geometry: bead i of the joined bar sits at x0 + i*pitch; the slider sits in the gap after bead d-1
-  function bondBarX0() { const g = B.geo; return (g.barW - (B.W - 1) * g.pitch) / 2; }
+  const BGAP = 18;   // the beads part to make room for the slider wherever it sits
+  function bondBarX0() { const g = B.geo; return (g.barW - (B.W - 1) * g.pitch - BGAP) / 2; }
+  const bondBeadX = i => bondBarX0() + i * B.geo.pitch + (i >= B.d ? BGAP : 0);
+  function bondSliderX(d) {   // the slider sits in the gap between bead d-1 and bead d
+    const x0 = bondBarX0(), P = B.geo.pitch, r = B.geo.r;
+    if (d === 0) return x0 + BGAP - r - BGAP / 2 - 6;
+    if (d === B.W) return x0 + (B.W - 1) * P + r + BGAP / 2 + 6;
+    return x0 + (d - .5) * P + BGAP / 2;
+  }
   function bondGroups() {   // the two loose groups, before they are joined: [left x of first bead, count]
     const g = B.geo, lo = 20 + g.r, hi = g.barW - 20 - g.r;
     if (!B.gx) B.gx = [lo, hi - (B.b - 1) * g.pitch];
@@ -2039,26 +2048,25 @@
       s.push(`<path d="M${x0} ${y} v${10 * d} q0 ${q * d} ${q} ${q * d} H${x1 - q} q${q} 0 ${q} ${-q * d} v${-10 * d}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`);
       s.push(`<text x="${(x0 + x1) / 2}" y="${up ? y - 18 - 6 : y + 17 + F * .95}" text-anchor="middle" font-size="${F}" fill="${col}">${label}</text>`);
     };
-    const bead = (x, cls = '') => s.push(`<circle class="${cls}" cx="${x}" cy="${yBead}" r="${r}" fill="var(--teal)"/>`);
-    const partCol = role => B.ask === role ? 'var(--coral-deep)' : 'var(--teal)';
+    const bead = (x, col) => s.push(`<circle cx="${x}" cy="${yBead}" r="${r}" fill="${col}"/>`);
     s.push(`<line x1="${20}" y1="${yBead}" x2="${w - 20}" y2="${yBead}" stroke="rgba(255,255,255,.3)" stroke-width="${Math.max(3, Math.round(r * .3))}" stroke-linecap="round"/>`);
     if (!B.joined) {
       bondGroups().forEach(([x, n], k) => {
         s.push(`<g class="grab" data-group="${k}">`);
         s.push(`<rect x="${x - r - 6}" y="${yBead - r - 10}" width="${(n - 1) * P + 2 * r + 12}" height="${2 * r + 20}" fill="transparent"/>`);
-        for (let i = 0; i < n; i++) bead(x + i * P);
+        const col = k ? BCOL.b : BCOL.a; for (let i = 0; i < n; i++) bead(x + i * P, col);
         s.push('</g>');
-        brk(x - r, x + (n - 1) * P + r, yLow, 'var(--teal)', n, false);
+        brk(x - r, x + (n - 1) * P + r, yLow, col, n, false);
       });
     } else {
-      const x0 = bondBarX0(), xe = x0 + (B.W - 1) * P;
-      brk(x0 - r - 2, xe + r + 2, yTop + 22, B.ask === 'W' ? 'var(--coral-deep)' : 'rgba(255,255,255,.7)', B.W, true);
-      for (let i = 0; i < B.W; i++) s.push(`<circle data-bead="${i}" cx="${x0 + i * P}" cy="${yBead}" r="${r}" fill="var(--teal)"/>`);
-      const sx = B.d === 0 ? x0 - r - 14 : B.d === B.W ? xe + r + 14 : x0 + (B.d - .5) * P;
-      if (B.d > 0) brk(x0 - r, sx - 10, yLow, B.ask === 'a' ? 'var(--coral-deep)' : 'var(--teal)', B.d, false);
-      if (B.d < B.W) brk(sx + 10, xe + r, yLow, B.ask === 'b' ? 'var(--coral-deep)' : 'var(--teal)', B.W - B.d, false);
+      const x0 = bondBeadX(0), xe = bondBeadX(B.W - 1);
+      brk(Math.min(x0, bondSliderX(0)) - r - 2, Math.max(xe, bondSliderX(B.W)) + r + 2, yTop + 22, BCOL.W, B.W, true);
+      for (let i = 0; i < B.W; i++) s.push(`<circle data-bead="${i}" cx="${bondBeadX(i)}" cy="${yBead}" r="${r}" fill="${i < B.d ? BCOL.a : BCOL.b}"/>`);
+      const sx = bondSliderX(B.d);
+      if (B.d > 0) brk(x0 - r, sx - 14, yLow, BCOL.a, B.d, false);
+      if (B.d < B.W) brk(sx + 14, xe + r, yLow, BCOL.b, B.W - B.d, false);
       const sh = 2 * r + 30;
-      s.push(`<g class="grab" data-slider="1"><rect x="${sx - 18}" y="${yBead - sh / 2 - 6}" width="36" height="${sh + 12}" fill="transparent"/><rect x="${sx - 5}" y="${yBead - sh / 2}" width="10" height="${sh}" rx="5" fill="var(--coral-deep)" stroke="#fff" stroke-width="2"/></g>`);
+      s.push(`<g class="grab" data-slider="1"><rect x="${sx - 22}" y="${yBead - sh / 2 - 6}" width="44" height="${sh + 12}" fill="transparent"/><rect x="${sx - 9}" y="${yBead - sh / 2}" width="18" height="${sh}" rx="9" fill="#000" stroke="#fff" stroke-width="2"/></g>`);
     }
     $('bbar').innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${s.join('')}</svg>`;
     $('bkeys').querySelectorAll('button').forEach(b => { b.disabled = B.solved || R.over; });
@@ -2083,7 +2091,7 @@
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'back'].forEach(k => { const b = el('button', k === 'back' ? 'back' : '', k === 'back' ? '⌫' : k); b.type = 'button'; b.dataset.k = k; b.addEventListener('click', () => bondType(k)); keys.appendChild(b); });
     const bar = $('bbar'); let drag = null;
     const localX = e => { const r = bar.querySelector('svg').getBoundingClientRect(); return e.clientX - r.left; };
-    const setSlider = x => { const P = B.geo.pitch, x0 = bondBarX0(); const d = Math.max(0, Math.min(B.W, Math.round((x - x0) / P + .5))); if (d !== B.d) { B.d = d; renderBond(); } };
+    const setSlider = x => { let d = 0, best = Infinity; for (let k = 0; k <= B.W; k++) { const dist = Math.abs(bondSliderX(k) - x); if (dist < best) { best = dist; d = k; } } if (d !== B.d) { B.d = d; renderBond(); } };
     bar.addEventListener('pointerdown', e => {
       if (R.over) return;
       const x = localX(e), grp = e.target.closest('[data-group]'), bead = e.target.closest('[data-bead]');
