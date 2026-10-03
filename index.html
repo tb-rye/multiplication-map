@@ -1983,7 +1983,7 @@
   const BCOL = { W: 'var(--lime)', a: 'var(--teal)', b: 'var(--coral)' };   // whole, left part, right part: each bubble, its beads and its bracket share one colour
   const bAnswer = () => B.ask === 'W' ? B.W : B.ask === 'a' ? B.a : B.b;
   function loadBond(p) {
-    B.W = p.W; B.a = p.a; B.b = p.b; B.ask = p.ask; B.typed = ''; B.solved = false; clearTimeout(B.wrongT);
+    B.W = p.W; B.a = p.a; B.b = p.b; B.ask = p.ask; B.typed = ''; B.solved = false; clearTimeout(B.wrongT); clearInterval(B.glide);
     B.d = 0; B.joined = p.ask !== 'W'; B.gx = null;
     document.querySelectorAll('.cresult').forEach(n => n.remove());
     layoutBond(); renderBond(); renderRace();
@@ -2061,15 +2061,22 @@
     } else {
       const x0 = bondBeadX(0), xe = bondBeadX(B.W - 1);
       brk(Math.min(x0, bondSliderX(0)) - r - 2, Math.max(xe, bondSliderX(B.W)) + r + 2, yTop + 22, BCOL.W, B.W, true);
-      for (let i = 0; i < B.W; i++) s.push(`<circle data-bead="${i}" cx="${bondBeadX(i)}" cy="${yBead}" r="${r}" fill="${i < B.d ? BCOL.a : BCOL.b}"/>`);
+      for (let i = 0; i < B.W; i++) s.push(`<circle data-bead="${i}" cx="${bondBeadX(i)}" cy="${yBead}" r="${r}" fill="${B.d === 0 || B.d === B.W ? BCOL.W : i < B.d ? BCOL.a : BCOL.b}"/>`);   // slider at either end: the beads are all one whole, in the total's colour
       const sx = bondSliderX(B.d);
-      if (B.d > 0) brk(x0 - r, sx - 14, yLow, BCOL.a, B.d, false);
-      if (B.d < B.W) brk(sx + 14, xe + r, yLow, BCOL.b, B.W - B.d, false);
+      if (B.d > 0 && B.d < B.W) { brk(x0 - r, sx - 14, yLow, BCOL.a, B.d, false); brk(sx + 14, xe + r, yLow, BCOL.b, B.W - B.d, false); }
       const sh = 2 * r + 30;
       s.push(`<g class="grab" data-slider="1"><rect x="${sx - 22}" y="${yBead - sh / 2 - 6}" width="44" height="${sh + 12}" fill="transparent"/><rect x="${sx - 9}" y="${yBead - sh / 2}" width="18" height="${sh}" rx="9" fill="#000" stroke="#fff" stroke-width="2"/></g>`);
     }
     $('bbar').innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${s.join('')}</svg>`;
     $('bkeys').querySelectorAll('button').forEach(b => { b.disabled = B.solved || R.over; });
+  }
+  // answered without the bar: the bar catches up — groups join, and the slider glides to the split
+  function bondShowSplit() {
+    clearInterval(B.glide);
+    if (!B.joined) { B.joined = true; B.d = B.a; return; }
+    if (B.d === B.a) return;
+    if (R.on) { B.d = B.a; return; }   // racing: no time for a glide, the slider just jumps to the split
+    B.glide = setInterval(() => { if (!B.solved || B.d === B.a) { clearInterval(B.glide); return; } B.d += B.d < B.a ? 1 : -1; renderBond(); }, 70);
   }
   function bondType(k) {
     if (B.solved || R.over) return;
@@ -2083,7 +2090,7 @@
       try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
       B.typed = ''; clearTimeout(B.wrongT); B.wrongT = setTimeout(renderBond, 650); return;
     }
-    if (+B.typed === ans) { B.solved = true; raceRight(); }
+    if (+B.typed === ans) { B.solved = true; raceRight(); bondShowSplit(); }
     renderBond();
   }
   function setupBond() {
