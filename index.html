@@ -278,6 +278,7 @@
     body.dotsmode nav.views { gap: 4px; } body.dotsmode nav.views button { padding: 4px 9px; font-size: 12px; } body.dotsmode nav.views button[aria-selected="true"] { font-size: 12px; }
     body.dotsmode .top { gap: 6px 8px; }
   }
+  @media (max-width: 1100px) and (min-width: 901px) { body.dotsmode .subnav button .num { display: none; } body.dotsmode .subnav button { padding: 3px 9px; } }
   @media (max-width: 900px) { body.dotsmode .subnav { order: 3; flex-basis: 100%; justify-content: flex-start; } }
 
   .machine-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px; margin-bottom: 8px; }
@@ -428,6 +429,27 @@
   .cresult button.quiet { background: transparent; color: var(--lime-ink); box-shadow: none; border-color: var(--lime-ink); }
   .cresult button { margin-top: 16px; padding: 9px 22px; border-radius: 999px; background: var(--coral); color: #5C1A0C; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-family: var(--hand); font-weight: 800; font-size: 16px; cursor: pointer; }
   .valueline .term { color: var(--lime-ink); }
+  /* number bonds: a part-part-whole cherry with a bead slider underneath that splits the whole */
+  body.mode-bond .machine-wrap, body.mode-bond .readout, body.mode-bond .keyrow, body.mode-bond .coach { display: none; }
+  body.mode-bond #newBtn, body.mode-bond #undoBtn, body.mode-bond #redoBtn { display: none; }
+  body.mode-bond .stage { justify-content: center; }
+  .bond { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; padding-top: 4px; }
+  .btree { position: relative; flex: none; }
+  .btree svg { display: block; overflow: visible; }
+  .btree text { font-family: var(--hand); font-weight: 800; user-select: none; }
+  .btree .bq { transform-box: fill-box; transform-origin: center; }
+  .btree .bq.buzz { animation: buzz .45s ease-in-out; }
+  .btree .caret { animation: blink 1s steps(2) infinite; }
+  .bside { position: absolute; display: flex; align-items: center; gap: 14px; translate: 0 -50%; }
+  .bside .ctick { margin: 0; font-size: 54px; }
+  .bside .cnext { position: static; translate: none; }
+  .bbar { position: relative; flex: none; touch-action: none; user-select: none; }
+  .bbar svg { display: block; overflow: visible; }
+  .bbar text { font-family: var(--hand); font-weight: 800; user-select: none; }
+  .bbar .grab { cursor: grab; }
+  .bbar .grab:active { cursor: grabbing; }
+  .bond .cresult { z-index: 6; }
+
   .valueline .op { opacity: .55; font-size: 16px; }
   .valueline .tot { display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--lime); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
   .valueline.ok .tot { background: var(--spring); color: var(--spring-ink); }
@@ -684,8 +706,9 @@
   <div class="subnav" id="subnav" role="tablist" aria-label="Exploding dots sections">
     <button type="button" role="tab" data-mode="make" aria-selected="true"><span class="num">1</span>Make a number</button>
     <button type="button" role="tab" data-mode="cross" aria-selected="false"><span class="num">2</span>Cross ten</button>
-    <button type="button" role="tab" data-mode="add" aria-selected="false"><span class="num">3</span>Add</button>
-    <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">4</span>Subtract</button>
+    <button type="button" role="tab" data-mode="bond" aria-selected="false"><span class="num">3</span>Bonds</button>
+    <button type="button" role="tab" data-mode="add" aria-selected="false"><span class="num">4</span>Add</button>
+    <button type="button" role="tab" data-mode="sub" aria-selected="false"><span class="num">5</span>Subtract</button>
   </div>
   <div class="dotsframe">
     <main class="panel" id="dotsPanel" data-title="">
@@ -728,6 +751,11 @@
             <div class="canswer"><div class="cfield" id="cfield" aria-label="your answer"><span id="ctyped"></span><i class="caret"></i></div><button type="button" class="cnext" id="cnext">Next ›</button></div>
           </div>
           <div class="ckeys" id="ckeys"></div>
+        </div>
+        <div class="bond" id="bond" hidden>
+          <div class="btree" id="btree"></div>
+          <div class="bbar" id="bbar"></div>
+          <div class="ckeys" id="bkeys"></div>
         </div>
       </div>
       <div class="coach">
@@ -1085,9 +1113,10 @@
     make: [['ones', 'All in the ones box'], ['tens', 'All in the tens box'], ['jumble', 'Jumbled'], ['puzzle', 'Puzzles']], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
     sub: [['borrow', 'Borrowing'], ['zeros', 'Across zeros'], ['noborrow', 'No borrowing']],
     cross: [['9', '+9'], ['78', '+7 & 8s'], ['56', '+5 & 6s'], ['14', '+1–4']],
+    bond: [['w10', 'Within 10'], ['w20', '11 to 20'], ['whole', 'Find the whole'], ['part', 'Find a part']],
     regroup: [['borrow', 'Borrowing'], ['zeros', 'Across zeros']],
   };
-  const GEN = { digits: 'mix', kind: { make: 'mix', add: 'mix', sub: 'mix', cross: 'mix' } };
+  const GEN = { digits: 'mix', kind: { make: 'mix', add: 'mix', sub: 'mix', cross: 'mix', bond: 'mix' } };
   const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const nDigit = n => rnd(10 ** (n - 1), 10 ** n - 1);
   // random problems that actually exercise the chosen skill
@@ -1101,6 +1130,13 @@
       const bs = kind === '9' ? [9] : kind === '78' ? [7, 8] : kind === '56' ? [5, 6] : [2, 3, 4];
       const b = bs[rnd(0, bs.length - 1)], a = rnd(Math.max(2, 11 - b), 9);
       return { a, b, kind };
+    }
+    if (M.mode === 'bond') {
+      // every bond within 20: a whole from 2 to 20 split into two parts, one of the three numbers hidden
+      const W = kind === 'w10' ? rnd(2, 10) : kind === 'w20' ? rnd(11, 20) : rnd(2, 20);
+      const a = rnd(1, W - 1), b = W - a;
+      const ask = kind === 'whole' ? 'W' : kind === 'part' ? (Math.random() < .5 ? 'a' : 'b') : ['W', 'a', 'b'][rnd(0, 2)];
+      return { W, a, b, ask, kind };
     }
     if (M.mode === 'make') {
       // a challenge is a pile of dots that is not yet a number: dist[k] = how many dots start in box k
@@ -1131,13 +1167,13 @@
   }
   function setMode(mode) {
     if (R.on) { clearInterval(R.tick); clearTimeout(R.next); R.on = false; } R.over = false; renderRace();
-    M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make'); document.body.classList.toggle('mode-cross', mode === 'cross');
+    M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make'); document.body.classList.toggle('mode-cross', mode === 'cross'); document.body.classList.toggle('mode-bond', mode === 'bond');
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
     buildChips(); buildCustom();
     loadProblem(null, generate());
   }
   function buildChips() {
-    const dc = $('digitChips'); dc.innerHTML = ''; dc.hidden = M.mode === 'cross'; dc.previousElementSibling.hidden = M.mode === 'cross';
+    const dc = $('digitChips'); dc.innerHTML = ''; const nod = M.mode === 'cross' || M.mode === 'bond'; dc.hidden = nod; dc.previousElementSibling.hidden = nod;
     ['mix', 2, 3, 4, 5].filter(n => M.mode !== 'make' || n === 'mix' || n <= 3).forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n === 'mix' ? 'Mix' : n + ' digits'; b.setAttribute('aria-pressed', GEN.digits === n); b.addEventListener('click', () => { GEN.digits = n; buildChips(); }); dc.appendChild(b); });
     const kc = $('kindChips'); kc.innerHTML = ''; $('kindLbl').hidden = !KINDS[M.mode].length;
     (KINDS[M.mode].length ? [['mix', 'Mix']].concat(KINDS[M.mode]) : []).forEach(([k, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', GEN.kind[M.mode] === k); b.addEventListener('click', () => { GEN.kind[M.mode] = k; buildChips(); }); kc.appendChild(b); });
@@ -1145,6 +1181,7 @@
   function buildCustom() {
     const host = $('custom');
     if (M.mode === 'make') host.innerHTML = `<input type="number" id="ca" min="1" max="99" placeholder="47" aria-label="number of dots"><button type="button" id="cgo">Go</button>`;
+    else if (M.mode === 'bond') host.innerHTML = `<input type="number" id="ca" min="2" max="20" placeholder="13" aria-label="whole"><span class="opx">=</span><input type="number" id="cb" min="1" max="19" placeholder="6" aria-label="one part"><span class="opx">+ ?</span><button type="button" id="cgo">Go</button>`;
     else if (M.mode === 'cross') host.innerHTML = `<input type="number" id="ca" min="1" max="9" placeholder="8" aria-label="first number"><span class="opx">+</span><input type="number" id="cb" min="1" max="9" placeholder="5" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     else host.innerHTML = `<input type="number" id="ca" min="0" max="99999" placeholder="${M.mode === 'add' ? 345 : 500}" aria-label="first number"><span class="opx">${M.mode === 'add' ? '+' : '−'}</span><input type="number" id="cb" min="0" max="99999" placeholder="${M.mode === 'add' ? 178 : 134}" aria-label="second number"><button type="button" id="cgo">Go</button>`;
     $('cgo').addEventListener('click', () => {
@@ -1152,6 +1189,7 @@
       if (M.mode === 'make') { if (!$('ca').value || a < 1 || a > 99) { coachSay('Type a number from 1 to 99.'); return; } openPop(false); loadProblem(null, { t: a, kind: 'ones', dist: [a], own: true }); return; }
       const b = +$('cb').value;
       if (!$('ca').value || !$('cb').value || a < 0 || b < 0) { coachSay('Type two numbers first.'); return; }
+      if (M.mode === 'bond') { if (a < 2 || a > 20 || b < 1 || b >= a) { coachSay('A whole up to 20, and a part smaller than it.'); return; } openPop(false); loadProblem(null, { W: a, a: b, b: a - b, ask: 'b', own: true }); return; }
       if (M.mode === 'cross') { if (a > 9 || b > 9 || a + b <= 10) { coachSay('Two numbers under ten that add to more than ten.'); return; } openPop(false); loadProblem(null, { a, b, own: true }); return; }
       if (M.mode !== 'add' && b > a) { coachSay('Put the bigger number first when subtracting.'); return; }
       openPop(false); loadProblem(null, { a, b, own: true });
@@ -1160,6 +1198,8 @@
   function loadProblem(i, custom) {
     const p = custom || M.prob;
     M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; M.undo = []; M.redo = []; M.hint = 0; M.answered = false; M.valueLast = undefined; M.valueSame = false; clearTimeout(M.hintT); document.querySelectorAll('.dot.flier').forEach(g => g.remove());
+    if (M.mode === 'bond') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = true; $('bond').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = true; $('raceBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = ''; $('mTitle').innerHTML = ''; loadBond(p); return; }
+    $('bond').hidden = true;
     if (M.mode === 'cross') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = true; $('raceBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = ''; $('mTitle').innerHTML = `${p.a}<i>+</i>${p.b}`; loadCross(p); return; }
     $('cross').hidden = true;
     const g = M.geo = { ...MODES[M.mode].geo };
@@ -1259,6 +1299,7 @@
   function relayout() {
     if (!M.prob) return;
     if (M.mode === 'cross') { layoutCross(); return; }
+    if (M.mode === 'bond') { layoutBond(); renderBond(); return; }
     const old = { ...M.geo }, oldFh = M.rows.map(r => r.fh);
     fitGeo();
     const wrap = $('machine').parentElement; wrap.style.setProperty('--bw', M.geo.BW + 'px'); wrap.style.setProperty('--ds', M.geo.DS + 'px');
@@ -1862,10 +1903,11 @@
     }
     if (!C.solved && +C.typed === C.a + C.b) {   // the right answer is recognised the moment it is typed
       C.solved = true; C.sel = new Set(); clearTimeout(C.hintT);
-      if (R.on) { R.score++; renderRace(); clearTimeout(R.next); R.next = setTimeout(() => { if (R.on) loadProblem(null, generate()); }, 500); }   // in a race the check flashes, then the next one comes
+      raceRight();
     }
     renderCross();
   }
+  function raceRight() { if (R.on) { R.score++; renderRace(); clearTimeout(R.next); R.next = setTimeout(() => { if (R.on) loadProblem(null, generate()); }, 500); } }   // in a race the check flashes, then the next one comes
   function renderRace() {
     let bar = document.querySelector('#dotsPanel .race');
     if (!R.on && !R.over) { if (bar) bar.remove(); $('raceBtn').classList.remove('on'); $('raceBtn').textContent = '🏁 Race'; return; }
@@ -1882,16 +1924,18 @@
   }
   function stopRace() { clearInterval(R.tick); clearTimeout(R.next); R.on = false; R.over = false; document.querySelectorAll('.cresult').forEach(n => n.remove()); renderRace(); loadProblem(null, generate()); }
   function endRace() {
-    clearInterval(R.tick); clearTimeout(R.next); R.on = false; R.over = true; R.left = 0; C.typed = ''; C.solved = false; renderCross(); renderRace();
+    clearInterval(R.tick); clearTimeout(R.next); R.on = false; R.over = true; R.left = 0;
+    if (M.mode === 'bond') { B.typed = ''; B.solved = false; renderBond(); } else { C.typed = ''; C.solved = false; renderCross(); }
+    renderRace();
     document.querySelectorAll('.cresult').forEach(n => n.remove());
     const card = el('div', 'cresult'); card.innerHTML = `<div class="card"><div class="big">${R.score}</div><div class="sub">${R.score === 1 ? 'answer' : 'answers'} right in one minute</div><div class="btns"><button type="button" class="quiet" id="raceDone">Not now</button><button type="button" class="go" id="raceAgain">🏁 Race again</button></div></div>`;
-    $('cross').appendChild(card); $('raceAgain').addEventListener('click', startRace); $('raceDone').addEventListener('click', stopRace);
+    $(M.mode === 'bond' ? 'bond' : 'cross').appendChild(card); $('raceAgain').addEventListener('click', startRace); $('raceDone').addEventListener('click', stopRace);
   }
   function setupCross() {
     $('cnext').addEventListener('click', () => { if (R.over) return; loadProblem(null, generate()); });
     const keys = $('ckeys');
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'back'].forEach(k => { const b = el('button', k === 'back' ? 'back' : '', k === 'back' ? '⌫' : k); b.type = 'button'; b.dataset.k = k; b.addEventListener('click', () => crossType(k)); keys.appendChild(b); });
-    window.addEventListener('keydown', e => { if (M.mode !== 'cross' || $('view-dots').hidden || e.target.tagName === 'INPUT') return; if (/^[0-9]$/.test(e.key)) crossType(e.key); else if (e.key === 'Backspace') crossType('back'); else if (e.key === 'Enter') crossType('go'); });
+    window.addEventListener('keydown', e => { if ((M.mode !== 'cross' && M.mode !== 'bond') || $('view-dots').hidden || e.target.tagName === 'INPUT') return; const t = M.mode === 'bond' ? bondType : crossType; if (/^[0-9]$/.test(e.key)) t(e.key); else if (e.key === 'Backspace') t('back'); });
     const host = $('cframes'); let down = null;
     host.addEventListener('pointerdown', e => {
       const de = e.target.closest('.cdot'); if (!de || de.classList.contains('ghost') || R.over) return;
@@ -1931,8 +1975,139 @@
     };
     window.addEventListener('pointerup', finish); window.addEventListener('pointercancel', finish);
   }
+
+  /* ---- number bonds within 20: a cherry (whole on top, two parts below) and a bead slider that splits the whole.
+          The bar holds exactly as many beads as the whole. When the whole is the unknown, the two parts start as
+          separate groups at either end of the line and are dragged together; where they meet the slider appears. ---- */
+  const B = { W: 0, a: 0, b: 0, ask: 'b', d: 0, joined: true, gx: [0, 0], typed: '', solved: false, wrongT: null, geo: null };
+  const bAnswer = () => B.ask === 'W' ? B.W : B.ask === 'a' ? B.a : B.b;
+  function loadBond(p) {
+    B.W = p.W; B.a = p.a; B.b = p.b; B.ask = p.ask; B.typed = ''; B.solved = false; clearTimeout(B.wrongT);
+    B.d = 0; B.joined = p.ask !== 'W'; B.gx = null;
+    document.querySelectorAll('.cresult').forEach(n => n.remove());
+    layoutBond(); renderBond(); renderRace();
+  }
+  function layoutBond() {
+    const main = document.querySelector('#view-dots main.panel'), cs = getComputedStyle(main);
+    const W = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 8;
+    const top = $('bond').getBoundingClientRect().top || 150;
+    const H = Math.max(320, window.innerHeight - top - 30);
+    $('bond').style.minHeight = H + 'px';
+    const kw = Math.max(40, Math.min(60, Math.floor((W - 10 * 8 - 24) / 11)));
+    $('bond').style.setProperty('--kw', kw + 'px');
+    const pitch = Math.max(26, Math.min(58, Math.floor((W - 60) / (Math.max(B.W, 12) + 1.2)), Math.floor((H - kw - 46 - 5 * 48 - 64) / 2)));   // and never so big that the cherry gets squeezed   // beads as big as the whole allows, with room for the two groups to start apart
+    const r = Math.round(pitch * .38), font = Math.max(22, Math.round(pitch * .62));
+    const barH = Math.round(font * 2 + r * 2 + 64);
+    const avail = H - kw - 16 - barH - 30;
+    const cr = Math.max(30, Math.min(72, Math.floor(avail / 5), Math.floor(W / 8)));   // cherry circle radius
+    B.geo = { W, pitch, r, font, barH, cr, barW: Math.min(W, Math.round(pitch * (Math.max(B.W, 12) + 1.2) + 40)) };
+  }
+  function bondCherry() {
+    const g = B.geo, cr = g.cr, dx = Math.round(cr * 2.1), dy = Math.round(cr * 2.6), sw = Math.max(4, Math.round(cr * .1));
+    const w = dx * 2 + cr * 2 + sw * 2, h = dy + cr * 2 + sw * 2;
+    const T = { x: w / 2, y: cr + sw }, L = { x: T.x - dx, y: T.y + dy }, Rr = { x: T.x + dx, y: T.y + dy };
+    const seg = (a, b) => { const vx = b.x - a.x, vy = b.y - a.y, len = Math.hypot(vx, vy), k = cr + sw + 3; return `<line x1="${a.x + vx / len * k}" y1="${a.y + vy / len * k}" x2="${b.x - vx / len * k}" y2="${b.y - vy / len * k}" stroke="rgba(255,255,255,.75)" stroke-width="${Math.max(3, Math.round(cr * .07))}" stroke-linecap="round"/>`; };
+    const fs = Math.round(cr * .9);
+    const circ = (p, role, val) => {
+      const asked = B.ask === role;
+      let stroke = role === 'W' ? 'var(--lime)' : 'var(--teal)', fill = '#fff', txt = String(val), col = '#2A2458';
+      if (asked) { stroke = B.solved ? 'var(--spring)' : 'var(--coral-deep)'; txt = B.solved ? String(bAnswer()) : B.typed; }
+      const caret = asked && !B.solved ? `<rect class="caret" x="${p.x + (txt ? fs * .32 * txt.length + 3 : -2)}" y="${p.y - fs * .45}" width="4" height="${fs * .9}" rx="2" fill="var(--coral-deep)"/>` : '';
+      return `<g class="${asked ? 'bq' : ''}" data-role="${role}"><circle cx="${p.x}" cy="${p.y}" r="${cr}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/><text x="${p.x}" y="${p.y + fs * .36}" text-anchor="middle" font-size="${fs}" fill="${col}">${txt}</text>${caret}</g>`;
+    };
+    $('btree').innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${seg(T, L)}${seg(T, Rr)}${circ(T, 'W', B.W)}${circ(L, 'a', B.a)}${circ(Rr, 'b', B.b)}</svg>`;
+    const side = el('div', 'bside'); side.style.left = (Rr.x + cr + sw + 22) + 'px'; side.style.top = Rr.y + 'px';
+    if (B.solved) side.appendChild(el('div', 'ctick', '✓'));
+    const nx = el('button', 'cnext' + (B.solved ? ' ready' : ''), 'Next ›'); nx.type = 'button'; nx.addEventListener('click', () => { if (!R.over) loadProblem(null, generate()); });
+    side.appendChild(nx); $('btree').appendChild(side);
+  }
+  // bar geometry: bead i of the joined bar sits at x0 + i*pitch; the slider sits in the gap after bead d-1
+  function bondBarX0() { const g = B.geo; return (g.barW - (B.W - 1) * g.pitch) / 2; }
+  function bondGroups() {   // the two loose groups, before they are joined: [left x of first bead, count]
+    const g = B.geo, lo = 20 + g.r, hi = g.barW - 20 - g.r;
+    if (!B.gx) B.gx = [lo, hi - (B.b - 1) * g.pitch];
+    return [[B.gx[0], B.a], [B.gx[1], B.b]];
+  }
+  function renderBond() {
+    if (!B.geo) layoutBond();
+    bondCherry();
+    const g = B.geo, P = g.pitch, r = g.r, F = g.font, w = g.barW, h = g.barH;
+    const yTop = F + 10, yBead = yTop + 22 + r + 6, yLow = yBead + r + 12;
+    const s = [];
+    const brk = (x0, x1, y, col, label, up, sw = 3) => {
+      const d = up ? -1 : 1, q = 7;
+      s.push(`<path d="M${x0} ${y} v${10 * d} q0 ${q * d} ${q} ${q * d} H${x1 - q} q${q} 0 ${q} ${-q * d} v${-10 * d}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`);
+      s.push(`<text x="${(x0 + x1) / 2}" y="${up ? y - 18 - 6 : y + 17 + F * .95}" text-anchor="middle" font-size="${F}" fill="${col}">${label}</text>`);
+    };
+    const bead = (x, cls = '') => s.push(`<circle class="${cls}" cx="${x}" cy="${yBead}" r="${r}" fill="var(--teal)"/>`);
+    const partCol = role => B.ask === role ? 'var(--coral-deep)' : 'var(--teal)';
+    s.push(`<line x1="${20}" y1="${yBead}" x2="${w - 20}" y2="${yBead}" stroke="rgba(255,255,255,.3)" stroke-width="${Math.max(3, Math.round(r * .3))}" stroke-linecap="round"/>`);
+    if (!B.joined) {
+      bondGroups().forEach(([x, n], k) => {
+        s.push(`<g class="grab" data-group="${k}">`);
+        s.push(`<rect x="${x - r - 6}" y="${yBead - r - 10}" width="${(n - 1) * P + 2 * r + 12}" height="${2 * r + 20}" fill="transparent"/>`);
+        for (let i = 0; i < n; i++) bead(x + i * P);
+        s.push('</g>');
+        brk(x - r, x + (n - 1) * P + r, yLow, 'var(--teal)', n, false);
+      });
+    } else {
+      const x0 = bondBarX0(), xe = x0 + (B.W - 1) * P;
+      brk(x0 - r - 2, xe + r + 2, yTop + 22, B.ask === 'W' ? 'var(--coral-deep)' : 'rgba(255,255,255,.7)', B.W, true);
+      for (let i = 0; i < B.W; i++) s.push(`<circle data-bead="${i}" cx="${x0 + i * P}" cy="${yBead}" r="${r}" fill="var(--teal)"/>`);
+      const sx = B.d === 0 ? x0 - r - 14 : B.d === B.W ? xe + r + 14 : x0 + (B.d - .5) * P;
+      if (B.d > 0) brk(x0 - r, sx - 10, yLow, B.ask === 'a' ? 'var(--coral-deep)' : 'var(--teal)', B.d, false);
+      if (B.d < B.W) brk(sx + 10, xe + r, yLow, B.ask === 'b' ? 'var(--coral-deep)' : 'var(--teal)', B.W - B.d, false);
+      const sh = 2 * r + 30;
+      s.push(`<g class="grab" data-slider="1"><rect x="${sx - 18}" y="${yBead - sh / 2 - 6}" width="36" height="${sh + 12}" fill="transparent"/><rect x="${sx - 5}" y="${yBead - sh / 2}" width="10" height="${sh}" rx="5" fill="var(--coral-deep)" stroke="#fff" stroke-width="2"/></g>`);
+    }
+    $('bbar').innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${s.join('')}</svg>`;
+    $('bkeys').querySelectorAll('button').forEach(b => { b.disabled = B.solved || R.over; });
+  }
+  function bondType(k) {
+    if (B.solved || R.over) return;
+    if (k === 'back') B.typed = B.typed.slice(0, -1);
+    else if (B.typed.length < 2) B.typed += k;
+    const ans = bAnswer();
+    if (B.typed && !String(ans).startsWith(B.typed)) {   // a wrong digit: the circle goes red and shakes, then clears for another try
+      renderBond();
+      const q = document.querySelector('#btree .bq'), c = q && q.querySelector('circle'), t = q && q.querySelector('text');
+      if (q) { c.setAttribute('fill', 'var(--coral-deep)'); t.setAttribute('fill', '#fff'); q.classList.remove('buzz'); void q.getBoundingClientRect(); q.classList.add('buzz'); }
+      try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
+      B.typed = ''; clearTimeout(B.wrongT); B.wrongT = setTimeout(renderBond, 650); return;
+    }
+    if (+B.typed === ans) { B.solved = true; raceRight(); }
+    renderBond();
+  }
+  function setupBond() {
+    const keys = $('bkeys');
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'back'].forEach(k => { const b = el('button', k === 'back' ? 'back' : '', k === 'back' ? '⌫' : k); b.type = 'button'; b.dataset.k = k; b.addEventListener('click', () => bondType(k)); keys.appendChild(b); });
+    const bar = $('bbar'); let drag = null;
+    const localX = e => { const r = bar.querySelector('svg').getBoundingClientRect(); return e.clientX - r.left; };
+    const setSlider = x => { const P = B.geo.pitch, x0 = bondBarX0(); const d = Math.max(0, Math.min(B.W, Math.round((x - x0) / P + .5))); if (d !== B.d) { B.d = d; renderBond(); } };
+    bar.addEventListener('pointerdown', e => {
+      if (R.over) return;
+      const x = localX(e), grp = e.target.closest('[data-group]'), bead = e.target.closest('[data-bead]');
+      if (!B.joined) { if (!grp) return; const k = +grp.dataset.group; drag = { k, dx: x - B.gx[k] }; e.preventDefault(); return; }
+      if (bead) { B.d = +bead.dataset.bead + 1; renderBond(); }   // tapping a bead puts the slider just after it
+      drag = { slider: true }; if (!bead) setSlider(x); e.preventDefault();
+    });
+    window.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const x = localX(e), g = B.geo, P = g.pitch;
+      if (drag.slider) { setSlider(x); return; }
+      const lo = 20 + g.r, hi = g.barW - 20 - g.r, n = drag.k ? B.b : B.a;
+      let nx = Math.max(lo, Math.min(hi - (n - 1) * P, x - drag.dx));
+      if (drag.k === 0) nx = Math.min(nx, B.gx[1] - B.a * P); else nx = Math.max(nx, B.gx[0] + B.a * P);   // groups can't pass through each other
+      B.gx[drag.k] = nx;
+      const gap = B.gx[1] - (B.gx[0] + (B.a - 1) * P);
+      if (gap <= P * 1.35) { B.joined = true; B.d = B.a; drag = null; }   // they touch: one bar, and the slider sits at the seam
+      renderBond();
+    });
+    const end = () => { drag = null; };
+    window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
+  }
   function setupDots() {
-    setupCross();
+    setupCross(); setupBond();
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     $('genBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
     $('newBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
