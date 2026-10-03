@@ -367,11 +367,12 @@
   body.mode-cross .coach .say:empty { visibility: hidden; }
   body.mode-cross #resetMachine { display: none; }
   body.mode-cross .stage { justify-content: center; }
-  .cross { display: flex; align-items: center; justify-content: center; gap: 56px; width: 100%; --cs: 46px; }
-  .cross.stacked { flex-direction: column; gap: 22px; }
-  .cframes { display: flex; flex-direction: column; gap: 22px; }
+  .cross { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; --cs: 46px; padding-top: 10px; }
+  .csum { margin: auto 0; }
+  .cframes { display: flex; flex-direction: column; gap: 16px; }
   .cfr { display: flex; align-items: center; gap: 20px; position: relative; }
-  .cnum { font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.15); line-height: 1; width: calc(var(--cs) * 1.5); text-align: center; color: var(--c); user-select: none; }
+  .cnum { position: relative; font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.15); line-height: 1; width: calc(var(--cs) * 1.9); text-align: right; color: var(--c); user-select: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cnum .plus { position: absolute; left: 0; top: 0; color: var(--coral); }
   .cframe { position: relative; display: grid; grid-template-columns: repeat(10, var(--cs)); grid-template-rows: var(--cs); gap: 4px; padding: 6px; background: var(--inset); border: 1.5px solid var(--panel-line); border-radius: 12px; transition: border-color .25s, box-shadow .25s; }
   .cframe.full { border-color: var(--spring); box-shadow: 0 0 0 2px rgba(46,232,122,.35); }
   .cframe.over { border-color: var(--lime); }
@@ -386,17 +387,32 @@
   .cdrag { position: fixed; z-index: 1000; display: flex; gap: 10px; padding: 7px 11px; border-radius: 999px; background: rgba(0,0,0,.3); border: 1.5px dashed var(--lime); pointer-events: none; transform: translate(-50%, -50%); }
   .cdrag .cdot { box-shadow: 0 8px 14px rgba(0,0,0,.45); }
   .ctag { position: absolute; left: 50%; top: -34px; translate: -50% 0; background: var(--lime); color: var(--lime-ink); font-family: var(--hand); font-weight: 800; font-size: 15px; padding: 2px 12px; border-radius: 999px; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; pointer-events: none; animation: pop .15s ease-out; z-index: 5; }
-  .ctree { width: 300px; flex: none; }
-  .cross.stacked .ctree { width: 240px; }
-  .ctree svg { width: 100%; height: auto; overflow: visible; }
-  .ctree line { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
-  .ctree .node rect { fill: rgba(0,0,0,.28); rx: 12; }
-  .ctree .node text { font-family: var(--hand); font-weight: 800; font-size: 30px; text-anchor: middle; dominant-baseline: central; fill: var(--text); }
-  .ctree .a text { fill: var(--teal); } .ctree .b text { fill: var(--mint); } .ctree .t text { fill: var(--spring); }
-  .ctree .lit rect { fill: var(--lime); } .ctree .lit text { fill: var(--lime-ink); }
-  .ctree .plan rect { fill: none; stroke: var(--lime); stroke-dasharray: 5 4; stroke-width: 2; } .ctree .plan text { fill: var(--lime); }
-  .ctree .op { font-family: var(--hand); font-weight: 800; font-size: 24px; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
-  .ctree .pop { animation: pop .3s ease-out; transform-box: fill-box; transform-origin: center; }
+  .csum { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+  .cbar { height: 3px; width: calc(var(--cs) * 1.9); background: var(--coral); border-radius: 2px; margin: 2px 0; }
+  .canswer { display: flex; justify-content: flex-end; width: calc(var(--cs) * 1.9); }
+  .cfield { display: inline-flex; align-items: center; justify-content: flex-end; min-width: calc(var(--cs) * 1.9); height: calc(var(--cs) * 1.3); padding: 0 10px; border-radius: 14px; background: var(--inset); border: 2px dashed var(--panel-line); font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * .95); color: var(--text); letter-spacing: .04em; transition: border-color .2s, background .2s; }
+  .cfield.live { border-style: solid; border-color: var(--lime); }
+  .cfield.ok { border-style: solid; border-color: var(--ink); background: var(--spring); color: var(--spring-ink); box-shadow: 2px 2px 0 var(--ink); }
+  .cfield.buzz { animation: buzz .45s ease-in-out; border-color: var(--coral-deep); border-style: solid; }
+  .cfield .caret { width: 2px; height: 60%; margin-left: 4px; background: var(--lime); animation: blink 1s steps(2) infinite; }
+  .cfield.ok .caret { display: none; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .ckeys { display: flex; gap: 8px; justify-content: center; width: 100%; padding: 6px 0 2px; }
+  .ckeys button { width: var(--kw, 58px); height: var(--kw, 58px); border-radius: 14px; border: 1.5px solid rgba(0,0,0,.45); box-shadow: 0 3px 0 rgba(0,0,0,.45); background: rgba(255,253,242,.22); color: var(--text); font-family: var(--hand); font-weight: 800; font-size: calc(var(--kw, 58px) * .5); cursor: pointer; transition: transform .08s, box-shadow .08s; touch-action: manipulation; }
+  .ckeys button:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+  .ckeys button.back { background: rgba(92,74,166,.5); color: var(--text); font-size: calc(var(--kw, 58px) * .42); }
+  .ckeys button.go { background: rgba(46,232,122,.55); color: #063a1c; width: calc(var(--kw, 58px) * 1.5); font-size: calc(var(--kw, 58px) * .4); letter-spacing: .04em; }
+  .ckeys button:disabled { opacity: .5; cursor: default; }
+  .race { position: absolute; top: 5px; left: 12px; z-index: 2; display: flex; align-items: center; gap: 10px; height: 30px; }
+  .race .clock { display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--lime); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-family: var(--hand); font-weight: 800; font-size: 19px; font-variant-numeric: tabular-nums; }
+  .race .clock.low { background: var(--coral-deep); color: #fff; }
+  .race .score { font-family: var(--hand); font-weight: 800; font-size: 16px; color: var(--lime-ink); }
+  #raceBtn.on { background: var(--coral-deep); color: #fff; border-color: var(--ink); }
+  .cresult { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 5; }
+  .cresult .card { background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); border-radius: 18px; padding: 26px 40px; text-align: center; font-family: var(--hand); font-weight: 800; animation: pop .3s ease-out; }
+  .cresult .big { font-size: 64px; line-height: 1; }
+  .cresult .sub { font-size: 18px; margin-top: 8px; }
+  .cresult button { margin-top: 16px; padding: 9px 22px; border-radius: 999px; background: var(--coral); color: #5C1A0C; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-family: var(--hand); font-weight: 800; font-size: 16px; cursor: pointer; }
   .valueline .term { color: var(--lime-ink); }
   .valueline .op { opacity: .55; font-size: 16px; }
   .valueline .tot { display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--lime); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
@@ -666,6 +682,7 @@
           <button type="button" id="undoBtn" class="quiet" aria-label="undo" disabled>↶ Undo</button>
           <button type="button" id="redoBtn" class="quiet" aria-label="redo" disabled>↷ Redo</button>
           <button type="button" id="hintBtn" hidden>Hint</button>
+          <button type="button" id="raceBtn" hidden>🏁 Race</button>
           <button type="button" id="regroupAll" class="quiet" hidden>Show me</button>
           <button type="button" id="resetMachine">Start over</button>
           <button type="button" id="newBtn" class="go">＋ New problem</button>
@@ -691,8 +708,12 @@
         </div>
         <div class="notebook" id="notebook" hidden></div>
         <div class="cross" id="cross" hidden>
-          <div class="cframes" id="cframes"></div>
-          <div class="ctree" id="ctree"></div>
+          <div class="csum">
+            <div class="cframes" id="cframes"></div>
+            <div class="cbar"></div>
+            <div class="canswer"><div class="cfield" id="cfield" aria-label="your answer"><span id="ctyped"></span><i class="caret"></i></div></div>
+          </div>
+          <div class="ckeys" id="ckeys"></div>
         </div>
       </div>
       <div class="coach">
@@ -1095,6 +1116,7 @@
     return M.mode === 'add' ? { a: 358, b: 287 } : { a: 500, b: 134 };
   }
   function setMode(mode) {
+    if (R.on) { clearInterval(R.tick); R.on = false; } R.over = false; renderRace();
     M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make'); document.body.classList.toggle('mode-cross', mode === 'cross');
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
     buildChips(); buildCustom();
@@ -1124,7 +1146,7 @@
   function loadProblem(i, custom) {
     const p = custom || M.prob;
     M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; M.undo = []; M.redo = []; M.hint = 0; M.answered = false; M.valueLast = undefined; M.valueSame = false; clearTimeout(M.hintT); document.querySelectorAll('.dot.flier').forEach(g => g.remove());
-    if (M.mode === 'cross') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = ''; loadCross(p); return; }
+    if (M.mode === 'cross') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = true; $('raceBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = ''; loadCross(p); return; }
     $('cross').hidden = true;
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
@@ -1154,7 +1176,7 @@
     const kindLabel = (KINDS[M.mode].find(([k]) => k === GEN.kind[M.mode]) || [])[1];
     $('mMeta').textContent = ''; $('mMeta').hidden = true;
     $('notebook').hidden = !(M.mode === 'sub' || M.mode === 'add');
-    $('regroupAll').hidden = M.mode !== 'sub'; $('hintBtn').hidden = M.mode !== 'make'; $('resetPop').hidden = M.mode !== 'make';
+    $('regroupAll').hidden = M.mode !== 'sub'; $('hintBtn').hidden = M.mode !== 'make'; $('resetPop').hidden = M.mode !== 'make'; $('raceBtn').hidden = true;
     if (M.mode === 'sub') buildNotebookSub();
     if (M.mode === 'add') buildNotebookAdd();
     fitGeo();
@@ -1735,28 +1757,32 @@
   }
   /* ---- cross ten: 8 + 5 as two rows of ten. Tap dots to choose a group, drag the group into the other row,
           and a number-bond tree writes down what the hands did: 8 + 5 → 8 + 2 + 3 → 10 + 3 → 13 ---- */
-  const C = { a: 0, b: 0, dots: [], sel: new Set(), undo: [], redo: [], hint: 0, hintT: null };
+  const C = { a: 0, b: 0, dots: [], sel: new Set(), undo: [], redo: [], hint: 0, hintT: null, typed: '', solved: false };
+  const R = { on: false, left: 60, score: 0, tick: null, over: false };   // the one-minute race
   const crossRow = r => C.dots.filter(d => d.row === r).sort((p, q) => (p.home === r ? 0 : 1) - (q.home === r ? 0 : 1) || p.id - q.id);   // home dots first, moved-in dots at the end
   const crossMoved = r => C.dots.filter(d => d.row === r && d.home !== r).length;
   const crossTarget = () => crossMoved('a') ? 'a' : crossMoved('b') ? 'b' : null;
   const crossFull = () => { const t = crossTarget(); return t ? crossRow(t).length === 10 : false; };
   function loadCross(p) {
-    C.a = p.a; C.b = p.b; C.dots = []; C.sel = new Set(); C.undo = []; C.redo = []; C.hint = 0; clearTimeout(C.hintT); M.hint = 0;
+    C.a = p.a; C.b = p.b; C.dots = []; C.sel = new Set(); C.undo = []; C.redo = []; C.hint = 0; clearTimeout(C.hintT); M.hint = 0; C.typed = ''; C.solved = false;
     let id = 0; for (let i = 0; i < p.a; i++) C.dots.push({ id: ++id, home: 'a', row: 'a' }); for (let i = 0; i < p.b; i++) C.dots.push({ id: ++id, home: 'b', row: 'b' });
     const host = $('cframes'); host.innerHTML = '';
     ['a', 'b'].forEach(r => { const fr = el('div', 'cfr'); fr.innerHTML = `<div class="cnum" id="cnum-${r}" style="--c:${r === 'a' ? 'var(--teal)' : 'var(--mint)'}"></div><div class="cframe" id="cframe-${r}" data-row="${r}"></div>`; host.appendChild(fr); });
-    let vl = $('valueline'); if (!vl) { vl = el('div', 'valueline'); vl.id = 'valueline'; $('dotsPanel').appendChild(vl); }
-    layoutCross(); renderCross();
+    const vl = $('valueline'); if (vl) vl.innerHTML = '';
+    document.querySelectorAll('.cresult').forEach(n => n.remove());
+    layoutCross(); renderCross(); renderRace();
   }
   function layoutCross() {
     const main = document.querySelector('#view-dots main.panel'), cs = getComputedStyle(main);
     const W = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 8;
-    const stacked = W < 880; $('cross').classList.toggle('stacked', stacked);
-    const room = stacked ? W - 40 : W - 300 - 56 - 40;                       // frames share the row with the tree
-    const cell = Math.max(30, Math.min(48, Math.floor((room - 10 - 6 * 4 - 12 - 20) / 11.5)));
+    const top = $('cross').getBoundingClientRect().top || 150;
+    const H = Math.max(300, window.innerHeight - top - 96);                   // fill the screen so the panel keeps its shape
+    $('cross').style.minHeight = H + 'px';
+    const kw = Math.max(40, Math.min(60, Math.floor((W - 11 * 8 - 24) / 12.5)));   // twelve keys across, the GO key half again as wide
+    $('cross').style.setProperty('--kw', kw + 'px');
+    const byW = Math.floor((W - 40 - 20 - 10 - 6 * 4 - 12) / 11.5), byH = Math.floor((H - kw - 16 - 14 * 2 - 3 - 8) / 4.6);   // two rows, bar, answer field
+    const cell = Math.max(30, Math.min(52, byW, byH));
     $('cross').style.setProperty('--cs', cell + 'px');
-    const top = $('cross').getBoundingClientRect().top || 150;                 // fill the screen so the panel keeps its shape
-    $('cross').style.minHeight = Math.max(300, window.innerHeight - top - 96) + 'px';
   }
   const crossSnap = () => JSON.stringify(C.dots.map(d => d.row));
   function crossRestore(json) { JSON.parse(json).forEach((r, i) => { C.dots[i].row = r; }); C.sel = new Set(); renderCross(); }
@@ -1775,45 +1801,22 @@
         frame.appendChild(c);
       }
       frame.classList.toggle('full', dots.length === 10);
-      $(`cnum-${r}`).textContent = dots.length;
+      $(`cnum-${r}`).innerHTML = (r === 'b' ? '<span class="plus">+</span>' : '') + dots.length;
       if (C.sel.size && dots.some(d => C.sel.has(d.id))) { const last = dots.filter(d => C.sel.has(d.id)).pop(); const cell = frame.children[dots.indexOf(last)]; const t = el('div', 'ctag', `${C.sel.size} of the ${r === 'a' ? C.a : C.b}`); cell.appendChild(t); }
     });
-    renderCrossTree();
-    const vl = $('valueline'); if (vl) { vl.classList.toggle('ok', full); vl.innerHTML = `<span class="tot">${full ? C.a + C.b : '?'}</span>`; }
-    const ub = $('undoBtn'), rb = $('redoBtn'); ub.disabled = !C.undo.length; rb.disabled = !C.redo.length;
+    const f = $('cfield'); $('ctyped').textContent = C.typed; f.classList.toggle('ok', C.solved); f.classList.toggle('live', !C.solved && C.typed.length > 0);
+    $('ckeys').querySelectorAll('button').forEach(b => { b.disabled = C.solved || R.over; });
+    const ub = $('undoBtn'), rb = $('redoBtn'); ub.disabled = !C.undo.length || C.solved; rb.disabled = !C.redo.length || C.solved;
     renderCrossCoach();
-  }
-  function renderCrossTree() {
-    const a = C.a, b = C.b, target = crossTarget(), full = crossFull();
-    const N = (x, y, v, cls) => `<g class="node ${cls}" transform="translate(${x},${y})"><rect x="-30" y="-24" width="60" height="48"/><text>${v}</text></g>`;
-    const L = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1 + 26}" x2="${x2}" y2="${y2 - 26}"/>`;
-    const P = (x, y) => `<text class="op" x="${x}" y="${y}">+</text>`;
-    const y0 = 40, y1 = 140, y2 = 240, y3 = 340;
-    let svg = N(90, y0, a, 'a') + P(150, y0) + N(210, y0, b, 'b');
-    // which number splits: the one whose dots are leaving. Before any move, a tapped group is a plan (dashed)
-    const selRow = C.sel.size ? C.dots.find(d => C.sel.has(d.id)).row : null;
-    const src = target ? (target === 'a' ? 'b' : 'a') : selRow;
-    const m = target ? crossMoved(target) : C.sel.size;
-    if (src && m > 0) {
-      const plan = !target;
-      if (src === 'b') {   // 8 + 5 → 8 + 2 + 3
-        svg += L(90, y0, 90, y1) + L(210, y0, 180, y1) + L(210, y0, 270, y1);
-        svg += N(90, y1, a, 'a') + P(135, y1) + N(180, y1, m, plan ? 'b plan' : 'b lit') + P(225, y1) + N(270, y1, b - m, 'b');
-        if (full) { svg += L(90, y1, 135, y2) + L(180, y1, 135, y2) + L(270, y1, 270, y2); svg += N(135, y2, 10, 't pop') + P(200, y2) + N(270, y2, b - m, 'b'); svg += L(135, y2, 200, y3) + L(270, y2, 200, y3) + N(200, y3, a + b, 't lit pop'); }
-      } else {             // 5 + 8 → 3 + 2 + 8
-        svg += L(90, y0, 30, y1) + L(90, y0, 120, y1) + L(210, y0, 210, y1);
-        svg += N(30, y1, a - m, 'a') + P(75, y1) + N(120, y1, m, plan ? 'a plan' : 'a lit') + P(165, y1) + N(210, y1, b, 'b');
-        if (full) { svg += L(30, y1, 30, y2) + L(120, y1, 165, y2) + L(210, y1, 165, y2); svg += N(30, y2, a - m, 'a') + P(100, y2) + N(165, y2, 10, 't pop'); svg += L(30, y2, 100, y3) + L(165, y2, 100, y3) + N(100, y3, a + b, 't lit pop'); }
-      }
-    }
-    $('ctree').innerHTML = `<svg viewBox="-10 0 320 ${src && m > 0 ? (full ? 380 : 180) : 80}">${svg}</svg>`;
   }
   function renderCrossCoach() {
     const say = $('coach'); say.classList.remove('win', 'oops'); clearTimeout(C.hintT);
     const full = crossFull(), target = crossTarget();
-    if (full) { say.classList.add('win'); const t = target, m = crossMoved(t), rest = (t === 'a' ? C.b : C.a) - m, big = t === 'a' ? C.a : C.b; say.innerHTML = `<b>${C.a} + ${C.b} = ${C.a + C.b}</b> — ${big} and ${m} make ten, and ${rest} more.`; return; }
+    if (R.over) { say.innerHTML = ''; return; }
+    if (C.solved) { say.classList.add('win'); say.innerHTML = `<b>${C.a} + ${C.b} = ${C.a + C.b}</b>`; return; }
+    if (full) { say.innerHTML = ''; return; }
     const hint = M.hint || 0;
-    if (hint < 1) { C.hintT = setTimeout(() => { M.hint = 1; renderCross(); }, 15000); say.innerHTML = ''; return; }
+    if (hint < 1) { say.innerHTML = ''; return; }
     const r = target || (crossRow('a').length >= crossRow('b').length ? 'a' : 'b'), other = r === 'a' ? 'b' : 'a';
     const gap = 10 - crossRow(r).length, src = other === 'a' ? C.a : C.b;
     if (hint === 1) say.innerHTML = `The ${r === 'a' ? 'top' : 'bottom'} row has <b>${gap}</b> empty ${gap === 1 ? 'space' : 'spaces'}. How many of the <b>${src}</b> could fill ${gap === 1 ? 'it' : 'them'}?`;
@@ -1826,10 +1829,41 @@
     const n = el('div', 'dropnote', html); n.style.left = '50%'; n.style.transform = 'translateX(-50%)'; frame.parentElement.appendChild(n);
     setTimeout(() => n.classList.add('fade'), 2200); setTimeout(() => n.remove(), 2600);
   }
+  function crossType(k) {
+    if (C.solved || R.over) return;
+    if (k === 'back') C.typed = C.typed.slice(0, -1);
+    else if (k === 'go') { if (!C.typed) return; if (+C.typed === C.a + C.b) { C.solved = true; C.sel = new Set(); clearTimeout(C.hintT); } else { const f = $('cfield'); f.classList.remove('buzz'); void f.offsetWidth; f.classList.add('buzz'); setTimeout(() => f.classList.remove('buzz'), 500); try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} C.typed = ''; } }
+    else if (C.typed.length < 2) C.typed += k;
+    if (R.on && +C.typed === C.a + C.b) { R.score++; renderRace(); loadProblem(null, generate()); return; }   // in a race the right answer moves straight on
+    renderCross();
+  }
+  function renderRace() {
+    let bar = document.querySelector('#dotsPanel .race');
+    if (!R.on && !R.over) { if (bar) bar.remove(); $('raceBtn').classList.remove('on'); $('raceBtn').textContent = '🏁 Race'; return; }
+    if (!bar) { bar = el('div', 'race'); $('dotsPanel').appendChild(bar); }
+    const m = Math.floor(R.left / 60), sec = String(R.left % 60).padStart(2, '0');
+    bar.innerHTML = `<span class="clock${R.left <= 10 && R.on ? ' low' : ''}">${m}:${sec}</span><span class="score">${R.score} right</span>`;
+    $('raceBtn').classList.toggle('on', R.on); $('raceBtn').textContent = R.on ? '⏹ Stop' : '🏁 Race again';
+  }
+  function startRace() {
+    clearInterval(R.tick); R.on = true; R.over = false; R.left = 60; R.score = 0;
+    openPop(false); loadProblem(null, generate());
+    R.tick = setInterval(() => { R.left--; if (R.left <= 0) { endRace(); return; } renderRace(); }, 1000);
+    renderRace();
+  }
+  function endRace() {
+    clearInterval(R.tick); R.on = false; R.over = true; R.left = 0; C.typed = ''; renderCross(); renderRace();
+    document.querySelectorAll('.cresult').forEach(n => n.remove());
+    const card = el('div', 'cresult'); card.innerHTML = `<div class="card"><div class="big">${R.score}</div><div class="sub">${R.score === 1 ? 'answer' : 'answers'} right in one minute</div><button type="button" class="go" id="raceAgain">🏁 Race again</button></div>`;
+    $('cross').appendChild(card); $('raceAgain').addEventListener('click', startRace);
+  }
   function setupCross() {
+    const keys = $('ckeys');
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'back', 'go'].forEach(k => { const b = el('button', k === 'back' ? 'back' : k === 'go' ? 'go' : '', k === 'back' ? '⌫' : k === 'go' ? 'GO' : k); b.type = 'button'; b.dataset.k = k; b.addEventListener('click', () => crossType(k)); keys.appendChild(b); });
+    window.addEventListener('keydown', e => { if (M.mode !== 'cross' || $('view-dots').hidden || e.target.tagName === 'INPUT') return; if (/^[0-9]$/.test(e.key)) crossType(e.key); else if (e.key === 'Backspace') crossType('back'); else if (e.key === 'Enter') crossType('go'); });
     const host = $('cframes'); let down = null;
     host.addEventListener('pointerdown', e => {
-      const de = e.target.closest('.cdot'); if (!de || crossFull()) return;
+      const de = e.target.closest('.cdot'); if (!de || crossFull() || C.solved || R.over) return;
       const d = C.dots.find(x => x.id === +de.dataset.id);
       down = { d, x: e.clientX, y: e.clientY, drag: null, pid: e.pointerId }; e.preventDefault();
     });
@@ -1872,6 +1906,7 @@
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     $('genBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
     $('newBtn').addEventListener('click', () => { openPop(false); loadProblem(null, generate()); });
+    $('raceBtn').addEventListener('click', () => { if (R.on) { endRace(); } else startRace(); });
     $('optBtn').addEventListener('click', () => openPop($('pop').hidden));
     $('popClose').addEventListener('click', () => openPop(false));
     document.addEventListener('pointerdown', e => { if (!$('pop').hidden && !e.target.closest('#pop') && !e.target.closest('#optBtn')) openPop(false); });
