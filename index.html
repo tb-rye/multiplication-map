@@ -367,7 +367,7 @@
   /* cross ten: two rows of ten, a group of dots chosen by tapping, and a number-bond tree that grows with each move */
   body.mode-cross .machine-wrap, body.mode-cross .readout, body.mode-cross .keyrow { display: none; }
   body.mode-cross .coach .say:empty { visibility: hidden; }
-  body.mode-cross #resetMachine { display: none; }
+  body.mode-cross #resetMachine, body.mode-cross #newBtn { display: none; }
   body.mode-cross .stage { justify-content: center; }
   .cross { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; --cs: 46px; padding-top: 10px; }
   .csum { margin: auto 0; padding-left: calc(var(--cs) * .9); }   /* room for the plus sign that hangs left of the number column */
@@ -379,7 +379,7 @@
   .cnum { position: relative; font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.15); line-height: 1; width: calc(var(--cs) * 1.65); text-align: right; color: rgba(255,255,255,.55); user-select: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .cnum .plus { position: absolute; right: calc(100% + .22em); top: 0; }
   .cframe { position: relative; display: grid; grid-template-columns: repeat(10, var(--cs)); grid-template-rows: var(--cs); gap: 4px; padding: 6px; background: var(--inset); border: 1.5px solid var(--panel-line); border-radius: 12px; transition: border-color .25s, box-shadow .25s; }
-  .cframe.over { border-color: var(--lime); }
+  .cframe.over { border-color: rgba(255,178,160,.7); }
   .cframe.buzz { animation: buzz .45s ease-in-out; border-color: var(--coral-deep); }
   .ccell { position: relative; border: 1.5px dashed rgba(184,172,232,.28); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
   .ccell:nth-child(5) { margin-right: 10px; }
@@ -389,7 +389,6 @@
   .cdot.sel { background: var(--coral); transform: translateY(-3px); }
   .cdot.gone { visibility: hidden; }
   .cdot.ghost { background: transparent; border: 2px dashed var(--coral); opacity: .5; box-shadow: none; cursor: default; }
-  .cdot.moved { background: var(--coral); }
   .ctick { font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.1); line-height: 1; color: var(--spring); margin-right: 14px; animation: tick .5s ease-out; text-shadow: 2px 2px 0 var(--ink); }
   @keyframes tick { 0% { transform: scale(.4); opacity: 0; } 35% { transform: scale(1.25); opacity: 1; } 55% { transform: scale(.9); } 100% { transform: scale(1); } }
   .cdrag { position: fixed; z-index: 1000; display: flex; gap: 4px; pointer-events: none; transform: translate(-50%, -50%); opacity: .55; }
@@ -397,7 +396,10 @@
   .ctag { position: absolute; left: 50%; top: -34px; translate: -50% 0; background: var(--lime); color: var(--lime-ink); font-family: var(--hand); font-weight: 800; font-size: 15px; padding: 2px 12px; border-radius: 999px; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; pointer-events: none; animation: pop .15s ease-out; z-index: 5; }
   .csum { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
   .cbar { height: 3px; width: calc(var(--cs) * 1.65); background: rgba(255,255,255,.55); border-radius: 2px; margin: 2px 0; }
-  .canswer { display: flex; justify-content: flex-end; width: calc(var(--cs) * 1.65); }
+  .canswer { display: flex; align-items: center; justify-content: flex-end; width: calc(var(--cs) * 1.65); }
+  .cnext { position: absolute; left: calc(100% + 16px); top: 50%; translate: 0 -50%; padding: 8px 18px; border-radius: 999px; background: transparent; border: 1.5px solid rgba(255,255,255,.3); color: rgba(255,255,255,.45); font-family: var(--hand); font-weight: 800; font-size: 16px; cursor: pointer; white-space: nowrap; }
+  .cnext.ready { background: var(--coral); color: #5C1A0C; border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); animation: pop .25s ease-out; }
+  .canswer { position: relative; }
   .cfield { display: inline-flex; align-items: center; justify-content: flex-end; min-width: calc(var(--cs) * 1.65); height: calc(var(--cs) * 1.3); padding: 0 10px; border-radius: 14px; background: var(--inset); border: 2px dashed var(--panel-line); font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * .95); color: var(--text); letter-spacing: .04em; transition: border-color .2s, background .2s; }
   .cfield.live { border-style: solid; border-color: var(--lime); }
   .cfield.ok { border-style: solid; border-color: var(--ink); background: var(--spring); color: var(--spring-ink); box-shadow: 2px 2px 0 var(--ink); }
@@ -721,7 +723,7 @@
           <div class="csum">
             <div class="cframes" id="cframes"></div>
             <div class="cbar"></div>
-            <div class="canswer"><div class="cfield" id="cfield" aria-label="your answer"><span id="ctyped"></span><i class="caret"></i></div></div>
+            <div class="canswer"><div class="cfield" id="cfield" aria-label="your answer"><span id="ctyped"></span><i class="caret"></i></div><button type="button" class="cnext" id="cnext">Next ›</button></div>
           </div>
           <div class="ckeys" id="ckeys"></div>
         </div>
@@ -1080,7 +1082,7 @@
   const KINDS = {
     make: [['ones', 'All in the ones box'], ['tens', 'All in the tens box'], ['jumble', 'Jumbled'], ['puzzle', 'Puzzles']], add: [['carry', 'Carrying'], ['nocarry', 'No carrying']],
     sub: [['borrow', 'Borrowing'], ['zeros', 'Across zeros'], ['noborrow', 'No borrowing']],
-    cross: [['big', 'Bigger number on top'], ['written', 'As written']],
+    cross: [['9', '+9'], ['78', '+7 & 8s'], ['56', '+5 & 6s'], ['14', '+1–4']],
     regroup: [['borrow', 'Borrowing'], ['zeros', 'Across zeros']],
   };
   const GEN = { digits: 'mix', kind: { make: 'mix', add: 'mix', sub: 'mix', cross: 'mix' } };
@@ -1093,9 +1095,9 @@
     const kind = GEN.kind[M.mode] === 'mix' && kinds.length ? kinds[rnd(0, kinds.length - 1)][0] : GEN.kind[M.mode];
     if (M.mode === 'cross') {
       // the 36 single-digit facts that cross ten: both parts 2–9, sum over ten
-      const pairs = []; for (let x = 2; x <= 9; x++) for (let y = 2; y <= 9; y++) if (x + y > 10) pairs.push([x, y]);
-      let [a, b] = pairs[rnd(0, pairs.length - 1)];
-      if (kind === 'big' && b > a) [a, b] = [b, a];
+      // the second number is the one being added on; the first is whatever still crosses ten with it
+      const bs = kind === '9' ? [9] : kind === '78' ? [7, 8] : kind === '56' ? [5, 6] : [2, 3, 4];
+      const b = bs[rnd(0, bs.length - 1)], a = rnd(Math.max(2, 11 - b), 9);
       return { a, b, kind };
     }
     if (M.mode === 'make') {
@@ -1777,7 +1779,7 @@
     C.a = p.a; C.b = p.b; C.dots = []; C.sel = new Set(); C.undo = []; C.redo = []; C.hint = 0; clearTimeout(C.hintT); M.hint = 0; C.typed = ''; C.solved = false;
     let id = 0; for (let i = 0; i < p.a; i++) C.dots.push({ id: ++id, home: 'a', row: 'a' }); for (let i = 0; i < p.b; i++) C.dots.push({ id: ++id, home: 'b', row: 'b' });
     const host = $('cframes'); host.innerHTML = '';
-    ['a', 'b'].forEach(r => { const fr = el('div', 'cfr'); fr.innerHTML = `<div class="cnum" id="cnum-${r}" style="--c:${r === 'a' ? 'var(--teal)' : 'var(--mint)'}"></div><div class="cframe" id="cframe-${r}" data-row="${r}"></div>`; host.appendChild(fr); });
+    ['a', 'b'].forEach(r => { const fr = el('div', 'cfr'); fr.innerHTML = `<div class="cnum" id="cnum-${r}"></div><div class="cframe" id="cframe-${r}" data-row="${r}"></div>`; host.appendChild(fr); });
     const vl = $('valueline'); if (vl) vl.innerHTML = '';
     document.querySelectorAll('.cresult').forEach(n => n.remove());
     layoutCross(); renderCross(); renderRace();
@@ -1806,22 +1808,22 @@
       const asking = !full && hint >= 1 && (target ? target === r : crossRow(r).length >= crossRow(other).length);   // the fuller row is the one to fill
       for (let i = 0; i < 10; i++) {
         const c = el('div', 'ccell');
-        if (i < dots.length) { const d = dots[i]; const e = el('div', 'cdot' + (C.sel.has(d.id) ? ' sel' : '') + (d.row !== d.home ? ' moved' : '')); e.dataset.id = d.id; e.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); c.appendChild(e); }
+        if (i < dots.length) { const d = dots[i]; const e = el('div', 'cdot' + (C.sel.has(d.id) ? ' sel' : '') + (d.row !== d.home ? ' moved' : '')); e.dataset.id = d.id; e.style.setProperty('--c', 'var(--teal)'); c.appendChild(e); }
         else if (asking) c.classList.add('ask');
         frame.appendChild(c);
       }
       frame.classList.toggle('full', dots.length === 10);
       $(`cnum-${r}`).innerHTML = (r === 'b' ? '<span class="plus">+</span>' : '') + dots.length;
       const selN = dots.filter(d => C.sel.has(d.id)).length, movedN = dots.filter(d => d.home !== r).length;
-      const brk = (from, to, n, cls) => { const a = frame.children[from], b = frame.children[to]; const x0 = a.offsetLeft, x1 = b.offsetLeft + b.offsetWidth; const e = el('div', 'cbrk' + cls); e.style.setProperty('--c', cls ? 'var(--coral)' : r === 'a' ? 'var(--teal)' : 'var(--mint)'); e.style.left = x0 + 'px'; e.style.width = (x1 - x0) + 'px'; e.innerHTML = `<b>${n}</b>`; frame.appendChild(e); };
+      const brk = (from, to, n, cls) => { const a = frame.children[from], b = frame.children[to]; const x0 = a.offsetLeft, x1 = b.offsetLeft + b.offsetWidth; const e = el('div', 'cbrk' + cls); e.style.setProperty('--c', cls ? 'var(--coral)' : 'var(--teal)'); e.style.left = x0 + 'px'; e.style.width = (x1 - x0) + 'px'; e.innerHTML = `<b>${n}</b>`; frame.appendChild(e); };
       if (selN && selN < dots.length) { brk(0, dots.length - selN - 1, dots.length - selN, ''); brk(dots.length - selN, dots.length - 1, selN, ' sel'); }   // brackets show the split while choosing: 3 and 2
       else if (movedN && movedN < dots.length) { brk(0, dots.length - movedN - 1, dots.length - movedN, ''); brk(dots.length - movedN, dots.length - 1, movedN, ' sel'); }   // and after the move: 8 and 2
       // ghosts of the dots that left this row, so the remnants stay visible
       const gone = C.dots.filter(d => d.home === r && d.row !== r);
-      gone.forEach((d, i) => { const cell = frame.children[dots.length + i]; if (cell) { const g = el('div', 'cdot ghost'); g.style.setProperty('--c', r === 'a' ? 'var(--teal)' : 'var(--mint)'); cell.appendChild(g); } });
+      gone.forEach((d, i) => { const cell = frame.children[dots.length + i]; if (cell) { const g = el('div', 'cdot ghost'); cell.appendChild(g); } });
     });
     const f = $('cfield'); $('ctyped').textContent = C.typed; f.classList.toggle('ok', C.solved); f.classList.toggle('live', !C.solved && C.typed.length > 0);
-    f.parentElement.querySelectorAll('.ctick').forEach(n => n.remove()); if (C.solved) f.parentElement.insertBefore(el('div', 'ctick', '✓'), f);
+    f.parentElement.querySelectorAll('.ctick').forEach(n => n.remove()); if (C.solved) f.parentElement.insertBefore(el('div', 'ctick', '✓'), f); $('cnext').classList.toggle('ready', C.solved);
     $('ckeys').querySelectorAll('button').forEach(b => { b.disabled = C.solved || R.over; });
     const ub = $('undoBtn'), rb = $('redoBtn'); ub.disabled = !C.undo.length || C.solved; rb.disabled = !C.redo.length || C.solved;
     renderCrossCoach();
@@ -1876,6 +1878,7 @@
     $('cross').appendChild(card); $('raceAgain').addEventListener('click', startRace); $('raceDone').addEventListener('click', stopRace);
   }
   function setupCross() {
+    $('cnext').addEventListener('click', () => { if (R.over) return; loadProblem(null, generate()); });
     const keys = $('ckeys');
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'back', 'go'].forEach(k => { const b = el('button', k === 'back' ? 'back' : k === 'go' ? 'go' : '', k === 'back' ? '⌫' : k === 'go' ? 'GO' : k); b.type = 'button'; b.dataset.k = k; b.addEventListener('click', () => crossType(k)); keys.appendChild(b); });
     window.addEventListener('keydown', e => { if (M.mode !== 'cross' || $('view-dots').hidden || e.target.tagName === 'INPUT') return; if (/^[0-9]$/.test(e.key)) crossType(e.key); else if (e.key === 'Backspace') crossType('back'); else if (e.key === 'Enter') crossType('go'); });
@@ -1892,7 +1895,7 @@
         // start dragging the group: the tapped dot joins the selection (selection must live in one row)
         if (![...C.sel].every(id => C.dots.find(x => x.id === id).row === down.d.row)) C.sel = new Set();
         C.sel.add(down.d.id);
-        const ids = [...C.sel]; const g = el('div', 'cdrag'); g.style.setProperty('--cs', getComputedStyle($('cross')).getPropertyValue('--cs')); ids.forEach(id => { const d = C.dots.find(x => x.id === id); const e2 = el('div', 'cdot' + (d.row !== d.home ? ' moved' : '')); e2.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); g.appendChild(e2); document.querySelector(`.cdot[data-id="${id}"]`)?.classList.add('gone'); });
+        const ids = [...C.sel]; const g = el('div', 'cdrag'); g.style.setProperty('--cs', getComputedStyle($('cross')).getPropertyValue('--cs')); ids.forEach(id => { const d = C.dots.find(x => x.id === id); const e2 = el('div', 'cdot sel'); g.appendChild(e2); document.querySelector(`.cdot[data-id="${id}"]`)?.classList.add('gone'); });
         document.body.appendChild(g);
         down.drag = { g, ids };
       }
