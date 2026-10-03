@@ -368,11 +368,13 @@
   body.mode-cross #resetMachine { display: none; }
   body.mode-cross .stage { justify-content: center; }
   .cross { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; --cs: 46px; padding-top: 10px; }
-  .csum { margin: auto 0; }
+  .csum { margin: auto 0; padding-left: calc(var(--cs) * .9); }   /* room for the plus sign that hangs left of the number column */
   .cframes { display: flex; flex-direction: column; gap: 16px; }
   .cfr { display: flex; align-items: center; gap: 20px; position: relative; }
-  .cnum { position: relative; font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.15); line-height: 1; width: calc(var(--cs) * 1.9); text-align: right; color: var(--c); user-select: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .cnum .plus { position: absolute; left: 0; top: 0; color: var(--coral); }
+  .cnum { position: relative; font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.15); line-height: 1; width: calc(var(--cs) * 1.65); text-align: right; color: var(--c); user-select: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cnum .plus { position: absolute; right: calc(100% + .22em); top: 0; color: var(--coral); }
+  .ceq { width: calc(var(--cs) * 3.1); font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * .64); line-height: 1; color: var(--text); opacity: .42; white-space: nowrap; font-variant-numeric: tabular-nums; user-select: none; }
+  .ceq:not(:empty) { animation: pop .18s ease-out; }
   .cframe { position: relative; display: grid; grid-template-columns: repeat(10, var(--cs)); grid-template-rows: var(--cs); gap: 4px; padding: 6px; background: var(--inset); border: 1.5px solid var(--panel-line); border-radius: 12px; transition: border-color .25s, box-shadow .25s; }
   .cframe.full { border-color: var(--spring); box-shadow: 0 0 0 2px rgba(46,232,122,.35); }
   .cframe.over { border-color: var(--lime); }
@@ -384,13 +386,16 @@
   .cdot { width: calc(var(--cs) * .66); height: calc(var(--cs) * .66); border-radius: 50%; background: var(--c); box-shadow: 0 2px 0 rgba(0,0,0,.35); cursor: grab; touch-action: none; transition: transform .15s; }
   .cdot.sel { outline: 2.5px solid var(--lime); outline-offset: 3px; transform: translateY(-3px); }
   .cdot.gone { visibility: hidden; }
+  .cdot.moved { background: var(--coral); }
+  .ctick { font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * 1.1); line-height: 1; color: var(--spring); margin-right: 14px; animation: tick .5s ease-out; text-shadow: 2px 2px 0 var(--ink); }
+  @keyframes tick { 0% { transform: scale(.4); opacity: 0; } 35% { transform: scale(1.25); opacity: 1; } 55% { transform: scale(.9); } 100% { transform: scale(1); } }
   .cdrag { position: fixed; z-index: 1000; display: flex; gap: 10px; padding: 7px 11px; border-radius: 999px; background: rgba(0,0,0,.3); border: 1.5px dashed var(--lime); pointer-events: none; transform: translate(-50%, -50%); }
   .cdrag .cdot { box-shadow: 0 8px 14px rgba(0,0,0,.45); }
   .ctag { position: absolute; left: 50%; top: -34px; translate: -50% 0; background: var(--lime); color: var(--lime-ink); font-family: var(--hand); font-weight: 800; font-size: 15px; padding: 2px 12px; border-radius: 999px; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; pointer-events: none; animation: pop .15s ease-out; z-index: 5; }
   .csum { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
-  .cbar { height: 3px; width: calc(var(--cs) * 1.9); background: var(--coral); border-radius: 2px; margin: 2px 0; }
-  .canswer { display: flex; justify-content: flex-end; width: calc(var(--cs) * 1.9); }
-  .cfield { display: inline-flex; align-items: center; justify-content: flex-end; min-width: calc(var(--cs) * 1.9); height: calc(var(--cs) * 1.3); padding: 0 10px; border-radius: 14px; background: var(--inset); border: 2px dashed var(--panel-line); font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * .95); color: var(--text); letter-spacing: .04em; transition: border-color .2s, background .2s; }
+  .cbar { height: 3px; width: calc(var(--cs) * 1.65); background: var(--coral); border-radius: 2px; margin: 2px 0; }
+  .canswer { display: flex; justify-content: flex-end; width: calc(var(--cs) * 1.65); }
+  .cfield { display: inline-flex; align-items: center; justify-content: flex-end; min-width: calc(var(--cs) * 1.65); height: calc(var(--cs) * 1.3); padding: 0 10px; border-radius: 14px; background: var(--inset); border: 2px dashed var(--panel-line); font-family: var(--hand); font-weight: 800; font-size: calc(var(--cs) * .95); color: var(--text); letter-spacing: .04em; transition: border-color .2s, background .2s; }
   .cfield.live { border-style: solid; border-color: var(--lime); }
   .cfield.ok { border-style: solid; border-color: var(--ink); background: var(--spring); color: var(--spring-ink); box-shadow: 2px 2px 0 var(--ink); }
   .cfield.buzz { animation: buzz .45s ease-in-out; border-color: var(--coral-deep); border-style: solid; }
@@ -412,13 +417,15 @@
   .cresult .card { background: var(--lime); color: var(--lime-ink); border: 1.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); border-radius: 18px; padding: 26px 40px; text-align: center; font-family: var(--hand); font-weight: 800; animation: pop .3s ease-out; }
   .cresult .big { font-size: 64px; line-height: 1; }
   .cresult .sub { font-size: 18px; margin-top: 8px; }
+  .cresult .btns { display: flex; gap: 10px; justify-content: center; }
+  .cresult button.quiet { background: transparent; color: var(--lime-ink); box-shadow: none; border-color: var(--lime-ink); }
   .cresult button { margin-top: 16px; padding: 9px 22px; border-radius: 999px; background: var(--coral); color: #5C1A0C; border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-family: var(--hand); font-weight: 800; font-size: 16px; cursor: pointer; }
   .valueline .term { color: var(--lime-ink); }
   .valueline .op { opacity: .55; font-size: 16px; }
   .valueline .tot { display: inline-flex; align-items: center; height: 30px; padding: 0 16px; border-radius: 999px; background: var(--panel); color: var(--lime); border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
   .valueline.ok .tot { background: var(--spring); color: var(--spring-ink); }
   .valueline .same { font-family: var(--body); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--spring-ink); background: var(--mint); border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px 9px; animation: pop .25s ease-out; }
-  body.mode-make .qbar { left: auto; right: 40px; font-size: 15px; height: 30px; max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
+  body.mode-make .qbar, body.mode-cross .qbar { left: auto; right: 40px; font-size: 15px; height: 30px; max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
   body.mode-make .mbox .plabel b { display: none; }                 /* the strip under the box says what a place is worth */
   body.mode-make .coach .say:empty { visibility: hidden; }               /* nothing to read until a hint is asked for */
   body.mode-make #resetMachine { display: none; }                   /* lives in the ▾ menu on this tab */
@@ -1116,7 +1123,7 @@
     return M.mode === 'add' ? { a: 358, b: 287 } : { a: 500, b: 134 };
   }
   function setMode(mode) {
-    if (R.on) { clearInterval(R.tick); R.on = false; } R.over = false; renderRace();
+    if (R.on) { clearInterval(R.tick); clearTimeout(R.next); R.on = false; } R.over = false; renderRace();
     M.mode = mode; document.body.classList.toggle('mode-sub', mode === 'sub'); document.body.classList.toggle('mode-make', mode === 'make'); document.body.classList.toggle('mode-cross', mode === 'cross');
     document.querySelectorAll('#subnav [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === mode));
     buildChips(); buildCustom();
@@ -1146,7 +1153,7 @@
   function loadProblem(i, custom) {
     const p = custom || M.prob;
     M.prob = { ...p, idx: null }; $('target').hidden = true; M.unlocked = false; M.solved = false; M.hist = []; M.carry = {}; M.busy = false; M.reserved = null; M.undo = []; M.redo = []; M.hint = 0; M.answered = false; M.valueLast = undefined; M.valueSame = false; clearTimeout(M.hintT); document.querySelectorAll('.dot.flier').forEach(g => g.remove());
-    if (M.mode === 'cross') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = true; $('raceBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = ''; loadCross(p); return; }
+    if (M.mode === 'cross') { $('mMeta').hidden = true; $('notebook').hidden = true; $('cross').hidden = false; $('regroupAll').hidden = true; $('hintBtn').hidden = true; $('raceBtn').hidden = false; $('resetPop').hidden = false; $('dotsPanel').dataset.title = ''; $('qbar').textContent = `${p.a} + ${p.b}`; loadCross(p); return; }
     $('cross').hidden = true;
     const g = M.geo = { ...MODES[M.mode].geo };
     if (M.mode === 'make') {
@@ -1758,7 +1765,7 @@
   /* ---- cross ten: 8 + 5 as two rows of ten. Tap dots to choose a group, drag the group into the other row,
           and a number-bond tree writes down what the hands did: 8 + 5 → 8 + 2 + 3 → 10 + 3 → 13 ---- */
   const C = { a: 0, b: 0, dots: [], sel: new Set(), undo: [], redo: [], hint: 0, hintT: null, typed: '', solved: false };
-  const R = { on: false, left: 60, score: 0, tick: null, over: false };   // the one-minute race
+  const R = { on: false, left: 60, score: 0, tick: null, next: null, over: false };   // the one-minute race
   const crossRow = r => C.dots.filter(d => d.row === r).sort((p, q) => (p.home === r ? 0 : 1) - (q.home === r ? 0 : 1) || p.id - q.id);   // home dots first, moved-in dots at the end
   const crossMoved = r => C.dots.filter(d => d.row === r && d.home !== r).length;
   const crossTarget = () => crossMoved('a') ? 'a' : crossMoved('b') ? 'b' : null;
@@ -1767,7 +1774,7 @@
     C.a = p.a; C.b = p.b; C.dots = []; C.sel = new Set(); C.undo = []; C.redo = []; C.hint = 0; clearTimeout(C.hintT); M.hint = 0; C.typed = ''; C.solved = false;
     let id = 0; for (let i = 0; i < p.a; i++) C.dots.push({ id: ++id, home: 'a', row: 'a' }); for (let i = 0; i < p.b; i++) C.dots.push({ id: ++id, home: 'b', row: 'b' });
     const host = $('cframes'); host.innerHTML = '';
-    ['a', 'b'].forEach(r => { const fr = el('div', 'cfr'); fr.innerHTML = `<div class="cnum" id="cnum-${r}" style="--c:${r === 'a' ? 'var(--teal)' : 'var(--mint)'}"></div><div class="cframe" id="cframe-${r}" data-row="${r}"></div>`; host.appendChild(fr); });
+    ['a', 'b'].forEach(r => { const fr = el('div', 'cfr'); fr.innerHTML = `<div class="cnum" id="cnum-${r}" style="--c:${r === 'a' ? 'var(--teal)' : 'var(--mint)'}"></div><div class="cframe" id="cframe-${r}" data-row="${r}"></div><div class="ceq" id="ceq-${r}"></div>`; host.appendChild(fr); });
     const vl = $('valueline'); if (vl) vl.innerHTML = '';
     document.querySelectorAll('.cresult').forEach(n => n.remove());
     layoutCross(); renderCross(); renderRace();
@@ -1780,7 +1787,7 @@
     $('cross').style.minHeight = H + 'px';
     const kw = Math.max(40, Math.min(60, Math.floor((W - 11 * 8 - 24) / 12.5)));   // twelve keys across, the GO key half again as wide
     $('cross').style.setProperty('--kw', kw + 'px');
-    const byW = Math.floor((W - 40 - 20 - 10 - 6 * 4 - 12) / 11.5), byH = Math.floor((H - kw - 16 - 14 * 2 - 3 - 8) / 4.6);   // two rows, bar, answer field
+    const byW = Math.floor((W - 40 - 20 - 10 - 6 * 4 - 12) / 15.8), byH = Math.floor((H - kw - 16 - 14 * 2 - 3 - 8) / 4.6);   // two rows, bar, answer field
     const cell = Math.max(30, Math.min(52, byW, byH));
     $('cross').style.setProperty('--cs', cell + 'px');
   }
@@ -1796,15 +1803,18 @@
       const asking = !full && hint >= 1 && (target ? target === r : crossRow(r).length >= crossRow(other).length);   // the fuller row is the one to fill
       for (let i = 0; i < 10; i++) {
         const c = el('div', 'ccell');
-        if (i < dots.length) { const d = dots[i]; const e = el('div', 'cdot' + (C.sel.has(d.id) ? ' sel' : '')); e.dataset.id = d.id; e.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); c.appendChild(e); }
+        if (i < dots.length) { const d = dots[i]; const e = el('div', 'cdot' + (C.sel.has(d.id) ? ' sel' : '') + (d.row !== d.home ? ' moved' : '')); e.dataset.id = d.id; e.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); c.appendChild(e); }
         else if (asking) c.classList.add('ask');
         frame.appendChild(c);
       }
       frame.classList.toggle('full', dots.length === 10);
       $(`cnum-${r}`).innerHTML = (r === 'b' ? '<span class="plus">+</span>' : '') + dots.length;
+      const selN = dots.filter(d => C.sel.has(d.id)).length, movedN = dots.filter(d => d.home !== r).length;   // a quiet equation beside the row: 1 + 3 = 4 while choosing, 9 + 1 = 10 after the move
+      $(`ceq-${r}`).textContent = selN ? `${selN} + ${dots.length - selN} = ${dots.length}` : movedN ? `${dots.length - movedN} + ${movedN} = ${dots.length}` : '';
       if (C.sel.size && dots.some(d => C.sel.has(d.id))) { const last = dots.filter(d => C.sel.has(d.id)).pop(); const cell = frame.children[dots.indexOf(last)]; const t = el('div', 'ctag', `${C.sel.size} of the ${r === 'a' ? C.a : C.b}`); cell.appendChild(t); }
     });
     const f = $('cfield'); $('ctyped').textContent = C.typed; f.classList.toggle('ok', C.solved); f.classList.toggle('live', !C.solved && C.typed.length > 0);
+    f.parentElement.querySelectorAll('.ctick').forEach(n => n.remove()); if (C.solved && R.on) f.parentElement.insertBefore(el('div', 'ctick', '✓'), f);
     $('ckeys').querySelectorAll('button').forEach(b => { b.disabled = C.solved || R.over; });
     const ub = $('undoBtn'), rb = $('redoBtn'); ub.disabled = !C.undo.length || C.solved; rb.disabled = !C.redo.length || C.solved;
     renderCrossCoach();
@@ -1812,7 +1822,7 @@
   function renderCrossCoach() {
     const say = $('coach'); say.classList.remove('win', 'oops'); clearTimeout(C.hintT);
     const full = crossFull(), target = crossTarget();
-    if (R.over) { say.innerHTML = ''; return; }
+    if (R.over || R.on) { say.innerHTML = ''; return; }
     if (C.solved) { say.classList.add('win'); say.innerHTML = `<b>${C.a} + ${C.b} = ${C.a + C.b}</b>`; return; }
     if (full) { say.innerHTML = ''; return; }
     const hint = M.hint || 0;
@@ -1834,7 +1844,7 @@
     if (k === 'back') C.typed = C.typed.slice(0, -1);
     else if (k === 'go') { if (!C.typed) return; if (+C.typed === C.a + C.b) { C.solved = true; C.sel = new Set(); clearTimeout(C.hintT); } else { const f = $('cfield'); f.classList.remove('buzz'); void f.offsetWidth; f.classList.add('buzz'); setTimeout(() => f.classList.remove('buzz'), 500); try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} C.typed = ''; } }
     else if (C.typed.length < 2) C.typed += k;
-    if (R.on && +C.typed === C.a + C.b) { R.score++; renderRace(); loadProblem(null, generate()); return; }   // in a race the right answer moves straight on
+    if (R.on && !C.solved && +C.typed === C.a + C.b) { R.score++; C.solved = true; C.sel = new Set(); renderRace(); renderCross(); clearTimeout(R.next); R.next = setTimeout(() => { if (R.on) loadProblem(null, generate()); }, 500); return; }   // in a race the right answer flashes a check, then moves on
     renderCross();
   }
   function renderRace() {
@@ -1851,11 +1861,12 @@
     R.tick = setInterval(() => { R.left--; if (R.left <= 0) { endRace(); return; } renderRace(); }, 1000);
     renderRace();
   }
+  function stopRace() { clearInterval(R.tick); clearTimeout(R.next); R.on = false; R.over = false; document.querySelectorAll('.cresult').forEach(n => n.remove()); renderRace(); loadProblem(null, generate()); }
   function endRace() {
-    clearInterval(R.tick); R.on = false; R.over = true; R.left = 0; C.typed = ''; renderCross(); renderRace();
+    clearInterval(R.tick); clearTimeout(R.next); R.on = false; R.over = true; R.left = 0; C.typed = ''; C.solved = false; renderCross(); renderRace();
     document.querySelectorAll('.cresult').forEach(n => n.remove());
-    const card = el('div', 'cresult'); card.innerHTML = `<div class="card"><div class="big">${R.score}</div><div class="sub">${R.score === 1 ? 'answer' : 'answers'} right in one minute</div><button type="button" class="go" id="raceAgain">🏁 Race again</button></div>`;
-    $('cross').appendChild(card); $('raceAgain').addEventListener('click', startRace);
+    const card = el('div', 'cresult'); card.innerHTML = `<div class="card"><div class="big">${R.score}</div><div class="sub">${R.score === 1 ? 'answer' : 'answers'} right in one minute</div><div class="btns"><button type="button" class="quiet" id="raceDone">Not now</button><button type="button" class="go" id="raceAgain">🏁 Race again</button></div></div>`;
+    $('cross').appendChild(card); $('raceAgain').addEventListener('click', startRace); $('raceDone').addEventListener('click', stopRace);
   }
   function setupCross() {
     const keys = $('ckeys');
@@ -1874,7 +1885,7 @@
         // start dragging the group: the tapped dot joins the selection (selection must live in one row)
         if (![...C.sel].every(id => C.dots.find(x => x.id === id).row === down.d.row)) C.sel = new Set();
         C.sel.add(down.d.id);
-        const ids = [...C.sel]; const g = el('div', 'cdrag'); ids.forEach(id => { const d = C.dots.find(x => x.id === id); const e2 = el('div', 'cdot'); e2.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); g.appendChild(e2); document.querySelector(`.cdot[data-id="${id}"]`)?.classList.add('gone'); });
+        const ids = [...C.sel]; const g = el('div', 'cdrag'); ids.forEach(id => { const d = C.dots.find(x => x.id === id); const e2 = el('div', 'cdot' + (d.row !== d.home ? ' moved' : '')); e2.style.setProperty('--c', d.home === 'a' ? 'var(--teal)' : 'var(--mint)'); g.appendChild(e2); document.querySelector(`.cdot[data-id="${id}"]`)?.classList.add('gone'); });
         const tag = el('div', 'ctag', `${ids.length} ${ids.length === 1 ? 'one' : 'ones'}`); g.appendChild(tag); document.body.appendChild(g);
         down.drag = { g, ids };
       }
